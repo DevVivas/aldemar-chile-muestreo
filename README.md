@@ -7,7 +7,8 @@
 El diseño de la aplicación está inspirado en el entorno marítimo, priorizando la legibilidad en terreno bajo luz natural.
 
 * **Logotipo:** 
-  ![Logotipo AquaMuestra](docs/diseno/logo_AquaMuestra.png)
+  <img width="430" height="334" alt="logo_aquamuestra" src="https://github.com/user-attachments/assets/98f48975-6a4b-443f-844f-baebc7210f63" />
+
 * **Paleta de Colores:**
   * **Principal:** Azul Marino (`#003366`) 
   * **Secundario:** Verde Teal (`#008080`) 
@@ -18,7 +19,8 @@ El diseño de la aplicación está inspirado en el entorno marítimo, priorizand
 ## Flujo de usuario
 A continuación, se representa el flujo principal de navegación mediante un Diagrama de Actividad UML:
 
-![Flujo de Usuario](docs/diseno/flujo-usuario-uml.png)
+<img width="935" height="394" alt="flujo-usuario-uml" src="https://github.com/user-attachments/assets/3aebd5e9-3ebb-439d-8267-56571ba8cf29" />
+
 
 ## Pantallas principales
 
