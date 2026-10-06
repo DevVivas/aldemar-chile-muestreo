@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">AquaMuestra</string>
+    <string name="badge_app">APP DE TERRENO • V2.4.1</string>
+    <string name="login_subtitle">Registro y Trazabilidad de Muestras Biométricas</string>
+    <string name="login_location">Región de Los Lagos • Fiordo Reloncaví</string>
+
+    <string name="label_user">Usuario / ID Técnico</string>
+    <string name="label_required">REQUERIDO</string>
+    <string name="label_password">Contraseña de Terreno</string>
+    <string name="label_pin">PIN o Clave</string>
+    <string name="label_role">Rol Asignado en Faena</string>
+    <string name="role_sampler">Operador de Muestreo</string>
+    <string name="role_sampler_desc">Captura de biometría y tallas</string>
+    <string name="keep_session">Mantener sesión activa en terreno</string>
+    <string name="keep_session_desc">Almacena credenciales seguras para trabajo sin cobertura 3G/LTE</string>
+    <string name="btn_login">INICIAR SESIÓN</string>
+
+    <string name="offline_title">Búfer Local Listo</string>
+    <string name="offline_pending">%1$d registros pendientes de subir</string>
+    <string name="offline_badge">OFFLINE</string>
+    <string name="farm_label">CENTRO DE CULTIVO</string>
+    <string name="farm_name">Punta Pelluco • Módulo 104</string>
+    <string name="farm_cage">JAULA C-12</string>
+
+    <string name="footer_offline">Modo Offline Activo • ALDEMAR SpA</string>
+    <string name="footer_help">Mesa de Ayuda Marítima: +56 65 298 4000 • Anexo 12</string>
+    <string name="footer_version">AquaMuestra OS v2.4.1-rc (Chilean Salmonid Telemetry Stack)</string>
+</resources>

@@ -1,0 +1,40 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+gen/
+out/
+
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc.)
+local.properties
+
+# IDE specific files
+.idea/
+.vscode/
+.DS_Store
+*.iml
+*.hprof
+.cxx/
+.externalNativeBuild/
+captures/
+.settings/
+bin/
+tmp/
+lib/
+
+# OS specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
