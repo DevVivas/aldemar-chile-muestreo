@@ -10,38 +10,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aldemar.aquamuestra.ui.theme.AquaMuestraTheme
 import com.aldemar.aquamuestra.ui.theme.components.LoginHeader
 import com.aldemar.aquamuestra.ui.theme.components.LoginFormCard
+import com.aldemar.aquamuestra.ui.theme.components.RoleOption
+
+private val ColorPaper = Color(0xFFFFFFFF)
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(
+    modifier: Modifier = Modifier,
+    onLoginClick: (user: String, password: String, role: RoleOption, keepSession: Boolean) -> Unit = { _, _, _, _ -> }
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(ColorPaper)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LoginHeader(modifier = Modifier.fillMaxWidth())
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(32.dp))
 
         LoginFormCard(
-            onLoginClick = { user, password, role, keepSession ->
-                // Paso posterior: validación y navegación
-            }
+            onLoginClick = onLoginClick
         )
-        // Paso 4: tarjetas informativas
-        // Paso 5: footer
     }
 }
 
