@@ -1,28 +1,114 @@
 <resources>
     <string name="app_name">AquaMuestra</string>
-    <string name="badge_app">APP DE TERRENO • V2.4.1</string>
-    <string name="login_subtitle">Registro y Trazabilidad de Muestras Biométricas</string>
-    <string name="login_location">Región de Los Lagos • Fiordo Reloncaví</string>
 
-    <string name="label_user">Usuario / ID Técnico</string>
-    <string name="label_required">REQUERIDO</string>
-    <string name="label_password">Contraseña de Terreno</string>
-    <string name="label_pin">PIN o Clave</string>
-    <string name="label_role">Rol Asignado en Faena</string>
-    <string name="role_sampler">Operador de Muestreo</string>
-    <string name="role_sampler_desc">Captura de biometría y tallas</string>
-    <string name="keep_session">Mantener sesión activa en terreno</string>
-    <string name="keep_session_desc">Almacena credenciales seguras para trabajo sin cobertura 3G/LTE</string>
-    <string name="btn_login">INICIAR SESIÓN</string>
+    <!-- Textos para el Login -->
+    <string name="label_user">Usuario / Correo</string>
+    <string name="label_password">Contraseña</string>
+    <string name="btn_login">Iniciar Sesión</string>
+    <string name="keep_session_title">Mantener sesión iniciada</string>
+    <string name="keep_session_desc">No pedir credenciales en este dispositivo</string>
 
-    <string name="offline_title">Búfer Local Listo</string>
-    <string name="offline_pending">%1$d registros pendientes de subir</string>
-    <string name="offline_badge">OFFLINE</string>
-    <string name="farm_label">CENTRO DE CULTIVO</string>
-    <string name="farm_name">Punta Pelluco • Módulo 104</string>
-    <string name="farm_cage">JAULA C-12</string>
+    <!-- Navegación -->
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_historial">Historial</string>
 
-    <string name="footer_offline">Modo Offline Activo • ALDEMAR SpA</string>
-    <string name="footer_help">Mesa de Ayuda Marítima: +56 65 298 4000 • Anexo 12</string>
-    <string name="footer_version">AquaMuestra OS v2.4.1-rc (Chilean Salmonid Telemetry Stack)</string>
+    <!-- Content Descriptions -->
+    <string name="cd_volver">Volver</string>
+    <string name="cd_perfil">Perfil</string>
+    <string name="cd_opciones">Opciones</string>
+    <string name="cd_disminuir">Disminuir</string>
+    <string name="cd_aumentar">Aumentar</string>
+
+    <!-- InicioScreen -->
+    <string name="inicio_titulo">Bienvenido</string>
+    <string name="inicio_subtitulo">¿Qué deseas hacer hoy?</string>
+    <string name="inicio_card_nueva_titulo">Nueva Muestra</string>
+    <string name="inicio_card_nueva_sub">Registrar datos en terreno</string>
+    <string name="inicio_card_historial_titulo">Ver Historial</string>
+    <string name="inicio_card_historial_sub">Revisar y exportar registros</string>
+
+    <!-- HistorialScreen -->
+    <string name="historial_titulo">Historial de Muestras</string>
+    <string name="fab_agregar_desc">Agregar nueva muestra</string>
+
+    <!-- NewSampleFormScreen -->
+    <string name="form_title">Nueva Muestra</string>
+    <string name="form_draft_saved">Borrador guardado localmente</string>
+    <string name="form_location_info">Información de Ubicación</string>
+    <string name="form_gps_fixed">GPS FIJADO</string>
+    <string name="form_datetime_label">Fecha y Hora de Muestreo (Automático)</string>
+    <string name="form_center_label">Centro de Cultivo</string>
+    <string name="form_tren_label">Tren / Módulo de Concesión</string>
+    <string name="form_line_label">Línea de Cultivo</string>
+    <string name="form_species_label">Especie</string>
+
+    <string name="form_biometrics_title">Medición y Biometría</string>
+    <string name="form_sernapesca_norm">NORMA SERNAPESCA</string>
+    <string name="form_length_label">Longitud del Tramo Medido</string>
+    <string name="form_manual_count_title">Conteo Manual de Individuos</string>
+    <string name="form_reset">Reiniciar</string>
+    <string name="form_alive_units">EJEMPLARES VIVOS: %1$d ind</string>
+    <string name="form_observations_label">Observaciones</string>
+
+    <string name="form_evidence_title">Evidencia Fotográfica</string>
+    <string name="form_photo_counter">%1$d de 5 Fotos</string>
+    <string name="form_geostamp">Geostampa</string>
+    <string name="form_capture_photo">Capturar Fotografía Adicional</string>
+
+    <string name="form_save_draft">Guardar Borrador</string>
+    <string name="form_finish_reg">Finalizar Registro</string>
+
+    <!-- Detalle Revisión -->
+    <string name="detail_title">Detalle Revisión</string>
+    <string name="detail_status_label">ESTADO ACTUAL</string>
+    <string name="detail_status_pending">Pendiente de Revisión</string>
+    <string name="detail_batch">Lote #089</string>
+
+    <string name="detail_biometric_sheet">Ficha Biométrica</string>
+    <string name="detail_sernapesca_cert">Certificado Sernapesca</string>
+    <string name="detail_center_label">CENTRO</string>
+    <string name="detail_concession_label">CONCESIÓN / TREN</string>
+    <string name="detail_line_label">LÍNEA DE CULTIVO</string>
+    <string name="detail_species_label">ESPECIE</string>
+    <string name="detail_datetime_label">FECHA Y HORA</string>
+    <string name="detail_operator_label">OPERADOR</string>
+    <string name="detail_rope_section_label">TRAMO DE CUERDA</string>
+    <string name="detail_effective_count_label">CONTEO EFECTIVO</string>
+    <string name="detail_density_estimated">DENSIDAD ESTIMADA</string>
+    <string name="detail_density_value">300 ind / metro lineal</string>
+
+    <string name="detail_field_evidence">Evidencia de Terreno</string>
+    <string name="detail_approval_panel">Panel de Aprobación Técnica</string>
+    <string name="detail_supervisor_role">SUPERVISOR</string>
+    <string name="detail_quality_resolution">Resolución de calidad y biomasa</string>
+    <string name="detail_validate">Validar</string>
+    <string name="detail_observe">Observar</string>
+    <string name="detail_correct">Corregir</string>
+    <string name="detail_supervisor_comments">Comentarios del Supervisor *</string>
+    <string name="detail_legal_disclaimer">Este dictamen se adjuntará permanentemente a la bitácora electrónica del centro.</string>
+    <string name="detail_update_status_btn">Actualizar Estado de Revisión</string>
+
+
+    <!-- Muestreo y Operador -->
+    <string name="form_operator_label">Operador / Técnico *</string>
+    <string name="form_concession_label">Concesión</string>
+
+
+    <!-- Diálogo de Vista Previa -->
+    <string name="dialog_preview_title">Vista Previa</string>
+    <string name="dialog_close">Cerrar</string>
+    <string name="dialog_delete">Eliminar</string>
+
+    <!-- Mensajes de Notificación / Snackbar -->
+    <string name="msg_photo_success">Fotografía capturada con éxito (%1$d/5)</string>
+    <string name="msg_photo_permission_denied">Permiso de cámara denegado</string>
+    <string name="msg_max_photos_reached">Máximo 5 fotos alcanzado</string>
+    <string name="msg_draft_saved_success">¡Borrador guardado localmente con éxito!</string>
+    <string name="msg_finish_reg_success">¡Registro finalizado y sincronizado en búfer offline!</string>
+    <string name="msg_photo_deleted">Fotografía eliminada</string>
+
+    <string name="msg_required_fields_error">Debes completar todos los datos obligatorios.</string>
+
+
+
 </resources>

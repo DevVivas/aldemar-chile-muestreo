@@ -19,14 +19,13 @@ import androidx.compose.ui.unit.dp
 import com.aldemar.aquamuestra.ui.theme.AquaMuestraTheme
 import com.aldemar.aquamuestra.ui.theme.components.LoginHeader
 import com.aldemar.aquamuestra.ui.theme.components.LoginFormCard
-import com.aldemar.aquamuestra.ui.theme.components.RoleOption
 
 private val ColorPaper = Color(0xFFFFFFFF)
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    onLoginClick: (user: String, password: String, role: RoleOption, keepSession: Boolean) -> Unit = { _, _, _, _ -> }
+    onLoginClick: (user: String, password: String, keepSession: Boolean) -> Unit = { _, _, _ -> },
 ) {
     Column(
         modifier = modifier

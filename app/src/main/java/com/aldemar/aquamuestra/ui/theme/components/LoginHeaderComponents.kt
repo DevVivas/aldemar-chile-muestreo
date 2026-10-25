@@ -32,14 +32,6 @@ fun LoginHeader(modifier: Modifier = Modifier) {
             color = ColorInk,
             letterSpacing = (-0.02).sp
         )
-        Text(
-            text = stringResource(R.string.login_subtitle),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = ColorGraphite,
-            textAlign = TextAlign.Center,
-            letterSpacing = (-0.01).sp,
-            modifier = Modifier.padding(horizontal = 24.dp)
-        )
+
     }
 }

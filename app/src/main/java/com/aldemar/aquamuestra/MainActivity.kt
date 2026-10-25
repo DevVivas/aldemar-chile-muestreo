@@ -1,38 +1,27 @@
 package com.aldemar.aquamuestra
 
-import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.aldemar.aquamuestra.ui.theme.AppNavigation
 import com.aldemar.aquamuestra.ui.theme.AquaMuestraTheme
-import com.aldemar.aquamuestra.ui.theme.form.NewSampleFormScreen
-import com.aldemar.aquamuestra.ui.theme.login.LoginScreen
+
+// Asegúrate de que el paquete coincida con el tuyo
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
+            // AquaMuestraTheme escuchará los cambios globales de ThemeManager.isDarkMode
             AquaMuestraTheme {
-                var currentScreen by remember { mutableStateOf("login") }
-
-                if (currentScreen == "login") {
-                    LoginScreen(
-                        onLoginClick = { _, _, _, _ ->
-                            currentScreen = "new_sample"
-                        }
-                    )
-                } else {
-                    NewSampleFormScreen(
-                        onBackClick = {
-                            currentScreen = "login"
-                        }
-                    )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AppNavigation() // Tu NavHost con todas las rutas de la app
                 }
             }
         }
