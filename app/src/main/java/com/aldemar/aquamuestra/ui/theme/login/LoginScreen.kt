@@ -13,14 +13,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aldemar.aquamuestra.ui.theme.AquaMuestraTheme
-import com.aldemar.aquamuestra.ui.theme.components.LoginHeader
+import com.aldemar.aquamuestra.ui.theme.ThemeManager
 import com.aldemar.aquamuestra.ui.theme.components.LoginFormCard
-
-private val ColorPaper = Color(0xFFFFFFFF)
+import com.aldemar.aquamuestra.ui.theme.components.LoginHeader
 
 @Composable
 fun LoginScreen(
@@ -30,7 +28,7 @@ fun LoginScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ColorPaper)
+            .background(ThemeManager.backgroundColor)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 24.dp),

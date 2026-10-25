@@ -8,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.aldemar.aquamuestra.R
 import com.aldemar.aquamuestra.ui.theme.*
+import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.ui.theme.components.BottomNavBar
 
 @Composable
@@ -36,61 +36,44 @@ fun SampleDetailScreen(
     }
     var selectedAction by remember { mutableStateOf("Validar") }
 
+    // El AppTopBar va en el slot topBar del Scaffold (igual que en las demás pantallas).
+    // Antes estaba dentro del contenido: el Scaffold ya descontaba la barra de estado en
+    // paddingValues y el AppTopBar la sumaba otra vez, por eso se veía más abajo.
     Scaffold(
-        containerColor = ColorPaper,
+        containerColor = ThemeManager.backgroundColor,
+        topBar = {
+            AppTopBar(
+                title = stringResource(R.string.detail_title),
+                onBackClick = onBackClick
+            )
+        },
         bottomBar = { BottomNavBar(navController = navController) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            DetailTopAppBar(onBackClick = onBackClick)
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                StatusBanner(sampleId = sampleId)
-                BiometricSheetSection()
-                FieldEvidenceSection()
-                SupervisorApprovalSection(
-                    selectedAction = selectedAction,
-                    onActionSelected = { selectedAction = it },
-                    commentsText = commentsText,
-                    onCommentsChange = { commentsText = it }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun DetailTopAppBar(onBackClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(ColorAbyss)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-
+            StatusBanner(sampleId = sampleId)
+            BiometricSheetSection()
+            FieldEvidenceSection()
+            SupervisorApprovalSection(
+                selectedAction = selectedAction,
+                onActionSelected = { selectedAction = it },
+                commentsText = commentsText,
+                onCommentsChange = { commentsText = it }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
 private fun StatusBanner(sampleId: String) {
+    // El banner naranja es un color de "estado": se ve bien en ambos temas, se deja fijo.
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -131,13 +114,14 @@ private fun StatusBanner(sampleId: String) {
                     )
                 }
             }
+            // Etiqueta del lote: sobre el banner naranja, se mantiene clara con texto oscuro
             Surface(
                 shape = RoundedCornerShape(6.dp),
                 color = ColorPaper,
                 border = BorderStroke(1.dp, ColorMist)
             ) {
                 Text(
-                    text = "Lote #$sampleId",
+                    text = stringResource(R.string.lote_label, sampleId),
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -150,6 +134,9 @@ private fun StatusBanner(sampleId: String) {
 
 @Composable
 private fun BiometricSheetSection() {
+    val textColor = ThemeManager.textColor
+    val subTextColor = ThemeManager.secondaryTextColor
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -157,12 +144,12 @@ private fun BiometricSheetSection() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.Assignment, contentDescription = null, tint = ColorInk, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.Assignment, contentDescription = null, tint = textColor, modifier = Modifier.size(20.dp))
                 Text(
                     text = stringResource(R.string.detail_biometric_sheet),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = ColorInk
+                    color = textColor
                 )
             }
             Surface(shape = RoundedCornerShape(6.dp), color = Color(0xFFE0F7FA)) {
@@ -197,8 +184,8 @@ private fun BiometricSheetSection() {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                color = ColorFog,
-                border = BorderStroke(1.dp, ColorMist)
+                color = ThemeManager.surfaceColor,
+                border = BorderStroke(1.dp, ThemeManager.borderColor)
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp),
@@ -206,15 +193,15 @@ private fun BiometricSheetSection() {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.Default.Analytics, contentDescription = null, tint = ColorAbyss, modifier = Modifier.size(24.dp))
+                        Icon(Icons.Default.Analytics, contentDescription = null, tint = textColor, modifier = Modifier.size(24.dp))
                         Column {
-                            Text(stringResource(R.string.detail_density_estimated), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = ColorGraphite)
-                            Text(stringResource(R.string.detail_density_value), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = ColorInk)
+                            Text(stringResource(R.string.detail_density_estimated), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = subTextColor)
+                            Text(stringResource(R.string.detail_density_value), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = textColor)
                         }
                     }
                     Surface(shape = RoundedCornerShape(6.dp), color = Color(0xFF00796B)) {
                         Text(
-                            "Óptima",
+                            stringResource(R.string.detail_density_optimal),
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -238,20 +225,20 @@ private fun DataCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = ColorFog,
-        border = BorderStroke(1.dp, ColorMist)
+        color = ThemeManager.surfaceColor,
+        border = BorderStroke(1.dp, ThemeManager.borderColor)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = ColorGraphite)
+            Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = ThemeManager.secondaryTextColor)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 title,
                 fontSize = if (isValueLarge) 18.sp else 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = ColorInk
+                color = ThemeManager.textColor
             )
             if (subtitle.isNotEmpty()) {
-                Text(subtitle, fontSize = 11.sp, color = ColorGraphite)
+                Text(subtitle, fontSize = 11.sp, color = ThemeManager.secondaryTextColor)
             }
         }
     }
@@ -259,6 +246,9 @@ private fun DataCard(
 
 @Composable
 private fun FieldEvidenceSection() {
+    val textColor = ThemeManager.textColor
+    val subTextColor = ThemeManager.secondaryTextColor
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -266,10 +256,10 @@ private fun FieldEvidenceSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.PhotoCamera, contentDescription = null, tint = ColorInk, modifier = Modifier.size(20.dp))
-                Text(stringResource(R.string.detail_field_evidence), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = ColorInk)
+                Icon(Icons.Default.PhotoCamera, contentDescription = null, tint = textColor, modifier = Modifier.size(20.dp))
+                Text(stringResource(R.string.detail_field_evidence), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = textColor)
             }
-            Text("Foto 1 de 3", fontSize = 12.sp, color = ColorGraphite)
+            Text(stringResource(R.string.detail_photo_counter, 1, 3), fontSize = 12.sp, color = subTextColor)
         }
 
         Box(
@@ -277,12 +267,22 @@ private fun FieldEvidenceSection() {
                 .fillMaxWidth()
                 .height(200.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(ColorMist)
+                .background(ThemeManager.borderColor)
         ) {
-            Icon(Icons.Default.Image, contentDescription = null, tint = ColorSteel, modifier = Modifier.size(64.dp).align(Alignment.Center))
+            Icon(
+                Icons.Default.Image,
+                contentDescription = null,
+                tint = subTextColor,
+                modifier = Modifier
+                    .size(64.dp)
+                    .align(Alignment.Center)
+            )
 
+            // Etiqueta sobre la foto: siempre oscura con texto claro (se lee igual en ambos temas)
             Surface(
-                modifier = Modifier.align(Alignment.BottomStart).padding(12.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(12.dp),
                 shape = RoundedCornerShape(6.dp),
                 color = ColorCarbon.copy(alpha = 0.85f)
             ) {
@@ -302,11 +302,16 @@ private fun SupervisorApprovalSection(
     commentsText: String,
     onCommentsChange: (String) -> Unit
 ) {
+    val textColor = ThemeManager.textColor
+    val subTextColor = ThemeManager.secondaryTextColor
+    val borderColor = ThemeManager.borderColor
+    val isDark = ThemeManager.isDarkMode
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = ColorFog,
-        border = BorderStroke(1.dp, ColorMist)
+        color = ThemeManager.surfaceColor,
+        border = BorderStroke(1.dp, borderColor)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(
@@ -316,14 +321,21 @@ private fun SupervisorApprovalSection(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Surface(shape = RoundedCornerShape(8.dp), color = ColorAbyss) {
-                        Icon(Icons.Default.VerifiedUser, contentDescription = null, tint = ColorPaper, modifier = Modifier.padding(6.dp).size(18.dp))
+                        Icon(
+                            Icons.Default.VerifiedUser,
+                            contentDescription = null,
+                            tint = ColorPaper,
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .size(18.dp)
+                        )
                     }
                     Column {
-                        Text(stringResource(R.string.detail_approval_panel), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = ColorInk)
-                        Text(stringResource(R.string.detail_quality_resolution), fontSize = 12.sp, color = ColorGraphite)
+                        Text(stringResource(R.string.detail_approval_panel), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = textColor)
+                        Text(stringResource(R.string.detail_quality_resolution), fontSize = 12.sp, color = subTextColor)
                     }
                 }
-                Text(stringResource(R.string.detail_supervisor_role), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = ColorGraphite)
+                Text(stringResource(R.string.detail_supervisor_role), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = subTextColor)
             }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -355,8 +367,8 @@ private fun SupervisorApprovalSection(
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(stringResource(R.string.detail_supervisor_comments), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorGraphite)
-                    Text("${commentsText.length} / 300", fontSize = 11.sp, color = ColorSteel)
+                    Text(stringResource(R.string.detail_supervisor_comments), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = subTextColor)
+                    Text(stringResource(R.string.detail_comments_counter, commentsText.length, 300), fontSize = 11.sp, color = subTextColor)
                 }
                 TextField(
                     value = commentsText,
@@ -364,12 +376,12 @@ private fun SupervisorApprovalSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(90.dp)
-                        .border(1.dp, ColorMist, RoundedCornerShape(12.dp)),
+                        .border(1.dp, borderColor, RoundedCornerShape(12.dp)),
                     shape = RoundedCornerShape(12.dp),
-                    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, color = ColorInk),
+                    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, color = textColor),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = ColorPaper,
-                        unfocusedContainerColor = ColorPaper,
+                        focusedContainerColor = ThemeManager.backgroundColor,
+                        unfocusedContainerColor = ThemeManager.backgroundColor,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         cursorColor = ColorEmber
@@ -380,7 +392,7 @@ private fun SupervisorApprovalSection(
             Text(
                 text = stringResource(R.string.detail_legal_disclaimer),
                 fontSize = 11.sp,
-                color = ColorGraphite
+                color = subTextColor
             )
 
             Button(
@@ -389,7 +401,11 @@ private fun SupervisorApprovalSection(
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ColorAbyss, contentColor = ColorPaper),
+                colors = ButtonDefaults.buttonColors(
+                    // En modo oscuro el azul marino casi no se distingue del fondo: se usa el acento
+                    containerColor = if (isDark) ColorEmber else ColorAbyss,
+                    contentColor = ColorPaper
+                ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 Icon(Icons.Default.AssignmentTurnedIn, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -414,10 +430,10 @@ private fun ActionButton(
         modifier = modifier.height(42.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) activeColor else ColorPaper,
-            contentColor = if (isSelected) ColorPaper else ColorGraphite
+            containerColor = if (isSelected) activeColor else ThemeManager.backgroundColor,
+            contentColor = if (isSelected) ColorPaper else ThemeManager.secondaryTextColor
         ),
-        border = if (!isSelected) BorderStroke(1.dp, ColorMist) else null,
+        border = if (!isSelected) BorderStroke(1.dp, ThemeManager.borderColor) else null,
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         contentPadding = PaddingValues(horizontal = 4.dp)
     ) {

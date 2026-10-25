@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -56,6 +55,7 @@ import com.aldemar.aquamuestra.ui.theme.ColorEmber
 import com.aldemar.aquamuestra.ui.theme.ColorGraphite
 import com.aldemar.aquamuestra.ui.theme.ColorPaper
 import com.aldemar.aquamuestra.ui.theme.ThemeManager
+import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.ui.theme.components.BottomNavBar
 
 @Composable
@@ -66,94 +66,117 @@ fun InicioScreen(navController: NavController) {
     val backgroundColor = ThemeManager.backgroundColor
     val textColor = ThemeManager.textColor
     val subtitleColor = ThemeManager.secondaryTextColor
+    val logoutColor = Color(0xFFD32F2F)
 
     Scaffold(
         topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                IconButton(onClick = { showMenu = true }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.cd_opciones),
-                        tint = textColor
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    modifier = Modifier
-                        .width(240.dp)
-                        .background(ThemeManager.surfaceColor)
-                ) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = if (isDark) "Modo Claro" else "Modo Oscuro",
-                                fontSize = 15.sp,
-                                color = textColor
-                            )
-                        },
-                        leadingIcon = {
+            AppTopBar(
+                title = stringResource(R.string.inicio_titulo),
+                showShadow = false,
+                actions = {
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
                             Icon(
-                                imageVector = if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
-                                contentDescription = null,
-                                tint = if (isDark) ColorEmber else ColorGraphite
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = stringResource(R.string.cd_opciones),
+                                tint = textColor
                             )
-                        },
-                        trailingIcon = {
-                            Switch(
-                                checked = ThemeManager.isDarkMode,
-                                onCheckedChange = { ThemeManager.isDarkMode = it },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = ColorPaper,
-                                    checkedTrackColor = ColorEmber
-                                )
+                        }
+
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                            modifier = Modifier
+                                .width(240.dp)
+                                .background(ThemeManager.surfaceColor)
+                        ) {
+                            // Modo claro / oscuro (se guarda y se mantiene hasta que lo cambies)
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = if (isDark) stringResource(R.string.menu_modo_claro)
+                                        else stringResource(R.string.menu_modo_oscuro),
+                                        fontSize = 15.sp,
+                                        color = textColor
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
+                                        contentDescription = null,
+                                        tint = if (isDark) ColorEmber else ColorGraphite
+                                    )
+                                },
+                                trailingIcon = {
+                                    Switch(
+                                        checked = ThemeManager.isDarkMode,
+                                        onCheckedChange = { ThemeManager.isDarkMode = it },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = ColorPaper,
+                                            checkedTrackColor = ColorEmber
+                                        )
+                                    )
+                                },
+                                onClick = { ThemeManager.isDarkMode = !ThemeManager.isDarkMode }
                             )
-                        },
-                        onClick = { ThemeManager.isDarkMode = !ThemeManager.isDarkMode }
-                    )
 
-                    HorizontalDivider(color = ThemeManager.borderColor)
+                            HorizontalDivider(color = ThemeManager.borderColor)
 
-                    DropdownMenuItem(
-                        text = { Text("Sincronizar", fontSize = 15.sp, color = textColor) },
-                        leadingIcon = { Icon(Icons.Default.Sync, contentDescription = null, tint = subtitleColor) },
-                        onClick = { showMenu = false }
-                    )
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.menu_sincronizar),
+                                        fontSize = 15.sp,
+                                        color = textColor
+                                    )
+                                },
+                                leadingIcon = { Icon(Icons.Default.Sync, contentDescription = null, tint = subtitleColor) },
+                                onClick = { showMenu = false }
+                            )
 
-                    HorizontalDivider(color = ThemeManager.borderColor)
+                            HorizontalDivider(color = ThemeManager.borderColor)
 
-                    DropdownMenuItem(
-                        text = { Text("Cerrar Sesión", fontSize = 15.sp, color = Color(0xFFD32F2F), fontWeight = FontWeight.SemiBold) },
-                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = Color(0xFFD32F2F)) },
-                        onClick = { showMenu = false }
-                    )
+                            // Cerrar sesión: vuelve al Login y borra toda la pila de navegación,
+                            // así el botón "atrás" no puede regresar a la app.
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.menu_cerrar_sesion),
+                                        fontSize = 15.sp,
+                                        color = logoutColor,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ExitToApp,
+                                        contentDescription = null,
+                                        tint = logoutColor
+                                    )
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    navController.navigate(AppRoutes.Login.ruta) {
+                                        popUpTo(AppRoutes.Inicio.ruta) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
-            }
+            )
         },
-        bottomBar = { BottomNavBar(navController = navController) }, // LLamada correcta al BottomNavBar
+        bottomBar = { BottomNavBar(navController = navController) },
         containerColor = backgroundColor
     ) { paddingValues: PaddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp, vertical = 8.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = stringResource(R.string.inicio_titulo),
-                fontSize = 36.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor,
-                letterSpacing = (-0.02).sp
-            )
             Text(
                 text = stringResource(R.string.inicio_subtitulo),
                 fontSize = 16.sp,
@@ -161,7 +184,7 @@ fun InicioScreen(navController: NavController) {
                 letterSpacing = (-0.01).sp
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             ActionCard(
                 title = stringResource(R.string.inicio_card_nueva_titulo),

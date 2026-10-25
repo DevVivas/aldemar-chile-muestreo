@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">AquaMuestra</string>
 
+    <!--  Login  -->
+    <string name="login_keep_session_title">Mantener sesión activa</string>
+    <string name="login_keep_session_desc">Guardar credenciales en este dispositivo</string>
+    <string name="cd_cambiar_rol">Cambiar rol</string>
+
+    <!--  Compartidos (Historial y Detalle)  -->
+    <string name="lote_label">Lote #%1$s</string>
+
     <!-- Textos para el Login -->
     <string name="label_user">Usuario / Correo</string>
     <string name="label_password">Contraseña</string>
@@ -26,12 +34,22 @@
     <string name="inicio_card_nueva_sub">Registrar datos en terreno</string>
     <string name="inicio_card_historial_titulo">Ver Historial</string>
     <string name="inicio_card_historial_sub">Revisar y exportar registros</string>
+    <string name="menu_modo_claro">Modo Claro</string>
+    <string name="menu_modo_oscuro">Modo Oscuro</string>
+    <string name="menu_sincronizar">Sincronizar</string>
+    <string name="menu_cerrar_sesion">Cerrar Sesión</string>
 
     <!-- HistorialScreen -->
     <string name="historial_titulo">Historial de Muestras</string>
     <string name="fab_agregar_desc">Agregar nueva muestra</string>
+    <string name="historial_estado_sincronizado">Sincronizado</string>
+    <string name="historial_estado_pendiente">Pendiente</string>
 
     <!-- NewSampleFormScreen -->
+    <string name="detail_title">Detalle de muestra</string>
+    <string name="detail_density_optimal">Óptima</string>
+    <string name="detail_photo_counter">Foto %1$d de %2$d</string>
+    <string name="detail_comments_counter">%1$d / %2$d</string>
     <string name="form_title">Nueva Muestra</string>
     <string name="form_draft_saved">Borrador guardado localmente</string>
     <string name="form_location_info">Información de Ubicación</string>
@@ -41,7 +59,6 @@
     <string name="form_tren_label">Tren / Módulo de Concesión</string>
     <string name="form_line_label">Línea de Cultivo</string>
     <string name="form_species_label">Especie</string>
-
     <string name="form_biometrics_title">Medición y Biometría</string>
     <string name="form_sernapesca_norm">NORMA SERNAPESCA</string>
     <string name="form_length_label">Longitud del Tramo Medido</string>
@@ -49,21 +66,18 @@
     <string name="form_reset">Reiniciar</string>
     <string name="form_alive_units">EJEMPLARES VIVOS: %1$d ind</string>
     <string name="form_observations_label">Observaciones</string>
-
     <string name="form_evidence_title">Evidencia Fotográfica</string>
     <string name="form_photo_counter">%1$d de 5 Fotos</string>
     <string name="form_geostamp">Geostampa</string>
     <string name="form_capture_photo">Capturar Fotografía Adicional</string>
-
     <string name="form_save_draft">Guardar Borrador</string>
     <string name="form_finish_reg">Finalizar Registro</string>
 
     <!-- Detalle Revisión -->
-    <string name="detail_title">Detalle Revisión</string>
+    <string name="detail_titler">Detalle Revisión</string>
     <string name="detail_status_label">ESTADO ACTUAL</string>
     <string name="detail_status_pending">Pendiente de Revisión</string>
     <string name="detail_batch">Lote #089</string>
-
     <string name="detail_biometric_sheet">Ficha Biométrica</string>
     <string name="detail_sernapesca_cert">Certificado Sernapesca</string>
     <string name="detail_center_label">CENTRO</string>
@@ -76,7 +90,6 @@
     <string name="detail_effective_count_label">CONTEO EFECTIVO</string>
     <string name="detail_density_estimated">DENSIDAD ESTIMADA</string>
     <string name="detail_density_value">300 ind / metro lineal</string>
-
     <string name="detail_field_evidence">Evidencia de Terreno</string>
     <string name="detail_approval_panel">Panel de Aprobación Técnica</string>
     <string name="detail_supervisor_role">SUPERVISOR</string>
@@ -106,9 +119,12 @@
     <string name="msg_draft_saved_success">¡Borrador guardado localmente con éxito!</string>
     <string name="msg_finish_reg_success">¡Registro finalizado y sincronizado en búfer offline!</string>
     <string name="msg_photo_deleted">Fotografía eliminada</string>
-
     <string name="msg_required_fields_error">Debes completar todos los datos obligatorios.</string>
 
-
+    <!--  Formulario de nueva muestra  -->
+    <string name="form_required">Requerido</string>
+    <string name="form_photo_required">Fotografía requerida (*)</string>
+    <string name="form_draft_time_initial">hace 2 min</string>
+    <string name="form_draft_time_now">hace un momento</string>
 
 </resources>

@@ -14,13 +14,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aldemar.aquamuestra.R
-
-private val ColorPaper = Color(0xFFFFFFFF)
-private val ColorMist = Color(0xFFB9BBC6)
+import com.aldemar.aquamuestra.ui.theme.ThemeManager
 
 @Composable
 fun LoginFormCard(
@@ -35,9 +32,9 @@ fun LoginFormCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, ColorMist, RoundedCornerShape(12.dp)),
+            .border(1.dp, ThemeManager.borderColor, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = ColorPaper),
+        colors = CardDefaults.cardColors(containerColor = ThemeManager.backgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -51,8 +48,8 @@ fun LoginFormCard(
             KeepSessionRow(
                 checked = keepSession,
                 onCheckedChange = { keepSession = it },
-                title = "Mantener sesión activa",
-                description = "Guardar credenciales en este dispositivo"
+                title = stringResource(R.string.login_keep_session_title),
+                description = stringResource(R.string.login_keep_session_desc)
             )
 
             PrimaryButton(

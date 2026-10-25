@@ -1,4 +1,4 @@
-﻿package com.aldemar.aquamuestra.ui.theme.form
+package com.aldemar.aquamuestra.ui.theme.form
 
 import android.Manifest
 import android.content.Context
@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -38,6 +38,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import com.aldemar.aquamuestra.R
+import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.ui.theme.*
 import kotlinx.coroutines.launch
 import java.io.File
@@ -53,7 +54,9 @@ fun NewSampleFormScreen(
     val context = LocalContext.current
     var lengthMeters by remember { mutableFloatStateOf(0.50f) }
     var individualCount by remember { mutableIntStateOf(150) }
-    var draftTime by remember { mutableStateOf("hace 2 min") }
+    val draftNow = stringResource(R.string.form_draft_time_now)
+    val draftInitial = stringResource(R.string.form_draft_time_initial)
+    var draftTime by remember { mutableStateOf(draftInitial) }
 
     // Colores dinámicos para Modo Oscuro
     val bgColor = ThemeManager.backgroundColor
@@ -93,7 +96,7 @@ fun NewSampleFormScreen(
     ) { success ->
         if (success && tempPhotoUri != null) {
             capturedPhotos.add(tempPhotoUri!!)
-            draftTime = "hace un momento"
+            draftTime = draftNow
             scope.launch {
                 snackbarHostState.showSnackbar(String.format(msgPhotoSuccess, capturedPhotos.size))
             }
@@ -122,7 +125,12 @@ fun NewSampleFormScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = bgColor,
-        topBar = { TopAppBar(onBackClick = onBackClick) },
+        topBar = {
+            AppTopBar(
+                title = stringResource(R.string.form_title),
+                onBackClick = onBackClick
+            )
+        },
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -147,7 +155,7 @@ fun NewSampleFormScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 24.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
             DraftStatusBar(draftTime = draftTime)
@@ -156,31 +164,31 @@ fun NewSampleFormScreen(
             LocationAndOperatorSection(
                 currentDateTime = currentDateTimeFormatted,
                 operatorName = operatorName,
-                onOperatorChange = { operatorName = it; draftTime = "hace un momento" },
+                onOperatorChange = { operatorName = it; draftTime = draftNow },
                 selectedCenter = selectedCenter,
-                onCenterSelected = { selectedCenter = it; draftTime = "hace un momento" },
+                onCenterSelected = { selectedCenter = it; draftTime = draftNow },
                 centersList = centersList,
                 concessionText = concessionText,
-                onConcessionChange = { concessionText = it; draftTime = "hace un momento" },
+                onConcessionChange = { concessionText = it; draftTime = draftNow },
                 selectedTren = selectedTren,
-                onTrenSelected = { selectedTren = it; draftTime = "hace un momento" },
+                onTrenSelected = { selectedTren = it; draftTime = draftNow },
                 trenList = trenList,
                 selectedLine = selectedLine,
-                onLineSelected = { selectedLine = it; draftTime = "hace un momento" },
+                onLineSelected = { selectedLine = it; draftTime = draftNow },
                 lineList = lineList,
                 selectedSpecies = selectedSpecies,
-                onSpeciesSelected = { selectedSpecies = it; draftTime = "hace un momento" },
+                onSpeciesSelected = { selectedSpecies = it; draftTime = draftNow },
                 speciesList = speciesList
             )
 
             Spacer(modifier = Modifier.height(24.dp))
             BiometricsSection(
                 lengthMeters = lengthMeters,
-                onLengthChange = { lengthMeters = it; draftTime = "hace un momento" },
+                onLengthChange = { lengthMeters = it; draftTime = draftNow },
                 individualCount = individualCount,
-                onCountChange = { individualCount = it; draftTime = "hace un momento" },
+                onCountChange = { individualCount = it; draftTime = draftNow },
                 observationsText = observationsText,
-                onObservationsChange = { observationsText = it; draftTime = "hace un momento" }
+                onObservationsChange = { observationsText = it; draftTime = draftNow }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -217,7 +225,7 @@ fun NewSampleFormScreen(
             ) {
                 OutlinedButton(
                     onClick = {
-                        draftTime = "hace un momento"
+                        draftTime = draftNow
                         scope.launch {
                             snackbarHostState.showSnackbar(msgDraftSaved)
                         }
@@ -227,13 +235,18 @@ fun NewSampleFormScreen(
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.dp, ThemeManager.borderColor),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = textColor)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = textColor),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.form_save_draft),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = (-0.01).sp
+                        letterSpacing = (-0.01).sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
                     )
                 }
 
@@ -261,13 +274,18 @@ fun NewSampleFormScreen(
                         containerColor = ColorEmber,
                         contentColor = ColorPaper
                     ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.form_finish_reg),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = (-0.01).sp
+                        letterSpacing = (-0.01).sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
@@ -283,7 +301,7 @@ fun NewSampleFormScreen(
             onDelete = {
                 capturedPhotos.remove(selectedPhotoForPreview)
                 selectedPhotoForPreview = null
-                draftTime = "hace un momento"
+                draftTime = draftNow
                 scope.launch {
                     snackbarHostState.showSnackbar(msgPhotoDeleted)
                 }
@@ -371,7 +389,7 @@ private fun CustomInputField(
         ) {
             Text(label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = subTextColor)
             if (isError) {
-                Text("Requerido", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
+                Text(stringResource(R.string.form_required), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
             }
         }
         TextField(
@@ -464,7 +482,7 @@ private fun PhotoEvidenceSection(
                         tint = subTextColor,
                         modifier = Modifier.size(48.dp)
                     )
-                    Text("Fotografía requerida (*)", fontSize = 11.sp, color = Color(0xFFD32F2F), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.form_photo_required), fontSize = 11.sp, color = Color(0xFFD32F2F), fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -589,42 +607,6 @@ private fun PhotoPreviewDialog(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun TopAppBar(onBackClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(ColorAbyss)
-            .statusBarsPadding()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_volver),
-                    tint = ColorPaper
-                )
-            }
-            Text(
-                text = stringResource(R.string.form_title),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 48.dp),
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = ColorPaper,
-                letterSpacing = (-0.01).sp
-            )
         }
     }
 }
