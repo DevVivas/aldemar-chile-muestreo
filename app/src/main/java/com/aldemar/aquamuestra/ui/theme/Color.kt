@@ -2,23 +2,20 @@ package com.aldemar.aquamuestra.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Fondos
-val AquaBackground = Color(0xFFF8F9FA)
-val AquaSurface = Color(0xFFFFFFFF)
-val AquaSurfaceVariant = Color(0xFFF4F1EF)   // fondo de inputs
-val AquaInfoGray = Color(0xFFEEEEEC)         // tarjeta de ubicación
+// Paleta Clara (Ember / Paper / Fog)
+val ColorEmber = Color(0xFFD35400)
+val ColorPaper = Color(0xFFFFFFFF)
+val ColorFog = Color(0xFFF4F5F7)
+val ColorMist = Color(0xFFE2E8F0)
+val ColorInk = Color(0xFF1A202C)
+val ColorGraphite = Color(0xFF4A5568)
+val ColorSteel = Color(0xFF718096)
+val ColorAbyss = Color(0xFF0F172A)
+val ColorCarbon = Color(0xFF212121)
 
-// Marca
-val AquaNavy = Color(0xFF002A54)             // títulos
-val AquaNavyButton = Color(0xFF002B5C)       // botón principal
-val AquaTeal = Color(0xFF006B6B)             // textos/íconos turquesa
-val AquaTealLight = Color(0xFF9EF2F0)        // badge y pills
-
-// Estado offline
-val AquaOrangeLight = Color(0xFFFFDDC2)
-val AquaOrangeDark = Color(0xFF4A2800)
-
-// Texto
-val AquaTextSecondary = Color(0xFF4A5560)
-val AquaTextHint = Color(0xFF6B7580)
-val AquaOutline = Color(0xFFC9CED3)
+// Paleta Oscura Global
+val ColorDarkBackground = Color(0xFF121212)
+val ColorDarkSurface = Color(0xFF1E1E1E)
+val ColorDarkBorder = Color(0xFF2C2C2C)
+val ColorDarkTextPrimary = Color(0xFFF1F5F9)
+val ColorDarkTextSecondary = Color(0xFF94A3B8)
