@@ -1,6 +1,7 @@
 package com.aldemar.aquamuestra.ui.components.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -122,6 +123,7 @@ fun SyncCard(
                     containerColor = AquaTeal
                 ),
                 shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
