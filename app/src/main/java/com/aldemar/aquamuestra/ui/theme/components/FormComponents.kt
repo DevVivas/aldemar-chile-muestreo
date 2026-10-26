@@ -3,7 +3,6 @@ package com.aldemar.aquamuestra.ui.theme.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,21 +38,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aldemar.aquamuestra.R
+import com.aldemar.aquamuestra.ui.theme.ColorEmber
+import com.aldemar.aquamuestra.ui.theme.ColorPaper
+import com.aldemar.aquamuestra.ui.theme.ThemeManager
 
-// DESIGN.md tokens
-private val ColorPaper = Color(0xFFFFFFFF)
-private val ColorInk = Color(0xFF000000)
-private val ColorGraphite = Color(0xFF60646c)
-private val ColorFog = Color(0xFFF3F3F7)
-private val ColorMist = Color(0xFFB9BBC6)
-private val ColorEmber = Color(0xFFFF5900)
-private val ColorSteel = Color(0xFF8B8D98)
+// Los colores de estructura (fondo, texto, bordes) vienen de ThemeManager,
+// así cambian solos al activar el modo oscuro.
 
 @Composable
 fun AquaTextField(
@@ -65,19 +63,23 @@ fun AquaTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
+    val fieldBg = ThemeManager.surfaceColor
+    val textColor = ThemeManager.textColor
+    val hintColor = ThemeManager.secondaryTextColor
+
     TextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .border(1.dp, ColorMist, RoundedCornerShape(12.dp)),
+            .border(1.dp, ThemeManager.borderColor, RoundedCornerShape(12.dp)),
         singleLine = true,
         shape = RoundedCornerShape(12.dp),
         textStyle = androidx.compose.ui.text.TextStyle(
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = ColorInk,
+            color = textColor,
             letterSpacing = (-0.01).sp
         ),
         placeholder = {
@@ -85,16 +87,16 @@ fun AquaTextField(
                 text = placeholder,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = ColorSteel
+                color = hintColor
             )
         },
         trailingIcon = trailing,
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = ColorFog,
-            unfocusedContainerColor = ColorFog,
-            disabledContainerColor = ColorFog,
+            focusedContainerColor = fieldBg,
+            unfocusedContainerColor = fieldBg,
+            disabledContainerColor = fieldBg,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = ColorEmber
@@ -127,7 +129,7 @@ fun PasswordField(value: String, onValueChange: (String) -> Unit, placeholder: S
                     imageVector = if (visible) Icons.Outlined.VisibilityOff
                     else Icons.Outlined.Visibility,
                     contentDescription = null,
-                    tint = ColorSteel
+                    tint = ThemeManager.secondaryTextColor
                 )
             }
         }
@@ -145,12 +147,17 @@ fun RoleSelector(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
+    val surface = ThemeManager.surfaceColor
+    val textColor = ThemeManager.textColor
+    val subTextColor = ThemeManager.secondaryTextColor
+    val borderColor = ThemeManager.borderColor
+
     Box(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(ColorFog, RoundedCornerShape(12.dp))
-                .border(1.dp, ColorMist, RoundedCornerShape(12.dp))
+                .background(surface, RoundedCornerShape(12.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(12.dp))
                 .clickable { expanded = true }
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -160,24 +167,28 @@ fun RoleSelector(
                     text = selected.title,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = ColorInk,
+                    color = textColor,
                     letterSpacing = (-0.01).sp
                 )
             }
-            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Cambiar rol", tint = ColorGraphite)
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.cd_cambiar_rol), tint = subTextColor)
         }
 
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(surface)
+        ) {
             options.forEach { option ->
                 DropdownMenuItem(
                     text = {
                         Column {
-                            Text(option.title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = ColorInk)
+                            Text(option.title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textColor)
                             Text(
                                 option.description,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = ColorGraphite
+                                color = subTextColor
                             )
                         }
                     },
@@ -210,13 +221,13 @@ fun KeepSessionRow(
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
                 checkedColor = ColorEmber,
-                uncheckedColor = ColorMist,
+                uncheckedColor = ThemeManager.secondaryTextColor,
                 checkmarkColor = ColorPaper
             )
         )
         Column(modifier = Modifier.padding(start = 4.dp)) {
-            Text(title, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ColorInk, letterSpacing = (-0.01).sp)
-            Text(description, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorGraphite, letterSpacing = (-0.01).sp)
+            Text(title, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ThemeManager.textColor, letterSpacing = (-0.01).sp)
+            Text(description, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ThemeManager.secondaryTextColor, letterSpacing = (-0.01).sp)
         }
     }
 }

@@ -2,21 +2,16 @@ package com.aldemar.aquamuestra.ui.theme.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aldemar.aquamuestra.R
-
-private val ColorInk = Color(0xFF000000)
-private val ColorGraphite = Color(0xFF60646c)
+import com.aldemar.aquamuestra.ui.theme.ThemeManager
 
 @Composable
 fun LoginHeader(modifier: Modifier = Modifier) {
@@ -29,17 +24,8 @@ fun LoginHeader(modifier: Modifier = Modifier) {
             text = stringResource(R.string.app_name),
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = ColorInk,
+            color = ThemeManager.textColor,
             letterSpacing = (-0.02).sp
-        )
-        Text(
-            text = stringResource(R.string.login_subtitle),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = ColorGraphite,
-            textAlign = TextAlign.Center,
-            letterSpacing = (-0.01).sp,
-            modifier = Modifier.padding(horizontal = 24.dp)
         )
     }
 }

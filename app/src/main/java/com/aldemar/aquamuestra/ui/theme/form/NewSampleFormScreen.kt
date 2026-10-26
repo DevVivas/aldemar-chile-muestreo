@@ -1,191 +1,338 @@
-﻿package com.aldemar.aquamuestra.ui.theme.form
+package com.aldemar.aquamuestra.ui.theme.form
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aldemar.aquamuestra.ui.theme.AquaMuestraTheme
-
-private val ColorPaper = Color(0xFFFFFFFF)
-private val ColorAbyss = Color(0xFF000710)
-private val ColorInk = Color(0xFF000000)
-private val ColorGraphite = Color(0xFF60646c)
-private val ColorFog = Color(0xFFF3F3F7)
-private val ColorMist = Color(0xFFB9BBC6)
-private val ColorEmber = Color(0xFFFF5900)
-private val ColorSteel = Color(0xFF8B8D98)
-private val ColorCarbon = Color(0xFF15191e)
+import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import coil.compose.rememberAsyncImagePainter
+import com.aldemar.aquamuestra.R
+import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
+import com.aldemar.aquamuestra.ui.theme.*
+import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun NewSampleFormScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     var lengthMeters by remember { mutableFloatStateOf(0.50f) }
     var individualCount by remember { mutableIntStateOf(150) }
-    var photoCount by remember { mutableIntStateOf(1) }
-    var draftTime by remember { mutableStateOf("hace 2 min") }
-    var successMessage by remember { mutableStateOf<String?>(null) }
+    val draftNow = stringResource(R.string.form_draft_time_now)
+    val draftInitial = stringResource(R.string.form_draft_time_initial)
+    var draftTime by remember { mutableStateOf(draftInitial) }
 
-    // Interactive inputs state
+    // Colores dinámicos para Modo Oscuro
+    val bgColor = ThemeManager.backgroundColor
+    val textColor = ThemeManager.textColor
+
+    val currentDateTimeFormatted = remember {
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+        dateFormat.format(Date())
+    }
+
+    var operatorName by remember { mutableStateOf("D. Villamizar (TEC-4092)") }
+    var concessionText by remember { mutableStateOf("Concesión 103B") }
+    val capturedPhotos = remember { mutableStateListOf<Uri>() }
+
     var selectedCenter by remember { mutableStateOf("Centro Chiloé (Sector Huito)") }
     var selectedTren by remember { mutableStateOf("Tren 3 - Módulo B") }
     var selectedLine by remember { mutableStateOf("Línea 12") }
     var selectedSpecies by remember { mutableStateOf("Chorito (Mytilus chilensis)") }
-    var observationsText by remember { mutableStateOf("Crecimiento homogéneo, baja presencia de epibiontes, fijación sólida...") }
+    var observationsText by remember { mutableStateOf("Crecimiento homogéneo, baja presencia de epibiontes...") }
+
+    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedPhotoForPreview by remember { mutableStateOf<Uri?>(null) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val msgPhotoSuccess = stringResource(R.string.msg_photo_success)
+    val msgPermissionDenied = stringResource(R.string.msg_photo_permission_denied)
+    val msgMaxPhotos = stringResource(R.string.msg_max_photos_reached)
+    val msgDraftSaved = stringResource(R.string.msg_draft_saved_success)
+    val msgFinishReg = stringResource(R.string.msg_finish_reg_success)
+    val msgPhotoDeleted = stringResource(R.string.msg_photo_deleted)
+    val msgRequiredError = stringResource(R.string.msg_required_fields_error)
+
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && tempPhotoUri != null) {
+            capturedPhotos.add(tempPhotoUri!!)
+            draftTime = draftNow
+            scope.launch {
+                snackbarHostState.showSnackbar(String.format(msgPhotoSuccess, capturedPhotos.size))
+            }
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val uri = createTempImageUri(context)
+            tempPhotoUri = uri
+            takePictureLauncher.launch(uri)
+        } else {
+            scope.launch {
+                snackbarHostState.showSnackbar(msgPermissionDenied)
+            }
+        }
+    }
 
     val centersList = listOf("Centro Chiloé (Sector Huito)", "Punta Pelluco • Módulo 104", "Calbuco Sur", "Reloncaví Estuario")
     val trenList = listOf("Tren 1 - Módulo A", "Tren 2 - Módulo B", "Tren 3 - Módulo B", "Tren 4 - Módulo C")
     val lineList = listOf("Línea 10", "Línea 12", "Línea 15", "Línea 18")
-    val speciesList = listOf("Chorito (Mytilus chilensis)", "Salmón Atlántico (Salmo salar)", "Trucha Arcoíris (Oncorhynchus mykiss)", "Ostra Chilena (Ostrea chilensis)")
+    val speciesList = listOf("Chorito (Mytilus chilensis)", "Salmón Atlántico (Salmo salar)", "Trucha Arcoíris (Oncorhynchus mykiss)")
 
-    Column(modifier = modifier.fillMaxSize().background(ColorPaper)) {
-        TopAppBar(onBackClick = onBackClick)
-        Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
-            Spacer(modifier = Modifier.height(16.dp))
-            DraftStatusBar(draftTime = draftTime)
-            
-            if (successMessage != null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    color = ColorEmber.copy(alpha = 0.1f),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, ColorEmber)
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = bgColor,
+        topBar = {
+            AppTopBar(
+                title = stringResource(R.string.form_title),
+                onBackClick = onBackClick
+            )
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(16.dp)
+            ) { data ->
+                Snackbar(
+                    containerColor = ColorAbyss,
+                    contentColor = ColorPaper,
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = successMessage!!,
-                        modifier = Modifier.padding(12.dp),
-                        fontSize = 13.sp,
+                        text = data.visuals.message,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            DraftStatusBar(draftTime = draftTime)
+
+            Spacer(modifier = Modifier.height(24.dp))
+            LocationAndOperatorSection(
+                currentDateTime = currentDateTimeFormatted,
+                operatorName = operatorName,
+                onOperatorChange = { operatorName = it; draftTime = draftNow },
+                selectedCenter = selectedCenter,
+                onCenterSelected = { selectedCenter = it; draftTime = draftNow },
+                centersList = centersList,
+                concessionText = concessionText,
+                onConcessionChange = { concessionText = it; draftTime = draftNow },
+                selectedTren = selectedTren,
+                onTrenSelected = { selectedTren = it; draftTime = draftNow },
+                trenList = trenList,
+                selectedLine = selectedLine,
+                onLineSelected = { selectedLine = it; draftTime = draftNow },
+                lineList = lineList,
+                selectedSpecies = selectedSpecies,
+                onSpeciesSelected = { selectedSpecies = it; draftTime = draftNow },
+                speciesList = speciesList
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+            BiometricsSection(
+                lengthMeters = lengthMeters,
+                onLengthChange = { lengthMeters = it; draftTime = draftNow },
+                individualCount = individualCount,
+                onCountChange = { individualCount = it; draftTime = draftNow },
+                observationsText = observationsText,
+                onObservationsChange = { observationsText = it; draftTime = draftNow }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+            PhotoEvidenceSection(
+                capturedPhotos = capturedPhotos,
+                onPhotoClick = { uri -> selectedPhotoForPreview = uri },
+                onAddPhotoClick = {
+                    if (capturedPhotos.size >= 5) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(msgMaxPhotos)
+                        }
+                    } else {
+                        val hasPermission = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.CAMERA
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                        if (hasPermission) {
+                            val uri = createTempImageUri(context)
+                            tempPhotoUri = uri
+                            takePictureLauncher.launch(uri)
+                        } else {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        draftTime = draftNow
+                        scope.launch {
+                            snackbarHostState.showSnackbar(msgDraftSaved)
+                        }
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, ThemeManager.borderColor),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = textColor),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.form_save_draft),
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = ColorEmber,
+                        letterSpacing = (-0.01).sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        val isOperatorValid = operatorName.trim().isNotEmpty()
+                        val isConcessionValid = concessionText.trim().isNotEmpty()
+                        val isPhotoValid = capturedPhotos.isNotEmpty()
+
+                        if (isOperatorValid && isConcessionValid && isPhotoValid) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(msgFinishReg)
+                            }
+                        } else {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(msgRequiredError)
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ColorEmber,
+                        contentColor = ColorPaper
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.form_finish_reg),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = (-0.01).sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            LocationSection(
-                selectedCenter = selectedCenter,
-                onCenterSelected = { selectedCenter = it; draftTime = "hace un momento" },
-                centersList = centersList,
-                selectedTren = selectedTren,
-                onTrenSelected = { selectedTren = it; draftTime = "hace un momento" },
-                trenList = trenList,
-                selectedLine = selectedLine,
-                onLineSelected = { selectedLine = it; draftTime = "hace un momento" },
-                lineList = lineList,
-                selectedSpecies = selectedSpecies,
-                onSpeciesSelected = { selectedSpecies = it; draftTime = "hace un momento" },
-                speciesList = speciesList
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            BiometricsSection(
-                lengthMeters = lengthMeters,
-                onLengthChange = { lengthMeters = it; draftTime = "hace un momento" },
-                individualCount = individualCount,
-                onCountChange = { individualCount = it; draftTime = "hace un momento" },
-                observationsText = observationsText,
-                onObservationsChange = { observationsText = it; draftTime = "hace un momento" }
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            PhotoEvidenceSection(
-                photoCount = photoCount,
-                onAddPhoto = {
-                    if (photoCount < 5) photoCount++
-                    draftTime = "hace un momento"
-                    successMessage = "Fotografía agregada con éxito ($photoCount/5)"
-                }
-            )
             Spacer(modifier = Modifier.height(32.dp))
         }
-        BottomActionBar(
-            onSaveDraft = {
-                draftTime = "hace un momento"
-                successMessage = "¡Borrador guardado localmente con éxito!"
-            },
-            onFinishRegistration = {
-                successMessage = "¡Registro finalizado y sincronizado en búfer offline!"
+    }
+
+    if (selectedPhotoForPreview != null) {
+        PhotoPreviewDialog(
+            photoUri = selectedPhotoForPreview!!,
+            onDismiss = { selectedPhotoForPreview = null },
+            onDelete = {
+                capturedPhotos.remove(selectedPhotoForPreview)
+                selectedPhotoForPreview = null
+                draftTime = draftNow
+                scope.launch {
+                    snackbarHostState.showSnackbar(msgPhotoDeleted)
+                }
             }
         )
     }
 }
 
-@Composable
-private fun TopAppBar(onBackClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().background(ColorAbyss).statusBarsPadding()) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = ColorPaper) }
-            Text("Form Nueva Muestra", modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = ColorPaper, letterSpacing = (-0.01).sp)
-            IconButton(onClick = {}) { Icon(Icons.Default.Person, contentDescription = "Perfil", tint = ColorPaper) }
-            IconButton(onClick = {}) { Icon(Icons.Default.MoreVert, contentDescription = "Opciones", tint = ColorPaper) }
-        }
-    }
+private fun createTempImageUri(context: Context): Uri {
+    val imageFile = File.createTempFile(
+        "sample_${System.currentTimeMillis()}_",
+        ".jpg",
+        context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+    )
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        imageFile
+    )
 }
 
 @Composable
-private fun DraftStatusBar(draftTime: String) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Text("Borrador guardado localmente", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorGraphite, letterSpacing = (-0.01).sp)
-        Text(draftTime, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorSteel, letterSpacing = (-0.01).sp)
-    }
-}
-
-@Composable
-private fun LocationSection(
+private fun LocationAndOperatorSection(
+    currentDateTime: String,
+    operatorName: String,
+    onOperatorChange: (String) -> Unit,
     selectedCenter: String,
     onCenterSelected: (String) -> Unit,
     centersList: List<String>,
+    concessionText: String,
+    onConcessionChange: (String) -> Unit,
     selectedTren: String,
     onTrenSelected: (String) -> Unit,
     trenList: List<String>,
@@ -197,28 +344,298 @@ private fun LocationSection(
     speciesList: List<String>
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Default.LocationOn, contentDescription = null, tint = ColorInk, modifier = Modifier.size(18.dp))
-            Text("Informacion de Ubicacion", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = ColorInk, letterSpacing = (-0.01).sp)
-            Spacer(modifier = Modifier.weight(1f))
-            Surface(shape = RoundedCornerShape(6.dp), color = ColorFog) {
-                Text("GPS FIJADO", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = ColorInk, letterSpacing = (-0.01).sp)
+        InfoFieldLocked(stringResource(R.string.form_datetime_label), currentDateTime, hasLock = true)
+
+        CustomInputField(
+            label = stringResource(R.string.form_operator_label),
+            value = operatorName,
+            onValueChange = onOperatorChange,
+            isError = operatorName.trim().isEmpty()
+        )
+
+        InteractiveDropdownField(stringResource(R.string.form_center_label), selectedCenter, centersList, onCenterSelected)
+
+        CustomInputField(
+            label = stringResource(R.string.form_concession_label) + " *",
+            value = concessionText,
+            onValueChange = onConcessionChange,
+            isError = concessionText.trim().isEmpty()
+        )
+
+        InteractiveDropdownField(stringResource(R.string.form_tren_label), selectedTren, trenList, onTrenSelected)
+        InteractiveDropdownField(stringResource(R.string.form_line_label), selectedLine, lineList, onLineSelected)
+        InteractiveDropdownField(stringResource(R.string.form_species_label), selectedSpecies, speciesList, onSpeciesSelected)
+    }
+}
+
+@Composable
+private fun CustomInputField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    isError: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val cardBg = ThemeManager.surfaceColor
+    val textColor = ThemeManager.textColor
+    val subTextColor = ThemeManager.secondaryTextColor
+    val borderColor = ThemeManager.borderColor
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = subTextColor)
+            if (isError) {
+                Text(stringResource(R.string.form_required), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
             }
         }
-        InfoFieldLocked("Fecha y Hora de Muestreo (Automatico)", "20-10-2026 14:32", hasLock = true)
-        InteractiveDropdownField("Centro de Cultivo", selectedCenter, centersList, onCenterSelected)
-        InteractiveDropdownField("Tren / Modulo de Concesion", selectedTren, trenList, onTrenSelected)
-        InteractiveDropdownField("Linea de Cultivo", selectedLine, lineList, onLineSelected)
-        InteractiveDropdownField("Especie", selectedSpecies, speciesList, onSpeciesSelected)
+        TextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .border(
+                    width = 1.dp,
+                    color = if (isError) Color(0xFFD32F2F) else borderColor,
+                    shape = RoundedCornerShape(10.dp)
+                ),
+            shape = RoundedCornerShape(10.dp),
+            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, color = textColor, fontWeight = FontWeight.Medium),
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = cardBg,
+                unfocusedContainerColor = cardBg,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = ColorEmber
+            ),
+            singleLine = true
+        )
+    }
+}
+
+@Composable
+private fun PhotoEvidenceSection(
+    capturedPhotos: List<Uri>,
+    onPhotoClick: (Uri) -> Unit,
+    onAddPhotoClick: () -> Unit
+) {
+    val isPhotoEmpty = capturedPhotos.isEmpty()
+    val textColor = ThemeManager.textColor
+    val subTextColor = ThemeManager.secondaryTextColor
+    val borderColor = ThemeManager.borderColor
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.form_evidence_title) + " *",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = textColor,
+                letterSpacing = (-0.01).sp
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                "${capturedPhotos.size}/5",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (isPhotoEmpty) Color(0xFFD32F2F) else subTextColor,
+                letterSpacing = (-0.01).sp
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(ThemeManager.surfaceColor)
+                .border(
+                    width = if (isPhotoEmpty) 1.dp else 0.dp,
+                    color = if (isPhotoEmpty) Color(0xFFD32F2F) else Color.Transparent,
+                    shape = RoundedCornerShape(12.dp)
+                )
+        ) {
+            if (capturedPhotos.isNotEmpty()) {
+                val lastPhoto = capturedPhotos.last()
+                Image(
+                    painter = rememberAsyncImagePainter(lastPhoto),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { onPhotoClick(lastPhoto) },
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = null,
+                        tint = subTextColor,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(stringResource(R.string.form_photo_required), fontSize = 11.sp, color = Color(0xFFD32F2F), fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+
+        if (capturedPhotos.isNotEmpty()) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                capturedPhotos.forEach { photoUri ->
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
+                            .clickable { onPhotoClick(photoUri) }
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(photoUri),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            }
+        }
+
+        Button(
+            onClick = onAddPhotoClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = ThemeManager.surfaceColor, contentColor = textColor),
+            border = BorderStroke(1.dp, if (isPhotoEmpty) Color(0xFFD32F2F) else borderColor),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+        ) {
+            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                stringResource(R.string.form_capture_photo),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = (-0.01).sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun PhotoPreviewDialog(
+    photoUri: Uri,
+    onDismiss: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = ThemeManager.surfaceColor,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.dialog_preview_title),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = ThemeManager.textColor
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = null, tint = ThemeManager.secondaryTextColor)
+                    }
+                }
+
+                Image(
+                    painter = rememberAsyncImagePainter(photoUri),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, ThemeManager.borderColor)
+                    ) {
+                        Text(stringResource(R.string.dialog_close), color = ThemeManager.textColor, fontWeight = FontWeight.SemiBold)
+                    }
+
+                    Button(
+                        onClick = onDelete,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(stringResource(R.string.dialog_delete), color = ColorPaper, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DraftStatusBar(draftTime: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(stringResource(R.string.form_draft_saved), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ThemeManager.secondaryTextColor, letterSpacing = (-0.01).sp)
+        Text(draftTime, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorSteel, letterSpacing = (-0.01).sp)
     }
 }
 
 @Composable
 private fun InfoFieldLocked(label: String, value: String, hasLock: Boolean = false) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorGraphite, letterSpacing = (-0.01).sp)
-        Row(modifier = Modifier.fillMaxWidth().background(ColorFog).border(1.dp, ColorMist, RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(value, modifier = Modifier.weight(1f), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ColorInk, letterSpacing = (-0.01).sp)
+        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ThemeManager.secondaryTextColor, letterSpacing = (-0.01).sp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(ThemeManager.surfaceColor)
+                .border(1.dp, ThemeManager.borderColor, RoundedCornerShape(12.dp))
+                .padding(horizontal = 12.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(value, modifier = Modifier.weight(1f), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ThemeManager.textColor, letterSpacing = (-0.01).sp)
             if (hasLock) Icon(Icons.Default.Lock, contentDescription = null, tint = ColorSteel, modifier = Modifier.size(16.dp))
         }
     }
@@ -234,13 +651,13 @@ private fun InteractiveDropdownField(
     var expanded by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorGraphite, letterSpacing = (-0.01).sp)
+        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ThemeManager.secondaryTextColor, letterSpacing = (-0.01).sp)
         Box(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(ColorFog, RoundedCornerShape(12.dp))
-                    .border(1.dp, ColorMist, RoundedCornerShape(12.dp))
+                    .background(ThemeManager.surfaceColor, RoundedCornerShape(12.dp))
+                    .border(1.dp, ThemeManager.borderColor, RoundedCornerShape(12.dp))
                     .clickable { expanded = true }
                     .padding(horizontal = 12.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -250,20 +667,20 @@ private fun InteractiveDropdownField(
                     modifier = Modifier.weight(1f),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = ColorInk,
+                    color = ThemeManager.textColor,
                     letterSpacing = (-0.01).sp
                 )
-                Text("▾", fontSize = 14.sp, color = ColorInk)
+                Text("▾", fontSize = 14.sp, color = ThemeManager.textColor)
             }
 
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(ColorPaper)
+                modifier = Modifier.background(ThemeManager.surfaceColor)
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option, fontSize = 14.sp, color = ColorInk) },
+                        text = { Text(option, fontSize = 14.sp, color = ThemeManager.textColor) },
                         onClick = {
                             onOptionSelected(option)
                             expanded = false
@@ -284,46 +701,51 @@ private fun BiometricsSection(
     observationsText: String,
     onObservationsChange: (String) -> Unit
 ) {
+    val textColor = ThemeManager.textColor
+    val subTextColor = ThemeManager.secondaryTextColor
+    val cardBg = ThemeManager.surfaceColor
+    val borderColor = ThemeManager.borderColor
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Medicion y Biometria", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = ColorInk, letterSpacing = (-0.01).sp)
+            Text(stringResource(R.string.form_biometrics_title), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = textColor, letterSpacing = (-0.01).sp)
             Spacer(modifier = Modifier.weight(1f))
-            Surface(shape = RoundedCornerShape(6.dp), color = ColorFog) {
-                Text("NORMA SERNAPESCA", modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = ColorInk, letterSpacing = (-0.01).sp)
+            Surface(shape = RoundedCornerShape(6.dp), color = cardBg) {
+                Text(stringResource(R.string.form_sernapesca_norm), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = textColor, letterSpacing = (-0.01).sp)
             }
         }
-        Text("Longitud del Tramo Medido", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorGraphite, letterSpacing = (-0.01).sp)
+        Text(stringResource(R.string.form_length_label), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = subTextColor, letterSpacing = (-0.01).sp)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { if (lengthMeters > 0.05f) onLengthChange(lengthMeters - 0.05f) }) {
-                Icon(Icons.Default.Remove, contentDescription = "Disminuir", tint = ColorInk)
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.cd_disminuir), tint = textColor)
             }
             Text(
                 text = String.format(java.util.Locale.US, "%.2f m", lengthMeters),
                 modifier = Modifier.padding(horizontal = 24.dp),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = ColorInk,
+                color = textColor,
                 letterSpacing = (-0.02).sp
             )
             IconButton(onClick = { onLengthChange(lengthMeters + 0.05f) }) {
-                Icon(Icons.Default.Add, contentDescription = "Aumentar", tint = ColorInk)
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_aumentar), tint = textColor)
             }
         }
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = ColorFog, border = androidx.compose.foundation.BorderStroke(1.dp, ColorMist)) {
+        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = cardBg, border = BorderStroke(1.dp, borderColor)) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Conteo Manual de Individuos", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = ColorInk, letterSpacing = (-0.01).sp)
+                    Text(stringResource(R.string.form_manual_count_title), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textColor, letterSpacing = (-0.01).sp)
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        "Reiniciar",
+                        stringResource(R.string.form_reset),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        color = ColorGraphite,
+                        color = subTextColor,
                         letterSpacing = (-0.01).sp,
                         modifier = Modifier.clickable { onCountChange(0) }
                     )
                 }
-                Text("EJEMPLARES VIVOS: $individualCount ind", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = ColorInk, letterSpacing = (-0.01).sp)
+                Text(stringResource(R.string.form_alive_units, individualCount), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textColor, letterSpacing = (-0.01).sp)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CounterButton("-5", Modifier.weight(1f)) { onCountChange((individualCount - 5).coerceAtLeast(0)) }
                     CounterButton("-1", Modifier.weight(1f)) { onCountChange((individualCount - 1).coerceAtLeast(0)) }
@@ -333,25 +755,25 @@ private fun BiometricsSection(
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("Observaciones Tecnicas en Balsa", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorGraphite, letterSpacing = (-0.01).sp)
+            Text(stringResource(R.string.form_observations_label), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = subTextColor, letterSpacing = (-0.01).sp)
             TextField(
                 value = observationsText,
                 onValueChange = onObservationsChange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)
-                    .border(1.dp, ColorMist, RoundedCornerShape(12.dp)),
+                    .border(1.dp, borderColor, RoundedCornerShape(12.dp)),
                 shape = RoundedCornerShape(12.dp),
                 textStyle = androidx.compose.ui.text.TextStyle(
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = ColorInk,
+                    color = textColor,
                     letterSpacing = (-0.01).sp,
                     lineHeight = 18.sp
                 ),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = ColorFog,
-                    unfocusedContainerColor = ColorFog,
+                    focusedContainerColor = cardBg,
+                    unfocusedContainerColor = cardBg,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     cursorColor = ColorEmber
@@ -363,80 +785,21 @@ private fun BiometricsSection(
 
 @Composable
 private fun CounterButton(text: String, modifier: Modifier = Modifier, isAccent: Boolean = false, onClick: () -> Unit) {
+    val bgColor = if (isAccent) ColorEmber else ThemeManager.surfaceColor
+    val contentColor = if (isAccent) ColorPaper else ThemeManager.textColor
+    val borderColor = ThemeManager.borderColor
+
     Button(
         onClick = onClick,
         modifier = modifier.height(44.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isAccent) ColorEmber else ColorPaper,
-            contentColor = if (isAccent) ColorPaper else ColorInk
+            containerColor = bgColor,
+            contentColor = contentColor
         ),
-        border = if (!isAccent) androidx.compose.foundation.BorderStroke(1.dp, ColorMist) else null,
+        border = if (!isAccent) BorderStroke(1.dp, borderColor) else null,
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
     ) {
         Text(text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.01).sp)
     }
-}
-
-@Composable
-private fun PhotoEvidenceSection(photoCount: Int, onAddPhoto: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Evidencia Fotografica", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = ColorInk, letterSpacing = (-0.01).sp)
-            Spacer(modifier = Modifier.weight(1f))
-            Text("$photoCount de 5 Fotos", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorGraphite, letterSpacing = (-0.01).sp)
-        }
-        Box(modifier = Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(12.dp)).background(ColorMist)) {
-            Icon(Icons.Default.CameraAlt, contentDescription = null, tint = ColorSteel, modifier = Modifier.size(48.dp).align(Alignment.Center))
-            Surface(modifier = Modifier.align(Alignment.BottomStart).padding(12.dp), shape = RoundedCornerShape(6.dp), color = ColorCarbon.copy(alpha = 0.8f)) {
-                Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
-                    Text("Geostampa", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = ColorPaper, letterSpacing = (-0.01).sp)
-                    Text("-42.4728, -73.7831", fontSize = 10.sp, fontWeight = FontWeight.Medium, color = ColorPaper.copy(alpha = 0.9f), letterSpacing = (-0.01).sp)
-                }
-            }
-        }
-        Button(
-            onClick = onAddPhoto,
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = ColorPaper, contentColor = ColorInk),
-            border = androidx.compose.foundation.BorderStroke(1.dp, ColorMist),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-        ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Capturar Fotografia Adicional", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.01).sp)
-        }
-    }
-}
-
-@Composable
-private fun BottomActionBar(onSaveDraft: () -> Unit, onFinishRegistration: () -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().background(ColorAbyss).navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Button(
-            onClick = onSaveDraft,
-            modifier = Modifier.weight(1f).height(52.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = ColorPaper),
-            border = androidx.compose.foundation.BorderStroke(1.dp, ColorPaper.copy(alpha = 0.3f)),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-        ) {
-            Text("Guardar Borrador", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.01).sp)
-        }
-        Button(
-            onClick = onFinishRegistration,
-            modifier = Modifier.weight(1f).height(52.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = ColorEmber, contentColor = ColorPaper),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-        ) {
-            Text("Finalizar Registro", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.01).sp)
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400)
-@Composable
-private fun NewSampleFormPreview() {
-    AquaMuestraTheme { NewSampleFormScreen() }
 }

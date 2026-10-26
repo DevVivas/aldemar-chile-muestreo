@@ -14,39 +14,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aldemar.aquamuestra.R
-
-private val ColorPaper = Color(0xFFFFFFFF)
-private val ColorMist = Color(0xFFB9BBC6)
+import com.aldemar.aquamuestra.ui.theme.ThemeManager
 
 @Composable
 fun LoginFormCard(
-    onLoginClick: (user: String, password: String, role: RoleOption, keepSession: Boolean) -> Unit,
+    onLoginClick: (user: String, password: String, keepSession: Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val roles = listOf(
-        RoleOption(
-            stringResource(R.string.role_sampler),
-            stringResource(R.string.role_sampler_desc)
-        ),
-        RoleOption("Revisor de Calidad", "Validación de muestras y fotos"),
-        RoleOption("Supervisor de Centro", "Seguimiento y reportes")
-    )
 
     var user by rememberSaveable { mutableStateOf("TEC-CHL-4092") }
     var password by rememberSaveable { mutableStateOf("") }
-    var roleIndex by rememberSaveable { mutableStateOf(0) }
-    var keepSession by rememberSaveable { mutableStateOf(false) }
+    var keepSession by rememberSaveable { mutableStateOf(true) }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, ColorMist, RoundedCornerShape(12.dp)),
+            .border(1.dp, ThemeManager.borderColor, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = ColorPaper),
+        colors = CardDefaults.cardColors(containerColor = ThemeManager.backgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -57,23 +45,16 @@ fun LoginFormCard(
 
             PasswordField(password, { password = it }, placeholder = stringResource(R.string.label_password))
 
-            RoleSelector(
-                options = roles,
-                selected = roles[roleIndex],
-                onSelected = { roleIndex = roles.indexOf(it) }
-            )
-
             KeepSessionRow(
                 checked = keepSession,
                 onCheckedChange = { keepSession = it },
-                title = stringResource(R.string.keep_session),
-                description = stringResource(R.string.keep_session_desc),
-                modifier = Modifier.padding(top = 4.dp)
+                title = stringResource(R.string.login_keep_session_title),
+                description = stringResource(R.string.login_keep_session_desc)
             )
 
             PrimaryButton(
                 text = stringResource(R.string.btn_login),
-                onClick = { onLoginClick(user, password, roles[roleIndex], keepSession) },
+                onClick = { onLoginClick(user, password, keepSession) },
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
