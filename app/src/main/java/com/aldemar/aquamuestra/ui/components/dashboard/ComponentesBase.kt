@@ -1,5 +1,6 @@
 package com.aldemar.aquamuestra.ui.components.dashboard
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -20,15 +21,16 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.aldemar.aquamuestra.ui.theme.AquaNavy
-import com.aldemar.aquamuestra.ui.theme.AquaSurface
-import com.aldemar.aquamuestra.ui.theme.AquaTeal
+import com.aldemar.aquamuestra.ui.theme.AquaAbyss
+import com.aldemar.aquamuestra.ui.theme.AquaEmber
+import com.aldemar.aquamuestra.ui.theme.AquaMist
+import com.aldemar.aquamuestra.ui.theme.AquaPaper
 
 // 13. Un Component recibe datos y se preocupa solamente de mostrarlos.
 @Composable
 fun TarjetaBase(
     modifier: Modifier = Modifier,
-    color: Color = AquaSurface,
+    color: Color = AquaPaper,
     onClick: (() -> Unit)? = null,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     content: @Composable ColumnScope.() -> Unit
@@ -38,7 +40,8 @@ fun TarjetaBase(
             modifier = modifier,
             shape = RoundedCornerShape(12.dp),
             color = color,
-            shadowElevation = 1.dp
+            shadowElevation = 0.dp,
+            border = BorderStroke(1.dp, AquaMist)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -51,7 +54,8 @@ fun TarjetaBase(
             modifier = modifier,
             shape = RoundedCornerShape(12.dp),
             color = color,
-            shadowElevation = 1.dp,
+            shadowElevation = 0.dp,
+            border = BorderStroke(1.dp, AquaMist),
             onClick = onClick
         ) {
             Column(
@@ -135,20 +139,20 @@ fun TituloSeccion(
         Icon(
             imageVector = icono,
             contentDescription = null,
-            tint = AquaTeal
+            tint = AquaEmber
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = titulo,
             style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-            color = AquaNavy
+            color = AquaAbyss
         )
         if (extra != null) {
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = extra,
                 style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                color = AquaNavy
+                color = AquaAbyss
             )
         }
     }

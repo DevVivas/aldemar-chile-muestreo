@@ -20,9 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aldemar.aquamuestra.ui.theme.AquaNavy
-import com.aldemar.aquamuestra.ui.theme.AquaTealLight
-import com.aldemar.aquamuestra.ui.theme.AquaTextSecondary
+import com.aldemar.aquamuestra.ui.theme.AquaAbyss
+import com.aldemar.aquamuestra.ui.theme.AquaEmberSuave
+import com.aldemar.aquamuestra.ui.theme.AquaGraphite
 
 // 23. Barra inferior de navegación.
 @Composable
@@ -45,13 +45,13 @@ fun BarraInferiorDashboard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = AquaTealLight,
+                    color = AquaEmberSuave,
                     modifier = Modifier.padding(bottom = 4.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.GridView,
                         contentDescription = null,
-                        tint = AquaNavy,
+                        tint = AquaAbyss,
                         modifier = Modifier
                             .size(32.dp)
                             .padding(4.dp)
@@ -59,7 +59,7 @@ fun BarraInferiorDashboard(
                 }
                 Text(
                     text = "Inicio",
-                    color = AquaNavy,
+                    color = AquaAbyss,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -71,14 +71,14 @@ fun BarraInferiorDashboard(
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ReceiptLong,
                     contentDescription = null,
-                    tint = AquaTextSecondary,
+                    tint = AquaGraphite,
                     modifier = Modifier
                         .size(32.dp)
                         .padding(4.dp)
                 )
                 Text(
                     text = "Historial",
-                    color = AquaTextSecondary,
+                    color = AquaGraphite,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )

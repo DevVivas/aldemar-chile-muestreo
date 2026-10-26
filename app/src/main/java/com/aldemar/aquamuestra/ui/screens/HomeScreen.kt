@@ -45,10 +45,9 @@ import com.aldemar.aquamuestra.ui.components.dashboard.TelemetriaCard
 import com.aldemar.aquamuestra.ui.components.dashboard.TituloSeccion
 import com.aldemar.aquamuestra.ui.components.dashboard.UltimaMuestraCard
 import com.aldemar.aquamuestra.ui.components.dashboard.UserCard
-import com.aldemar.aquamuestra.ui.theme.AquaBackground
+import com.aldemar.aquamuestra.ui.theme.AquaPaper
 import com.aldemar.aquamuestra.ui.theme.AquaMuestraTheme
-import com.aldemar.aquamuestra.ui.theme.AquaSurface
-import com.aldemar.aquamuestra.ui.theme.AquaTeal
+import com.aldemar.aquamuestra.ui.theme.AquaEmber
 import com.aldemar.aquamuestra.viewmodel.DashboardViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -89,7 +88,7 @@ fun HomeScreen(
 
     // 28. Scaffold organiza la estructura de la pantalla.
     Scaffold(
-        containerColor = AquaBackground,
+        containerColor = AquaPaper,
         topBar = {
             DashboardTopBar(
                 centro = state.centro,
@@ -106,8 +105,8 @@ fun HomeScreen(
             if (puedeCrear) {
                 FloatingActionButton(
                     onClick = onNuevaMuestra,
-                    containerColor = AquaTeal,
-                    contentColor = AquaSurface,
+                    containerColor = AquaEmber,
+                    contentColor = AquaPaper,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Icon(

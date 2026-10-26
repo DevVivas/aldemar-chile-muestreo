@@ -23,10 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aldemar.aquamuestra.ui.theme.AquaNavyButton
-import com.aldemar.aquamuestra.ui.theme.AquaOutline
-import com.aldemar.aquamuestra.ui.theme.AquaTeal
-import com.aldemar.aquamuestra.ui.theme.AquaTealLight
+import com.aldemar.aquamuestra.ui.theme.AquaAbyss
+import com.aldemar.aquamuestra.ui.theme.AquaMist
+import com.aldemar.aquamuestra.ui.theme.AquaEmber
+import com.aldemar.aquamuestra.ui.theme.AquaEmberSuave
 
 // 14. Barra superior del dashboard.
 @Composable
@@ -37,7 +37,7 @@ fun DashboardTopBar(
     onPerfil: () -> Unit
 ) {
     Surface(
-        color = AquaNavyButton
+        color = AquaAbyss
     ) {
         Row(
             modifier = Modifier
@@ -57,7 +57,7 @@ fun DashboardTopBar(
                 )
                 Text(
                     text = "Centro: $centro",
-                    color = AquaOutline,
+                    color = AquaMist,
                     fontSize = 12.sp
                 )
             }
@@ -66,7 +66,7 @@ fun DashboardTopBar(
                 modifier = Modifier
                     .clickable { onInternet() },
                 shape = RoundedCornerShape(50),
-                color = AquaTealLight
+                color = AquaEmberSuave
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -76,12 +76,12 @@ fun DashboardTopBar(
                         Icon(
                             imageVector = Icons.Outlined.CloudDone,
                             contentDescription = null,
-                            tint = AquaTeal,
+                            tint = AquaEmber,
                             modifier = Modifier.padding(end = 4.dp)
                         )
                         Text(
                             text = "ONLINE",
-                            color = AquaTeal,
+                            color = AquaEmber,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -89,12 +89,12 @@ fun DashboardTopBar(
                         Icon(
                             imageVector = Icons.Outlined.CloudSync,
                             contentDescription = null,
-                            tint = AquaTeal,
+                            tint = AquaEmber,
                             modifier = Modifier.padding(end = 4.dp)
                         )
                         Text(
                             text = "OFFLINE ACTIVO",
-                            color = AquaTeal,
+                            color = AquaEmber,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )

@@ -14,10 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aldemar.aquamuestra.model.Telemetria
-import com.aldemar.aquamuestra.ui.theme.AquaInfoGray
-import com.aldemar.aquamuestra.ui.theme.AquaNavy
-import com.aldemar.aquamuestra.ui.theme.AquaTeal
-import com.aldemar.aquamuestra.ui.theme.AquaTextSecondary
+import com.aldemar.aquamuestra.ui.theme.AquaFog
+import com.aldemar.aquamuestra.ui.theme.AquaAbyss
+import com.aldemar.aquamuestra.ui.theme.AquaEmber
+import com.aldemar.aquamuestra.ui.theme.AquaGraphite
 
 // 22. Tarjeta con telemetría del centro.
 @Composable
@@ -27,7 +27,7 @@ fun TelemetriaCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = AquaInfoGray,
+        color = AquaFog,
         shadowElevation = 1.dp
     ) {
         Column(
@@ -47,19 +47,19 @@ fun TelemetriaCard(
                         tamano = 32.dp,
                         tamanoIcono = 18.dp,
                         colorFondo = Color.White,
-                        colorIcono = AquaTeal
+                        colorIcono = AquaEmber
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Telemetría de Centro",
                         style = MaterialTheme.typography.titleMedium,
-                        color = AquaNavy
+                        color = AquaAbyss
                     )
                 }
                 Text(
                     text = telemetria.sonda,
                     style = MaterialTheme.typography.bodySmall,
-                    color = AquaTextSecondary
+                    color = AquaGraphite
                 )
             }
             Row(
@@ -81,12 +81,12 @@ fun TelemetriaCard(
                         Text(
                             text = "Temp Agua",
                             style = MaterialTheme.typography.labelSmall,
-                            color = AquaTextSecondary
+                            color = AquaGraphite
                         )
                         Text(
                             text = telemetria.temperatura,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = AquaNavy,
+                            color = AquaAbyss,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -106,12 +106,12 @@ fun TelemetriaCard(
                         Text(
                             text = "Salinidad",
                             style = MaterialTheme.typography.labelSmall,
-                            color = AquaTextSecondary
+                            color = AquaGraphite
                         )
                         Text(
                             text = telemetria.salinidad,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = AquaNavy,
+                            color = AquaAbyss,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -131,12 +131,12 @@ fun TelemetriaCard(
                         Text(
                             text = "Oxígeno",
                             style = MaterialTheme.typography.labelSmall,
-                            color = AquaTextSecondary
+                            color = AquaGraphite
                         )
                         Text(
                             text = telemetria.oxigeno,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = AquaTeal,
+                            color = AquaEmber,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -145,7 +145,7 @@ fun TelemetriaCard(
             Text(
                 text = "Datos de ejemplo",
                 style = MaterialTheme.typography.labelSmall,
-                color = AquaTextSecondary
+                color = AquaGraphite
             )
         }
     }

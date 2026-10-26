@@ -28,12 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aldemar.aquamuestra.ui.theme.AquaNavy
-import com.aldemar.aquamuestra.ui.theme.AquaSurface
-import com.aldemar.aquamuestra.ui.theme.AquaSurfaceVariant
-import com.aldemar.aquamuestra.ui.theme.AquaTeal
-import com.aldemar.aquamuestra.ui.theme.AquaTealLight
-import com.aldemar.aquamuestra.ui.theme.AquaTextSecondary
+import com.aldemar.aquamuestra.ui.theme.AquaAbyss
+import com.aldemar.aquamuestra.ui.theme.AquaPaper
+import com.aldemar.aquamuestra.ui.theme.AquaFog
+import com.aldemar.aquamuestra.ui.theme.AquaEmber
+import com.aldemar.aquamuestra.ui.theme.AquaEmberSuave
+import com.aldemar.aquamuestra.ui.theme.AquaGraphite
 
 // 20. Tarjeta Historial.
 @Composable
@@ -55,26 +55,26 @@ fun HistorialCard(
                 icono = Icons.AutoMirrored.Outlined.FormatListBulleted,
                 tamano = 32.dp,
                 tamanoIcono = 18.dp,
-                colorFondo = AquaSurfaceVariant,
-                colorIcono = AquaTeal
+                colorFondo = AquaFog,
+                colorIcono = AquaEmber
             )
             PildoraEstado(
                 texto = "$total total",
                 icono = null,
-                colorFondo = AquaSurfaceVariant,
-                colorTexto = AquaTextSecondary
+                colorFondo = AquaFog,
+                colorTexto = AquaGraphite
             )
         }
         Column {
             Text(
                 text = "Ver Historial",
                 style = MaterialTheme.typography.titleMedium,
-                color = AquaNavy
+                color = AquaAbyss
             )
             Text(
                 text = "Registros históricos",
                 style = MaterialTheme.typography.bodySmall,
-                color = AquaTextSecondary
+                color = AquaGraphite
             )
         }
     }
@@ -100,13 +100,13 @@ fun SyncCard(
                     icono = Icons.Outlined.SyncAlt,
                     tamano = 32.dp,
                     tamanoIcono = 18.dp,
-                    colorFondo = AquaTealLight,
-                    colorIcono = AquaTeal
+                    colorFondo = AquaEmberSuave,
+                    colorIcono = AquaEmber
                 )
             }
             Surface(
                 shape = CircleShape,
-                color = AquaTeal,
+                color = AquaEmber,
                 modifier = Modifier.size(10.dp)
             ) {}
         }
@@ -114,13 +114,13 @@ fun SyncCard(
             Text(
                 text = "Sincronización",
                 style = MaterialTheme.typography.titleMedium,
-                color = AquaNavy
+                color = AquaAbyss
             )
             Spacer(modifier = Modifier.size(8.dp))
             Button(
                 onClick = { if (estadoSync == "Inactivo") onSync() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AquaTeal
+                    containerColor = AquaEmber
                 ),
                 shape = RoundedCornerShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
@@ -129,7 +129,7 @@ fun SyncCard(
                 Icon(
                     imageVector = Icons.Outlined.CloudUpload,
                     contentDescription = null,
-                    tint = AquaSurface,
+                    tint = AquaPaper,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -139,7 +139,7 @@ fun SyncCard(
                         "Completado" -> "Completado"
                         else -> "Sincronizar ahora"
                     },
-                    color = AquaSurface,
+                    color = AquaPaper,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )

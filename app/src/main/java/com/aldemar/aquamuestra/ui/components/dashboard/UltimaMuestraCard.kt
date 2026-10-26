@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aldemar.aquamuestra.model.UltimaMuestra
-import com.aldemar.aquamuestra.ui.theme.AquaNavy
-import com.aldemar.aquamuestra.ui.theme.AquaTeal
-import com.aldemar.aquamuestra.ui.theme.AquaTealLight
-import com.aldemar.aquamuestra.ui.theme.AquaTextSecondary
+import com.aldemar.aquamuestra.ui.theme.AquaAbyss
+import com.aldemar.aquamuestra.ui.theme.AquaEmber
+import com.aldemar.aquamuestra.ui.theme.AquaEmberSuave
+import com.aldemar.aquamuestra.ui.theme.AquaGraphite
 
 // 19. Tarjeta con la última muestra registrada.
 @Composable
@@ -41,21 +41,21 @@ fun UltimaMuestraCard(
                     icono = Icons.Outlined.HistoryToggleOff,
                     tamano = 32.dp,
                     tamanoIcono = 18.dp,
-                    colorFondo = com.aldemar.aquamuestra.ui.theme.AquaSurfaceVariant,
-                    colorIcono = AquaTeal
+                    colorFondo = com.aldemar.aquamuestra.ui.theme.AquaFog,
+                    colorIcono = AquaEmber
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Última Muestra Registrada",
                     style = MaterialTheme.typography.titleMedium,
-                    color = AquaNavy
+                    color = AquaAbyss
                 )
             }
             PildoraEstado(
                 texto = "Reciente",
                 icono = null,
-                colorFondo = AquaTealLight,
-                colorTexto = AquaTeal
+                colorFondo = AquaEmberSuave,
+                colorTexto = AquaEmber
             )
         }
         Row(
@@ -67,12 +67,12 @@ fun UltimaMuestraCard(
                 Text(
                     text = muestra.linea,
                     style = MaterialTheme.typography.titleMedium,
-                    color = AquaNavy
+                    color = AquaAbyss
                 )
                 Text(
                     text = "${muestra.hace} • Profundidad ${muestra.profundidad}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = AquaTextSecondary
+                    color = AquaGraphite
                 )
             }
             Column(
@@ -81,13 +81,13 @@ fun UltimaMuestraCard(
                 Text(
                     text = muestra.densidad,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AquaTeal,
+                    color = AquaEmber,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Calibre: ${muestra.calibre}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = AquaTextSecondary
+                    color = AquaGraphite
                 )
             }
         }

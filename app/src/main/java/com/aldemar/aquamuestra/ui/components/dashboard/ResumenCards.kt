@@ -22,13 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.aldemar.aquamuestra.ui.theme.AquaNavy
-import com.aldemar.aquamuestra.ui.theme.AquaOrangeDark
-import com.aldemar.aquamuestra.ui.theme.AquaOrangeLight
-import com.aldemar.aquamuestra.ui.theme.AquaSurfaceVariant
-import com.aldemar.aquamuestra.ui.theme.AquaTeal
-import com.aldemar.aquamuestra.ui.theme.AquaTealLight
-import com.aldemar.aquamuestra.ui.theme.AquaTextSecondary
+import com.aldemar.aquamuestra.ui.theme.AquaAbyss
+import com.aldemar.aquamuestra.ui.theme.AquaEmber
+import com.aldemar.aquamuestra.ui.theme.AquaEmberSuave
+import com.aldemar.aquamuestra.ui.theme.AquaFog
+import com.aldemar.aquamuestra.ui.theme.AquaGraphite
 
 // 16. Tarjeta Muestras Hoy.
 @Composable
@@ -51,14 +49,14 @@ fun MuestrasHoyCard(
             Text(
                 text = "MUESTRAS HOY",
                 style = MaterialTheme.typography.labelMedium,
-                color = AquaTextSecondary
+                color = AquaGraphite
             )
             CajaIcono(
                 icono = Icons.Outlined.Scale,
                 tamano = 32.dp,
                 tamanoIcono = 18.dp,
-                colorFondo = AquaSurfaceVariant,
-                colorIcono = AquaTeal
+                colorFondo = AquaFog,
+                colorIcono = AquaEmber
             )
         }
 
@@ -72,7 +70,7 @@ fun MuestrasHoyCard(
             Text(
                 text = "Lotes completados",
                 style = MaterialTheme.typography.bodySmall,
-                color = AquaTextSecondary
+                color = AquaGraphite
             )
         }
 
@@ -82,14 +80,14 @@ fun MuestrasHoyCard(
             Icon(
                 imageVector = Icons.Outlined.TrendingUp,
                 contentDescription = null,
-                tint = AquaTeal,
+                tint = AquaEmber,
                 modifier = Modifier.size(14.dp)
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "$signo$variacion% vs ayer ($ayer)",
                 style = MaterialTheme.typography.labelSmall,
-                color = AquaTeal
+                color = AquaEmber
             )
         }
     }
@@ -113,14 +111,14 @@ fun RevisionesCard(
             Text(
                 text = "REVISIONES",
                 style = MaterialTheme.typography.labelMedium,
-                color = AquaTextSecondary
+                color = AquaGraphite
             )
             CajaIcono(
                 icono = Icons.Outlined.VerifiedUser,
                 tamano = 32.dp,
                 tamanoIcono = 18.dp,
-                colorFondo = AquaSurfaceVariant,
-                colorIcono = AquaTeal
+                colorFondo = AquaFog,
+                colorIcono = AquaEmber
             )
         }
 
@@ -134,14 +132,14 @@ fun RevisionesCard(
                     icono = Icons.Outlined.CheckCircle,
                     tamano = 20.dp,
                     tamanoIcono = 12.dp,
-                    colorFondo = AquaTealLight,
-                    colorIcono = AquaTeal
+                    colorFondo = AquaFog,
+                    colorIcono = AquaGraphite
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Validadas  $validadas",
                     style = MaterialTheme.typography.bodySmall,
-                    color = AquaNavy
+                    color = AquaAbyss
                 )
             }
             Row(
@@ -151,14 +149,14 @@ fun RevisionesCard(
                     icono = Icons.Outlined.Schedule,
                     tamano = 20.dp,
                     tamanoIcono = 12.dp,
-                    colorFondo = AquaOrangeLight,
-                    colorIcono = AquaOrangeDark
+                    colorFondo = AquaFog,
+                    colorIcono = AquaGraphite
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Pendientes  $pendientes",
                     style = MaterialTheme.typography.bodySmall,
-                    color = AquaNavy
+                    color = AquaAbyss
                 )
             }
         }
@@ -166,7 +164,7 @@ fun RevisionesCard(
         Text(
             text = "Supervisión en pontón",
             style = MaterialTheme.typography.bodySmall,
-            color = AquaTextSecondary
+            color = AquaGraphite
         )
     }
 }

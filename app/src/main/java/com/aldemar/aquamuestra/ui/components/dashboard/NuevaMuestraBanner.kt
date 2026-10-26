@@ -1,6 +1,7 @@
 package com.aldemar.aquamuestra.ui.components.dashboard
 
 import androidx.compose.foundation.layout.*
+import com.aldemar.aquamuestra.ui.theme.AquaCarbon
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -16,9 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aldemar.aquamuestra.ui.theme.AquaNavy
-import com.aldemar.aquamuestra.ui.theme.AquaNavyButton
-import com.aldemar.aquamuestra.ui.theme.AquaOutline
+import com.aldemar.aquamuestra.ui.theme.AquaAbyss
+import com.aldemar.aquamuestra.ui.theme.AquaMist
 
 // 18. Banner para crear nueva muestra.
 @Composable
@@ -28,8 +28,8 @@ fun NuevaMuestraBanner(
     Surface(
         modifier = Modifier,
         shape = RoundedCornerShape(12.dp),
-        color = AquaNavy,
-        shadowElevation = 4.dp,
+        color = AquaAbyss,
+        shadowElevation = 0.dp,
         onClick = onClick
     ) {
         Row(
@@ -38,7 +38,7 @@ fun NuevaMuestraBanner(
         ) {
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = AquaNavyButton,
+                color = AquaCarbon,
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
@@ -61,13 +61,13 @@ fun NuevaMuestraBanner(
                 )
                 Text(
                     text = "Captura métricas y biomasa de la línea",
-                    color = AquaOutline,
+                    color = AquaMist,
                     fontSize = 12.sp
                 )
             }
             Surface(
                 shape = CircleShape,
-                color = AquaNavyButton,
+                color = AquaCarbon,
                 modifier = Modifier.size(36.dp)
             ) {
                 Icon(

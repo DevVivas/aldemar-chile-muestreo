@@ -11,7 +11,7 @@ val AquaTypography = Typography(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 30.sp,
-        color = AquaNavy
+        color = AquaAbyss
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,

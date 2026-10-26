@@ -14,10 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aldemar.aquamuestra.ui.theme.AquaSurface
-import com.aldemar.aquamuestra.ui.theme.AquaTeal
-import com.aldemar.aquamuestra.ui.theme.AquaTealLight
-import com.aldemar.aquamuestra.ui.theme.AquaTextSecondary
+import com.aldemar.aquamuestra.ui.theme.AquaPaper
+import com.aldemar.aquamuestra.ui.theme.AquaEmber
+import com.aldemar.aquamuestra.ui.theme.AquaEmberSuave
+import com.aldemar.aquamuestra.ui.theme.AquaGraphite
 
 // 15. Tarjeta con información del usuario.
 @Composable
@@ -31,7 +31,7 @@ fun UserCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = AquaTealLight,
+        color = AquaEmberSuave,
         shadowElevation = 1.dp
     ) {
         Row(
@@ -40,7 +40,7 @@ fun UserCard(
         ) {
             Surface(
                 shape = CircleShape,
-                color = AquaTeal,
+                color = AquaEmber,
                 modifier = Modifier.size(40.dp)
             ) {
                 Column(
@@ -50,7 +50,7 @@ fun UserCard(
                 ) {
                     Text(
                         text = iniciales,
-                        color = AquaSurface,
+                        color = AquaPaper,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
@@ -62,19 +62,19 @@ fun UserCard(
             ) {
                 Text(
                     text = nombre,
-                    color = AquaTeal,
+                    color = AquaEmber,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = detalle,
-                    color = AquaTextSecondary,
+                    color = AquaGraphite,
                     fontSize = 12.sp
                 )
             }
             Surface(
                 shape = RoundedCornerShape(50),
-                color = AquaTeal
+                color = AquaEmber
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -83,13 +83,13 @@ fun UserCard(
                     Icon(
                         imageVector = Icons.Outlined.CloudDone,
                         contentDescription = null,
-                        tint = AquaSurface,
+                        tint = AquaPaper,
                         modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Offline Listo ($registrosOffline)",
-                        color = AquaSurface,
+                        color = AquaPaper,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
