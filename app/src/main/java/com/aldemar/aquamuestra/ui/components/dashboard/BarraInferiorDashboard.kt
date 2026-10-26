@@ -1,6 +1,7 @@
 package com.aldemar.aquamuestra.ui.components.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,6 +66,9 @@ fun BarraInferiorDashboard(
                 )
             }
             Column(
+                modifier = Modifier
+                    .clickable(onClick = onHistorial)
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

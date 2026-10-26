@@ -13,7 +13,7 @@ import androidx.navigation.navArgument
 import com.aldemar.aquamuestra.ui.theme.detalle.SampleDetailScreen
 import com.aldemar.aquamuestra.ui.theme.form.NewSampleFormScreen
 import com.aldemar.aquamuestra.ui.theme.historial.HistorialScreen
-import com.aldemar.aquamuestra.ui.theme.inicio.InicioScreen
+import com.aldemar.aquamuestra.ui.screens.HomeScreen
 import com.aldemar.aquamuestra.ui.theme.login.LoginScreen
 
 sealed class AppRoutes(val ruta: String) {
@@ -40,7 +40,7 @@ fun AppNavigation() {
         ) {
             NavHost(
                 navController = navController,
-                startDestination = AppRoutes.Inicio.ruta
+                startDestination = AppRoutes.Login.ruta
             ) {
 
                 // 1. Pantalla de Login
@@ -52,9 +52,18 @@ fun AppNavigation() {
                     }
                 }
 
-                // 2. Pantalla de Inicio
+                // 2. Pantalla de Inicio (Dashboard)
                 composable(AppRoutes.Inicio.ruta) {
-                    InicioScreen(navController = navController)
+                    HomeScreen(
+                        onNuevaMuestra = { navController.navigate(AppRoutes.NewSample.ruta) },
+                        onHistorial = { navController.navigate(AppRoutes.Historial.ruta) },
+                        onCerrarSesion = {
+                            navController.navigate(AppRoutes.Login.ruta) {
+                                popUpTo(AppRoutes.Inicio.ruta) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
 
                 // 3. Pantalla de Nueva Muestra
