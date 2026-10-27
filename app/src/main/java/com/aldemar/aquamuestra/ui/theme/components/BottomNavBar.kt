@@ -2,6 +2,7 @@ package com.aldemar.aquamuestra.ui.theme.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -21,6 +22,7 @@ import com.aldemar.aquamuestra.R
 import com.aldemar.aquamuestra.ui.theme.AppRoutes
 import com.aldemar.aquamuestra.ui.theme.ColorDarkBorder
 import com.aldemar.aquamuestra.ui.theme.ColorFog
+import com.aldemar.aquamuestra.ui.theme.SessionManager
 import com.aldemar.aquamuestra.ui.theme.ThemeManager
 
 /**
@@ -96,5 +98,20 @@ fun BottomNavBar(navController: NavController) {
             },
             colors = itemColors
         )
+
+        // Opción: DASHBOARD (solo supervisor)
+        if (SessionManager.isSupervisor) {
+            NavigationBarItem(
+                icon = { Icon(Icons.Filled.Dashboard, contentDescription = null) },
+                label = { Text(stringResource(R.string.nav_dashboard), fontWeight = FontWeight.Medium) },
+                selected = currentRoute == AppRoutes.Dashboard.ruta,
+                onClick = {
+                    if (currentRoute != AppRoutes.Dashboard.ruta) {
+                        navController.navigateToTab(AppRoutes.Dashboard.ruta)
+                    }
+                },
+                colors = itemColors
+            )
+        }
     }
 }

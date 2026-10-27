@@ -60,12 +60,15 @@ fun SampleDetailScreen(
             StatusBanner(sampleId = sampleId)
             BiometricSheetSection()
             FieldEvidenceSection()
-            SupervisorApprovalSection(
-                selectedAction = selectedAction,
-                onActionSelected = { selectedAction = it },
-                commentsText = commentsText,
-                onCommentsChange = { commentsText = it }
-            )
+            // Panel de aprobación técnica: solo lo ve el supervisor
+            if (SessionManager.isSupervisor) {
+                SupervisorApprovalSection(
+                    selectedAction = selectedAction,
+                    onActionSelected = { selectedAction = it },
+                    commentsText = commentsText,
+                    onCommentsChange = { commentsText = it }
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

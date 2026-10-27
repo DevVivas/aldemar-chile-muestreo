@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Sync
@@ -54,6 +57,7 @@ import com.aldemar.aquamuestra.ui.theme.AppRoutes
 import com.aldemar.aquamuestra.ui.theme.ColorEmber
 import com.aldemar.aquamuestra.ui.theme.ColorGraphite
 import com.aldemar.aquamuestra.ui.theme.ColorPaper
+import com.aldemar.aquamuestra.ui.theme.SessionManager
 import com.aldemar.aquamuestra.ui.theme.ThemeManager
 import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.ui.theme.components.BottomNavBar
@@ -156,6 +160,7 @@ fun InicioScreen(navController: NavController) {
                                 },
                                 onClick = {
                                     showMenu = false
+                                    SessionManager.logout()
                                     navController.navigate(AppRoutes.Login.ruta) {
                                         popUpTo(AppRoutes.Inicio.ruta) { inclusive = true }
                                         launchSingleTop = true
@@ -174,6 +179,7 @@ fun InicioScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -207,6 +213,20 @@ fun InicioScreen(navController: NavController) {
                 borderColor = ThemeManager.borderColor,
                 onClick = { navController.navigate(AppRoutes.Historial.ruta) }
             )
+
+            // Solo el supervisor ve esta card
+            if (SessionManager.isSupervisor) {
+                ActionCard(
+                    title = stringResource(R.string.inicio_card_dashboard_titulo),
+                    subtitle = stringResource(R.string.inicio_card_dashboard_sub),
+                    icon = Icons.Filled.Dashboard,
+                    containerColor = ThemeManager.surfaceColor,
+                    contentColor = textColor,
+                    subtitleColor = subtitleColor,
+                    borderColor = ThemeManager.borderColor,
+                    onClick = { navController.navigate(AppRoutes.Dashboard.ruta) }
+                )
+            }
         }
     }
 }
