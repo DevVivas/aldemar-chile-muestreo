@@ -105,11 +105,17 @@ fun AquaTextField(
 }
 
 @Composable
-fun UserField(value: String, onValueChange: (String) -> Unit, placeholder: String = "") {
+fun UserField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String = "",
+    keyboardType: KeyboardType = KeyboardType.Text
+) {
     AquaTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = placeholder
+        placeholder = placeholder,
+        keyboardType = keyboardType
     )
 }
 

@@ -127,4 +127,49 @@
     <string name="form_draft_time_initial">hace 2 min</string>
     <string name="form_draft_time_now">hace un momento</string>
 
+
+    <string name="label_email">Correo electrónico</string>
+    <string name="login_error_invalid">Correo o contraseña incorrectos</string>
+    <!--  Roles  -->
+    <string name="role_supervisor">Supervisor de Calidad</string>
+    <string name="role_operario">Operador de Muestreo</string>
+    <!--  BottomNavBar / Inicio (solo supervisor)  -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="inicio_card_dashboard_titulo">Dashboard</string>
+    <string name="inicio_card_dashboard_sub">Resumen operativo del centro</string>
+    <!--  Dashboard  -->
+    <string name="dashboard_titulo">Dashboard</string>
+    <string name="dashboard_centro">Centro: %1$s</string>
+    <string name="dashboard_role_line">%1$s • Turno A</string>
+    <string name="dashboard_resumen">Resumen Operativo</string>
+    <string name="dashboard_hoy">Hoy, %1$s</string>
+    <string name="dashboard_muestras_hoy">MUESTRAS HOY</string>
+    <string name="dashboard_lotes_completados">Lotes completados</string>
+    <string name="dashboard_vs_ayer" formatted="false">+20% vs ayer (10)</string>
+    <string name="dashboard_revisiones">REVISIONES</string>
+    <string name="dashboard_validadas">Validadas</string>
+    <string name="dashboard_pendientes">Pendientes</string>
+    <string name="dashboard_supervision">Supervisión en pontón</string>
+    <string name="dashboard_ultima_muestra">Última Muestra Registrada</string>
+    <string name="dashboard_reciente">Reciente</string>
+    <string name="dashboard_ultima_linea">Línea A-04</string>
+    <string name="dashboard_ultima_detalle">Hace 25 min • Profundidad 6.5 m</string>
+    <string name="dashboard_ultima_medida">150 ind / 0.5 m</string>
+    <string name="dashboard_ultima_calibre">Calibre: 42 mm</string>
+    <string name="dashboard_ver_historial">Ver Historial</string>
+    <string name="dashboard_registros">Registros históricos</string>
+    <string name="dashboard_total">%1$d total</string>
+    <string name="dashboard_sincronizacion">Sincronización</string>
+    <string name="dashboard_sync_btn">Sincronizar ahora</string>
+    <string name="dashboard_sync_done">Datos sincronizados (simulación)</string>
+    <string name="dashboard_telemetria">Telemetría de Centro</string>
+    <string name="dashboard_sonda">Sonda Buoy-02</string>
+    <string name="dashboard_temp_agua">Temp Agua</string>
+    <string name="dashboard_salinidad">Salinidad</string>
+    <string name="dashboard_oxigeno">Oxígeno</string>
+    <string name="dashboard_temp_valor">11.4°C</string>
+    <string name="dashboard_sal_valor">32.8 PSU</string>
+    <string name="dashboard_oxi_valor">8.6 mg/L</string>
+    <string name="dashboard_datos_ejemplo">Datos de ejemplo</string>
+
 </resources>
