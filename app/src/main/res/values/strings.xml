@@ -128,8 +128,8 @@
     <string name="form_draft_time_now">hace un momento</string>
 
 
-    <string name="label_email">Correo electrónico</string>
-    <string name="login_error_invalid">Correo o contraseña incorrectos</string>
+    <string name="label_email">Usuario</string>
+    <string name="login_error_invalid">Usuario o contraseña incorrectos</string>
     <!--  Roles  -->
     <string name="role_supervisor">Supervisor de Calidad</string>
     <string name="role_operario">Operador de Muestreo</string>
