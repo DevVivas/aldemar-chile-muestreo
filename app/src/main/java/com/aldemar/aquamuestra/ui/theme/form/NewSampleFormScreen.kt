@@ -7,44 +7,169 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.aldemar.aquamuestra.R
+import com.aldemar.aquamuestra.data.local.EstadoRevision
+import com.aldemar.aquamuestra.ui.theme.SessionManager
+import com.aldemar.aquamuestra.ui.theme.ThemeManager
 import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
-import com.aldemar.aquamuestra.ui.theme.*
+import com.aldemar.aquamuestra.viewmodel.AppViewModelFactory
+import com.aldemar.aquamuestra.viewmodel.ErrorCampo
+import com.aldemar.aquamuestra.viewmodel.MuestraFormValidator
+import com.aldemar.aquamuestra.viewmodel.NewSampleEvento
+import com.aldemar.aquamuestra.viewmodel.NewSampleUiState
+import com.aldemar.aquamuestra.viewmodel.NewSampleViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+
+// Opciones de ejemplo (más adelante vendrán de Room o del backend).
+private val CENTROS = listOf("Centro Chiloé (Sector Huito)", "Punta Pelluco, módulo 104", "Calbuco Sur", "Reloncaví Estuario")
+private val TRENES = listOf("Tren 1 - Módulo A", "Tren 2 - Módulo B", "Tren 3 - Módulo B", "Tren 4 - Módulo C")
+private val LINEAS = listOf("Línea 10", "Línea 12", "Línea 15", "Línea 18")
+
+/** Tiempo que se ve la confirmación antes de volver atrás. */
+private const val PAUSA_CONFIRMACION_MS = 1_200L
+
+private val LOCALE_CL: Locale = Locale.forLanguageTag("es-CL")
+
+// -------------------------------------------------------------------------------------------
+// Paleta marina SOLO para esta pantalla (no se cambia Theme.kt).
+// Azul marino #003366 y teal #008080 del README, con tonos derivados para Material 3.
+// El fondo coincide con el de AppTopBar (blanco / #121212) para que no se vea una costura.
+// -------------------------------------------------------------------------------------------
+private val EsquemaMarinoClaro = lightColorScheme(
+    primary = Color(0xFF003366), onPrimary = Color.White,
+    primaryContainer = Color(0xFFD4E3F7), onPrimaryContainer = Color(0xFF0A2440),
+    secondary = Color(0xFF00696B), onSecondary = Color.White,
+    secondaryContainer = Color(0xFFCDEBEA), onSecondaryContainer = Color(0xFF0B3A3B),
+    tertiary = Color(0xFF8A4B00), onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFFFDDBA), onTertiaryContainer = Color(0xFF2D1600),
+    error = Color(0xFFBA1A1A), onError = Color.White,
+    errorContainer = Color(0xFFFFDAD6), onErrorContainer = Color(0xFF410002),
+    background = Color.White, onBackground = Color(0xFF1A2330),
+    surface = Color.White, onSurface = Color(0xFF1A2330),
+    surfaceVariant = Color(0xFFDEE4EB), onSurfaceVariant = Color(0xFF434E5A),
+    surfaceTint = Color(0xFF003366),
+    inverseSurface = Color(0xFF2C3440), inverseOnSurface = Color(0xFFEDF1F6), inversePrimary = Color(0xFFA4C9F0),
+    outline = Color(0xFF6F7A86), outlineVariant = Color(0xFFC3CBD4),
+    surfaceBright = Color.White, surfaceDim = Color(0xFFD8DEE4),
+    surfaceContainerLowest = Color.White, surfaceContainerLow = Color(0xFFF3F6F9),
+    surfaceContainer = Color(0xFFEDF1F5), surfaceContainerHigh = Color(0xFFE7ECF1),
+    surfaceContainerHighest = Color(0xFFE1E7ED)
+)
+
+private val EsquemaMarinoOscuro = darkColorScheme(
+    primary = Color(0xFFA4C9F0), onPrimary = Color(0xFF00315A),
+    primaryContainer = Color(0xFF0D4A7A), onPrimaryContainer = Color(0xFFD4E3F7),
+    secondary = Color(0xFF80D5D3), onSecondary = Color(0xFF003738),
+    secondaryContainer = Color(0xFF0F4F50), onSecondaryContainer = Color(0xFFCDEBEA),
+    tertiary = Color(0xFFFFB869), onTertiary = Color(0xFF4A2800),
+    tertiaryContainer = Color(0xFF6A3A00), onTertiaryContainer = Color(0xFFFFDDBA),
+    error = Color(0xFFFFB4AB), onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A), onErrorContainer = Color(0xFFFFDAD6),
+    background = Color(0xFF121212), onBackground = Color(0xFFE2E8EE),
+    surface = Color(0xFF121212), onSurface = Color(0xFFE2E8EE),
+    surfaceVariant = Color(0xFF3F4852), onSurfaceVariant = Color(0xFFBFC8D2),
+    surfaceTint = Color(0xFFA4C9F0),
+    inverseSurface = Color(0xFFE2E8EE), inverseOnSurface = Color(0xFF2C3440), inversePrimary = Color(0xFF003366),
+    outline = Color(0xFF89939D), outlineVariant = Color(0xFF3F4852),
+    surfaceBright = Color(0xFF383B40), surfaceDim = Color(0xFF121212),
+    surfaceContainerLowest = Color(0xFF0C0F12), surfaceContainerLow = Color(0xFF1A1D21),
+    surfaceContainer = Color(0xFF1E2226), surfaceContainerHigh = Color(0xFF282C31),
+    surfaceContainerHighest = Color(0xFF33373C)
+)
 
 @Composable
 fun NewSampleFormScreen(
@@ -52,639 +177,617 @@ fun NewSampleFormScreen(
     onBackClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    var lengthMeters by remember { mutableFloatStateOf(0.50f) }
-    var individualCount by remember { mutableIntStateOf(150) }
-    val draftNow = stringResource(R.string.form_draft_time_now)
-    val draftInitial = stringResource(R.string.form_draft_time_initial)
-    var draftTime by remember { mutableStateOf(draftInitial) }
+    val viewModel: NewSampleViewModel = viewModel(factory = AppViewModelFactory(context))
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Colores dinámicos para Modo Oscuro
-    val bgColor = ThemeManager.backgroundColor
-    val textColor = ThemeManager.textColor
+    // El operador parte con el usuario de la sesión (se puede editar).
+    LaunchedEffect(Unit) { viewModel.precargarOperador(SessionManager.currentUser?.name) }
 
-    val currentDateTimeFormatted = remember {
-        val dateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
-        dateFormat.format(Date())
+    MaterialTheme(
+        colorScheme = if (ThemeManager.isDarkMode) EsquemaMarinoOscuro else EsquemaMarinoClaro,
+        typography = MaterialTheme.typography,
+        shapes = MaterialTheme.shapes
+    ) {
+        NewSampleFormContent(
+            state = state,
+            viewModel = viewModel,
+            onBackClick = onBackClick,
+            modifier = modifier
+        )
     }
+}
 
-    var operatorName by remember { mutableStateOf("D. Villamizar (TEC-4092)") }
-    var concessionText by remember { mutableStateOf("Concesión 103B") }
-    val capturedPhotos = remember { mutableStateListOf<Uri>() }
-
-    var selectedCenter by remember { mutableStateOf("Centro Chiloé (Sector Huito)") }
-    var selectedTren by remember { mutableStateOf("Tren 3 - Módulo B") }
-    var selectedLine by remember { mutableStateOf("Línea 12") }
-    var selectedSpecies by remember { mutableStateOf("Chorito (Mytilus chilensis)") }
-    var observationsText by remember { mutableStateOf("Crecimiento homogéneo, baja presencia de epibiontes...") }
-
-    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
-    var selectedPhotoForPreview by remember { mutableStateOf<Uri?>(null) }
-
+@Composable
+private fun NewSampleFormContent(
+    state: NewSampleUiState,
+    viewModel: NewSampleViewModel,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    val msgPhotoSuccess = stringResource(R.string.msg_photo_success)
-    val msgPermissionDenied = stringResource(R.string.msg_photo_permission_denied)
-    val msgMaxPhotos = stringResource(R.string.msg_max_photos_reached)
-    val msgDraftSaved = stringResource(R.string.msg_draft_saved_success)
-    val msgFinishReg = stringResource(R.string.msg_finish_reg_success)
-    val msgPhotoDeleted = stringResource(R.string.msg_photo_deleted)
-    val msgRequiredError = stringResource(R.string.msg_required_fields_error)
+    val msgBorrador = stringResource(R.string.muestra_ok_borrador)
+    val msgEnviada = stringResource(R.string.muestra_ok_enviada)
+    val msgErrores = stringResource(R.string.muestra_aviso_errores)
+    val msgErrorGuardar = stringResource(R.string.muestra_aviso_error_guardar)
+    val msgPermiso = stringResource(R.string.muestra_aviso_permiso_camara)
 
-    val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success && tempPhotoUri != null) {
-            capturedPhotos.add(tempPhotoUri!!)
-            draftTime = draftNow
-            scope.launch {
-                snackbarHostState.showSnackbar(String.format(msgPhotoSuccess, capturedPhotos.size))
+    // ---- Eventos de un solo uso que manda el ViewModel
+    LaunchedEffect(state.evento) {
+        when (val evento = state.evento) {
+            is NewSampleEvento.GuardadoOk -> {
+                val mensaje = if (evento.estado == EstadoRevision.ENVIADA) msgEnviada else msgBorrador
+                scope.launch { snackbarHostState.showSnackbar(mensaje) }
+                delay(PAUSA_CONFIRMACION_MS)
+                onBackClick()
             }
+            NewSampleEvento.HayErrores -> {
+                viewModel.onEventoMostrado()
+                scope.launch { snackbarHostState.showSnackbar(msgErrores) }
+            }
+            NewSampleEvento.ErrorAlGuardar -> {
+                viewModel.onEventoMostrado()
+                scope.launch { snackbarHostState.showSnackbar(msgErrorGuardar) }
+            }
+            null -> Unit
         }
     }
 
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            val uri = createTempImageUri(context)
-            tempPhotoUri = uri
-            takePictureLauncher.launch(uri)
-        } else {
-            scope.launch {
-                snackbarHostState.showSnackbar(msgPermissionDenied)
-            }
-        }
+    // ---- Cámara (se mantiene TakePicture; CameraX llegará en otra tarea)
+    var rutaFotoPendiente by rememberSaveable { mutableStateOf<String?>(null) }
+
+    val takePictureLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        val ruta = rutaFotoPendiente
+        if (ok && ruta != null) viewModel.onFotoCapturada(ruta) else ruta?.let { File(it).delete() }
+        rutaFotoPendiente = null
     }
 
-    val centersList = listOf("Centro Chiloé (Sector Huito)", "Punta Pelluco • Módulo 104", "Calbuco Sur", "Reloncaví Estuario")
-    val trenList = listOf("Tren 1 - Módulo A", "Tren 2 - Módulo B", "Tren 3 - Módulo B", "Tren 4 - Módulo C")
-    val lineList = listOf("Línea 10", "Línea 12", "Línea 15", "Línea 18")
-    val speciesList = listOf("Chorito (Mytilus chilensis)", "Salmón Atlántico (Salmo salar)", "Trucha Arcoíris (Oncorhynchus mykiss)")
+    fun abrirCamara() {
+        val archivo = crearArchivoFoto(context)
+        rutaFotoPendiente = archivo.absolutePath
+        takePictureLauncher.launch(uriDeArchivo(context, archivo))
+    }
+
+    val permisoCamaraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { concedido ->
+        if (concedido) abrirCamara() else scope.launch { snackbarHostState.showSnackbar(msgPermiso) }
+    }
+
+    val onTomarFoto = {
+        val tienePermiso = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
+        if (tienePermiso) abrirCamara() else permisoCamaraLauncher.launch(Manifest.permission.CAMERA)
+    }
+
+    var mostrarFecha by rememberSaveable { mutableStateOf(false) }
+    var mostrarHora by rememberSaveable { mutableStateOf(false) }
+
+    // Qué botón se tocó, para mostrar el indicador de carga en ese y no en el otro.
+    var accionEnCurso by remember { mutableStateOf<EstadoRevision?>(null) }
+
+    val guardado = state.evento as? NewSampleEvento.GuardadoOk
+    val bloqueado = state.isSaving || guardado != null
+    val errores = state.errores
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = bgColor,
-        topBar = {
-            AppTopBar(
-                title = stringResource(R.string.form_title),
-                onBackClick = onBackClick
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = { AppTopBar(title = stringResource(R.string.muestra_titulo), onBackClick = onBackClick) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            BarraAcciones(
+                guardandoComo = if (state.isSaving) accionEnCurso else null,
+                guardadoComo = guardado?.estado,
+                habilitado = !bloqueado,
+                onGuardarBorrador = {
+                    accionEnCurso = EstadoRevision.BORRADOR
+                    viewModel.guardarBorrador()
+                },
+                onEnviar = {
+                    accionEnCurso = EstadoRevision.ENVIADA
+                    viewModel.enviar()
+                }
             )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(28.dp)
+        ) {
+            FichaId(id = state.id)
+
+            // ---------------------------------------------------------------- Ubicación
+            Seccion(titulo = stringResource(R.string.muestra_seccion_ubicacion)) {
+                CampoSeleccion(
+                    label = stringResource(R.string.muestra_centro),
+                    valor = state.centro,
+                    opciones = CENTROS,
+                    onSeleccion = viewModel::onCentroChange,
+                    error = errores.centro?.let { stringResource(R.string.muestra_error_centro) },
+                    habilitado = !bloqueado
+                )
+                OutlinedTextField(
+                    value = state.concesion,
+                    onValueChange = viewModel::onConcesionChange,
+                    label = { Text(stringResource(R.string.muestra_concesion)) },
+                    supportingText = { Text(stringResource(R.string.muestra_concesion_ayuda)) },
+                    singleLine = true,
+                    enabled = !bloqueado,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                CampoSeleccion(
+                    label = stringResource(R.string.muestra_tren),
+                    valor = state.tren,
+                    opciones = TRENES,
+                    onSeleccion = viewModel::onTrenChange,
+                    error = errores.tren?.let { stringResource(R.string.muestra_error_tren) },
+                    habilitado = !bloqueado
+                )
+                CampoSeleccion(
+                    label = stringResource(R.string.muestra_linea),
+                    valor = state.linea,
+                    opciones = LINEAS,
+                    onSeleccion = viewModel::onLineaChange,
+                    error = errores.linea?.let { stringResource(R.string.muestra_error_linea) },
+                    habilitado = !bloqueado
+                )
+            }
+
+            // ---------------------------------------------------------------- Fecha y operador
+            Seccion(titulo = stringResource(R.string.muestra_seccion_registro)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    CampoToque(
+                        label = stringResource(R.string.muestra_fecha),
+                        valor = formatearFecha(state.fechaHora),
+                        icono = Icons.Filled.CalendarMonth,
+                        descripcionAccion = stringResource(R.string.muestra_elegir_fecha),
+                        habilitado = !bloqueado,
+                        onClick = { mostrarFecha = true },
+                        modifier = Modifier.weight(1.4f)
+                    )
+                    CampoToque(
+                        label = stringResource(R.string.muestra_hora),
+                        valor = formatearHora(state.fechaHora),
+                        icono = Icons.Filled.Schedule,
+                        descripcionAccion = stringResource(R.string.muestra_elegir_hora),
+                        habilitado = !bloqueado,
+                        onClick = { mostrarHora = true },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                OutlinedTextField(
+                    value = state.operador,
+                    onValueChange = viewModel::onOperadorChange,
+                    label = { Text(stringResource(R.string.muestra_operador)) },
+                    isError = errores.operador != null,
+                    supportingText = errores.operador?.let { { Text(stringResource(R.string.muestra_error_operador)) } },
+                    singleLine = true,
+                    enabled = !bloqueado,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Words,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // ---------------------------------------------------------------- Conteo
+            Seccion(titulo = stringResource(R.string.muestra_seccion_conteo)) {
+                OutlinedTextField(
+                    value = state.tramoCm,
+                    onValueChange = viewModel::onTramoCmChange,
+                    label = { Text(stringResource(R.string.muestra_tramo)) },
+                    suffix = { Text(stringResource(R.string.muestra_tramo_sufijo)) },
+                    isError = errores.tramoCm != null,
+                    supportingText = {
+                        Text(
+                            when (errores.tramoCm) {
+                                ErrorCampo.OBLIGATORIO -> stringResource(R.string.muestra_error_tramo_vacio)
+                                null -> stringResource(R.string.muestra_tramo_ayuda)
+                                else -> stringResource(R.string.muestra_error_tramo_cero)
+                            }
+                        )
+                    },
+                    singleLine = true,
+                    enabled = !bloqueado,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                ContadorIndividuos(
+                    cantidad = state.cantidad,
+                    error = when (errores.cantidad) {
+                        ErrorCampo.OBLIGATORIO -> stringResource(R.string.muestra_error_cantidad_vacia)
+                        null -> null
+                        else -> stringResource(R.string.muestra_error_cantidad_negativa)
+                    },
+                    habilitado = !bloqueado,
+                    onCantidadChange = viewModel::onCantidadChange,
+                    onAjustar = viewModel::onCantidadAjustar
+                )
+            }
+
+            // ---------------------------------------------------------------- Foto
+            Seccion(titulo = stringResource(R.string.muestra_seccion_foto)) {
+                FotoMuestra(
+                    fotoPath = state.fotoPath,
+                    error = errores.foto?.let { stringResource(R.string.muestra_error_foto) },
+                    habilitado = !bloqueado,
+                    onTomarFoto = onTomarFoto,
+                    onQuitarFoto = viewModel::onFotoQuitada
+                )
+            }
+
+            // ---------------------------------------------------------------- Observaciones
+            Seccion(titulo = stringResource(R.string.muestra_seccion_observaciones)) {
+                val max = MuestraFormValidator.MAX_OBSERVACIONES
+                OutlinedTextField(
+                    value = state.observaciones,
+                    onValueChange = viewModel::onObservacionesChange,
+                    placeholder = { Text(stringResource(R.string.muestra_observaciones_hint)) },
+                    isError = errores.observaciones != null,
+                    supportingText = {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            if (errores.observaciones != null) {
+                                Text(stringResource(R.string.muestra_error_observaciones, max))
+                            }
+                            Spacer(Modifier.weight(1f))
+                            Text(stringResource(R.string.muestra_contador_caracteres, state.observaciones.length, max))
+                        }
+                    },
+                    minLines = 3,
+                    enabled = !bloqueado,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+
+    if (mostrarFecha) {
+        DialogoFecha(
+            fechaHora = state.fechaHora,
+            onAceptar = { viewModel.onFechaChange(it); mostrarFecha = false },
+            onCancelar = { mostrarFecha = false }
+        )
+    }
+    if (mostrarHora) {
+        DialogoHora(
+            fechaHora = state.fechaHora,
+            onAceptar = { h, m -> viewModel.onHoraChange(h, m); mostrarHora = false },
+            onCancelar = { mostrarHora = false }
+        )
+    }
+}
+
+// ===========================================================================================
+// Componentes de la pantalla
+// ===========================================================================================
+
+/** Ficha con el ID de la muestra: el único bloque destacado de la pantalla. */
+@Composable
+private fun FichaId(id: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
+            Text(stringResource(R.string.muestra_id_label), style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(4.dp))
+            SelectionContainer {
+                Column {
+                    Text(
+                        text = id.take(8).uppercase(LOCALE_CL),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 3.sp
+                    )
+                    Text(
+                        text = id,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    )
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            Text(stringResource(R.string.muestra_id_ayuda), style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+@Composable
+private fun Seccion(titulo: String, contenido: @Composable () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = titulo,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.semantics { heading() }
+        )
+        contenido()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CampoSeleccion(
+    label: String,
+    valor: String,
+    opciones: List<String>,
+    onSeleccion: (String) -> Unit,
+    error: String?,
+    habilitado: Boolean
+) {
+    var expandido by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expandido && habilitado,
+        onExpandedChange = { if (habilitado) expandido = it }
+    ) {
+        OutlinedTextField(
+            value = valor,
+            onValueChange = {},
+            readOnly = true,
+            enabled = habilitado,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido) },
+            isError = error != null,
+            supportingText = error?.let { { Text(it) } },
+            singleLine = true,
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, habilitado)
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(expanded = expandido, onDismissRequest = { expandido = false }) {
+            opciones.forEach { opcion ->
+                DropdownMenuItem(
+                    text = { Text(opcion, style = MaterialTheme.typography.bodyLarge) },
+                    onClick = {
+                        onSeleccion(opcion)
+                        expandido = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
+            }
+        }
+    }
+}
+
+/** Campo de solo lectura que abre un selector (fecha u hora) al tocarlo. */
+@Composable
+private fun CampoToque(
+    label: String,
+    valor: String,
+    icono: ImageVector,
+    descripcionAccion: String,
+    habilitado: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interaccion = remember { MutableInteractionSource() }
+    val presionado by interaccion.collectIsPressedAsState()
+    LaunchedEffect(presionado) { if (presionado && habilitado) onClick() }
+
+    OutlinedTextField(
+        value = valor,
+        onValueChange = {},
+        readOnly = true,
+        enabled = habilitado,
+        label = { Text(label) },
+        trailingIcon = {
+            IconButton(onClick = onClick, enabled = habilitado) {
+                Icon(icono, contentDescription = descripcionAccion)
+            }
         },
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier.padding(16.dp)
-            ) { data ->
-                Snackbar(
-                    containerColor = ColorAbyss,
-                    contentColor = ColorPaper,
-                    shape = RoundedCornerShape(12.dp)
+        singleLine = true,
+        interactionSource = interaccion,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun ContadorIndividuos(
+    cantidad: String,
+    error: String?,
+    habilitado: Boolean,
+    onCantidadChange: (String) -> Unit,
+    onAjustar: (Int) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = cantidad,
+            onValueChange = onCantidadChange,
+            label = { Text(stringResource(R.string.muestra_cantidad)) },
+            textStyle = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
+            isError = error != null,
+            supportingText = { Text(error ?: stringResource(R.string.muestra_cantidad_ayuda)) },
+            singleLine = true,
+            enabled = habilitado,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(-5, -1, 1, 5).forEach { delta ->
+                val descripcion = if (delta < 0) {
+                    stringResource(R.string.muestra_restar, -delta)
+                } else {
+                    stringResource(R.string.muestra_sumar, delta)
+                }
+                FilledTonalButton(
+                    onClick = { onAjustar(delta) },
+                    enabled = habilitado,
+                    shape = RoundedCornerShape(14.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                        .semantics { contentDescription = descripcion }
                 ) {
                     Text(
-                        text = data.visuals.message,
-                        fontSize = 14.sp,
+                        text = if (delta < 0) "−${-delta}" else "+$delta",
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            DraftStatusBar(draftTime = draftTime)
-
-            Spacer(modifier = Modifier.height(24.dp))
-            LocationAndOperatorSection(
-                currentDateTime = currentDateTimeFormatted,
-                operatorName = operatorName,
-                onOperatorChange = { operatorName = it; draftTime = draftNow },
-                selectedCenter = selectedCenter,
-                onCenterSelected = { selectedCenter = it; draftTime = draftNow },
-                centersList = centersList,
-                concessionText = concessionText,
-                onConcessionChange = { concessionText = it; draftTime = draftNow },
-                selectedTren = selectedTren,
-                onTrenSelected = { selectedTren = it; draftTime = draftNow },
-                trenList = trenList,
-                selectedLine = selectedLine,
-                onLineSelected = { selectedLine = it; draftTime = draftNow },
-                lineList = lineList,
-                selectedSpecies = selectedSpecies,
-                onSpeciesSelected = { selectedSpecies = it; draftTime = draftNow },
-                speciesList = speciesList
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-            BiometricsSection(
-                lengthMeters = lengthMeters,
-                onLengthChange = { lengthMeters = it; draftTime = draftNow },
-                individualCount = individualCount,
-                onCountChange = { individualCount = it; draftTime = draftNow },
-                observationsText = observationsText,
-                onObservationsChange = { observationsText = it; draftTime = draftNow }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-            PhotoEvidenceSection(
-                capturedPhotos = capturedPhotos,
-                onPhotoClick = { uri -> selectedPhotoForPreview = uri },
-                onAddPhotoClick = {
-                    if (capturedPhotos.size >= 5) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(msgMaxPhotos)
-                        }
-                    } else {
-                        val hasPermission = ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.CAMERA
-                        ) == PackageManager.PERMISSION_GRANTED
-
-                        if (hasPermission) {
-                            val uri = createTempImageUri(context)
-                            tempPhotoUri = uri
-                            takePictureLauncher.launch(uri)
-                        } else {
-                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                    }
-                }
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = {
-                        draftTime = draftNow
-                        scope.launch {
-                            snackbarHostState.showSnackbar(msgDraftSaved)
-                        }
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, ThemeManager.borderColor),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = textColor),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.form_save_draft),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = (-0.01).sp,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        val isOperatorValid = operatorName.trim().isNotEmpty()
-                        val isConcessionValid = concessionText.trim().isNotEmpty()
-                        val isPhotoValid = capturedPhotos.isNotEmpty()
-
-                        if (isOperatorValid && isConcessionValid && isPhotoValid) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(msgFinishReg)
-                            }
-                        } else {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(msgRequiredError)
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ColorEmber,
-                        contentColor = ColorPaper
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.form_finish_reg),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = (-0.01).sp,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-        }
-    }
-
-    if (selectedPhotoForPreview != null) {
-        PhotoPreviewDialog(
-            photoUri = selectedPhotoForPreview!!,
-            onDismiss = { selectedPhotoForPreview = null },
-            onDelete = {
-                capturedPhotos.remove(selectedPhotoForPreview)
-                selectedPhotoForPreview = null
-                draftTime = draftNow
-                scope.launch {
-                    snackbarHostState.showSnackbar(msgPhotoDeleted)
-                }
-            }
-        )
-    }
-}
-
-private fun createTempImageUri(context: Context): Uri {
-    val imageFile = File.createTempFile(
-        "sample_${System.currentTimeMillis()}_",
-        ".jpg",
-        context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
-    )
-    return FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.fileprovider",
-        imageFile
-    )
-}
-
-@Composable
-private fun LocationAndOperatorSection(
-    currentDateTime: String,
-    operatorName: String,
-    onOperatorChange: (String) -> Unit,
-    selectedCenter: String,
-    onCenterSelected: (String) -> Unit,
-    centersList: List<String>,
-    concessionText: String,
-    onConcessionChange: (String) -> Unit,
-    selectedTren: String,
-    onTrenSelected: (String) -> Unit,
-    trenList: List<String>,
-    selectedLine: String,
-    onLineSelected: (String) -> Unit,
-    lineList: List<String>,
-    selectedSpecies: String,
-    onSpeciesSelected: (String) -> Unit,
-    speciesList: List<String>
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        InfoFieldLocked(stringResource(R.string.form_datetime_label), currentDateTime, hasLock = true)
-
-        CustomInputField(
-            label = stringResource(R.string.form_operator_label),
-            value = operatorName,
-            onValueChange = onOperatorChange,
-            isError = operatorName.trim().isEmpty()
-        )
-
-        InteractiveDropdownField(stringResource(R.string.form_center_label), selectedCenter, centersList, onCenterSelected)
-
-        CustomInputField(
-            label = stringResource(R.string.form_concession_label) + " *",
-            value = concessionText,
-            onValueChange = onConcessionChange,
-            isError = concessionText.trim().isEmpty()
-        )
-
-        InteractiveDropdownField(stringResource(R.string.form_tren_label), selectedTren, trenList, onTrenSelected)
-        InteractiveDropdownField(stringResource(R.string.form_line_label), selectedLine, lineList, onLineSelected)
-        InteractiveDropdownField(stringResource(R.string.form_species_label), selectedSpecies, speciesList, onSpeciesSelected)
     }
 }
 
 @Composable
-private fun CustomInputField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    isError: Boolean = false,
-    modifier: Modifier = Modifier
+private fun FotoMuestra(
+    fotoPath: String?,
+    error: String?,
+    habilitado: Boolean,
+    onTomarFoto: () -> Unit,
+    onQuitarFoto: () -> Unit
 ) {
-    val cardBg = ThemeManager.surfaceColor
-    val textColor = ThemeManager.textColor
-    val subTextColor = ThemeManager.secondaryTextColor
-    val borderColor = ThemeManager.borderColor
+    val forma = RoundedCornerShape(16.dp)
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = subTextColor)
-            if (isError) {
-                Text(stringResource(R.string.form_required), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
-            }
-        }
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .border(
-                    width = 1.dp,
-                    color = if (isError) Color(0xFFD32F2F) else borderColor,
-                    shape = RoundedCornerShape(10.dp)
-                ),
-            shape = RoundedCornerShape(10.dp),
-            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, color = textColor, fontWeight = FontWeight.Medium),
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = cardBg,
-                unfocusedContainerColor = cardBg,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = ColorEmber
-            ),
-            singleLine = true
-        )
-    }
-}
-
-@Composable
-private fun PhotoEvidenceSection(
-    capturedPhotos: List<Uri>,
-    onPhotoClick: (Uri) -> Unit,
-    onAddPhotoClick: () -> Unit
-) {
-    val isPhotoEmpty = capturedPhotos.isEmpty()
-    val textColor = ThemeManager.textColor
-    val subTextColor = ThemeManager.secondaryTextColor
-    val borderColor = ThemeManager.borderColor
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                stringResource(R.string.form_evidence_title) + " *",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor,
-                letterSpacing = (-0.01).sp
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                "${capturedPhotos.size}/5",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (isPhotoEmpty) Color(0xFFD32F2F) else subTextColor,
-                letterSpacing = (-0.01).sp
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(ThemeManager.surfaceColor)
-                .border(
-                    width = if (isPhotoEmpty) 1.dp else 0.dp,
-                    color = if (isPhotoEmpty) Color(0xFFD32F2F) else Color.Transparent,
-                    shape = RoundedCornerShape(12.dp)
-                )
-        ) {
-            if (capturedPhotos.isNotEmpty()) {
-                val lastPhoto = capturedPhotos.last()
-                Image(
-                    painter = rememberAsyncImagePainter(lastPhoto),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { onPhotoClick(lastPhoto) },
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        Icons.Default.CameraAlt,
-                        contentDescription = null,
-                        tint = subTextColor,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Text(stringResource(R.string.form_photo_required), fontSize = 11.sp, color = Color(0xFFD32F2F), fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-
-        if (capturedPhotos.isNotEmpty()) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                capturedPhotos.forEach { photoUri ->
-                    Box(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
-                            .clickable { onPhotoClick(photoUri) }
-                    ) {
-                        Image(
-                            painter = rememberAsyncImagePainter(photoUri),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-            }
-        }
-
-        Button(
-            onClick = onAddPhotoClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = ThemeManager.surfaceColor, contentColor = textColor),
-            border = BorderStroke(1.dp, if (isPhotoEmpty) Color(0xFFD32F2F) else borderColor),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-        ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                stringResource(R.string.form_capture_photo),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = (-0.01).sp
-            )
-        }
-    }
-}
-
-@Composable
-private fun PhotoPreviewDialog(
-    photoUri: Uri,
-    onDismiss: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Dialog(onDismissRequest = onDismiss) {
+    if (fotoPath == null) {
         Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = ThemeManager.surfaceColor,
+            onClick = onTomarFoto,
+            enabled = habilitado,
+            shape = forma,
+            color = MaterialTheme.colorScheme.surfaceContainerLow,
+            border = BorderStroke(
+                width = if (error != null) 2.dp else 1.dp,
+                color = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant
+            ),
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight()
+                .height(160.dp)
+                .semantics { if (error != null) error(error) }
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.dialog_preview_title),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = ThemeManager.textColor
-                    )
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = null, tint = ThemeManager.secondaryTextColor)
-                    }
-                }
-
-                Image(
-                    painter = rememberAsyncImagePainter(photoUri),
+                Icon(
+                    Icons.Filled.PhotoCamera,
                     contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(40.dp)
                 )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, ThemeManager.borderColor)
-                    ) {
-                        Text(stringResource(R.string.dialog_close), color = ThemeManager.textColor, fontWeight = FontWeight.SemiBold)
-                    }
-
-                    Button(
-                        onClick = onDelete,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
-                    ) {
-                        Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(stringResource(R.string.dialog_delete), color = ColorPaper, fontWeight = FontWeight.SemiBold)
-                    }
-                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.muestra_foto_tomar),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    stringResource(R.string.muestra_foto_ayuda),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun DraftStatusBar(draftTime: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(stringResource(R.string.form_draft_saved), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ThemeManager.secondaryTextColor, letterSpacing = (-0.01).sp)
-        Text(draftTime, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ColorSteel, letterSpacing = (-0.01).sp)
-    }
-}
-
-@Composable
-private fun InfoFieldLocked(label: String, value: String, hasLock: Boolean = false) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ThemeManager.secondaryTextColor, letterSpacing = (-0.01).sp)
-        Row(
+        if (error != null) {
+            Text(
+                text = error,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+    } else {
+        AsyncImage(
+            model = File(fotoPath),
+            contentDescription = stringResource(R.string.muestra_foto_descripcion),
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(ThemeManager.surfaceColor)
-                .border(1.dp, ThemeManager.borderColor, RoundedCornerShape(12.dp))
-                .padding(horizontal = 12.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(value, modifier = Modifier.weight(1f), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ThemeManager.textColor, letterSpacing = (-0.01).sp)
-            if (hasLock) Icon(Icons.Default.Lock, contentDescription = null, tint = ColorSteel, modifier = Modifier.size(16.dp))
+                .aspectRatio(4f / 3f)
+                .clip(forma)
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(
+                onClick = onTomarFoto,
+                enabled = habilitado,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+            ) {
+                Icon(Icons.Filled.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.muestra_foto_otra))
+            }
+            TextButton(
+                onClick = onQuitarFoto,
+                enabled = habilitado,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+            ) {
+                Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.muestra_foto_quitar))
+            }
         }
     }
 }
 
+/** Botones fijos abajo: siempre a mano, grandes para usar con guantes o en movimiento. */
 @Composable
-private fun InteractiveDropdownField(
-    label: String,
-    selectedOption: String,
-    options: List<String>,
-    onOptionSelected: (String) -> Unit
+private fun BarraAcciones(
+    guardandoComo: EstadoRevision?,
+    guardadoComo: EstadoRevision?,
+    habilitado: Boolean,
+    onGuardarBorrador: () -> Unit,
+    onEnviar: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = ThemeManager.secondaryTextColor, letterSpacing = (-0.01).sp)
-        Box(modifier = Modifier.fillMaxWidth()) {
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        Column {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ThemeManager.surfaceColor, RoundedCornerShape(12.dp))
-                    .border(1.dp, ThemeManager.borderColor, RoundedCornerShape(12.dp))
-                    .clickable { expanded = true }
-                    .padding(horizontal = 12.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
-                Text(
-                    text = selectedOption,
-                    modifier = Modifier.weight(1f),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = ThemeManager.textColor,
-                    letterSpacing = (-0.01).sp
-                )
-                Text("▾", fontSize = 14.sp, color = ThemeManager.textColor)
-            }
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(ThemeManager.surfaceColor)
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option, fontSize = 14.sp, color = ThemeManager.textColor) },
-                        onClick = {
-                            onOptionSelected(option)
-                            expanded = false
-                        }
+                // El botón que acaba de guardar se mantiene con su color (solo muestra ✓, no hace nada)
+                // para que la confirmación se lea bien; el otro queda deshabilitado.
+                OutlinedButton(
+                    onClick = { if (habilitado) onGuardarBorrador() },
+                    enabled = habilitado || guardadoComo == EstadoRevision.BORRADOR,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                ) {
+                    ContenidoBoton(
+                        texto = stringResource(R.string.muestra_guardar_borrador),
+                        guardado = guardadoComo == EstadoRevision.BORRADOR,
+                        guardando = guardandoComo == EstadoRevision.BORRADOR
+                    )
+                }
+                Button(
+                    onClick = { if (habilitado) onEnviar() },
+                    enabled = habilitado || guardadoComo == EstadoRevision.ENVIADA,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                ) {
+                    ContenidoBoton(
+                        texto = stringResource(R.string.muestra_enviar),
+                        guardado = guardadoComo == EstadoRevision.ENVIADA,
+                        guardando = guardandoComo == EstadoRevision.ENVIADA
                     )
                 }
             }
@@ -693,113 +796,100 @@ private fun InteractiveDropdownField(
 }
 
 @Composable
-private fun BiometricsSection(
-    lengthMeters: Float,
-    onLengthChange: (Float) -> Unit,
-    individualCount: Int,
-    onCountChange: (Int) -> Unit,
-    observationsText: String,
-    onObservationsChange: (String) -> Unit
+private fun ContenidoBoton(texto: String, guardado: Boolean, guardando: Boolean) {
+    when {
+        guardado -> {
+            Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.muestra_guardada), style = MaterialTheme.typography.titleSmall)
+        }
+        guardando -> CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
+        else -> Text(texto, style = MaterialTheme.typography.titleSmall, maxLines = 1)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DialogoFecha(
+    fechaHora: Long,
+    onAceptar: (Long) -> Unit,
+    onCancelar: () -> Unit
 ) {
-    val textColor = ThemeManager.textColor
-    val subTextColor = ThemeManager.secondaryTextColor
-    val cardBg = ThemeManager.surfaceColor
-    val borderColor = ThemeManager.borderColor
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.form_biometrics_title), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = textColor, letterSpacing = (-0.01).sp)
-            Spacer(modifier = Modifier.weight(1f))
-            Surface(shape = RoundedCornerShape(6.dp), color = cardBg) {
-                Text(stringResource(R.string.form_sernapesca_norm), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = textColor, letterSpacing = (-0.01).sp)
-            }
+    // No se permiten fechas futuras: una muestra siempre se registra hoy o antes.
+    val hoyUtc = remember { medianocheUtc(System.currentTimeMillis()) }
+    val estado = rememberDatePickerState(
+        initialSelectedDateMillis = medianocheUtc(fechaHora),
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis <= hoyUtc
         }
-        Text(stringResource(R.string.form_length_label), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = subTextColor, letterSpacing = (-0.01).sp)
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { if (lengthMeters > 0.05f) onLengthChange(lengthMeters - 0.05f) }) {
-                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.cd_disminuir), tint = textColor)
+    )
+    DatePickerDialog(
+        onDismissRequest = onCancelar,
+        confirmButton = {
+            TextButton(onClick = { estado.selectedDateMillis?.let(onAceptar) ?: onCancelar() }) {
+                Text(stringResource(R.string.muestra_aceptar))
             }
-            Text(
-                text = String.format(java.util.Locale.US, "%.2f m", lengthMeters),
-                modifier = Modifier.padding(horizontal = 24.dp),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor,
-                letterSpacing = (-0.02).sp
-            )
-            IconButton(onClick = { onLengthChange(lengthMeters + 0.05f) }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_aumentar), tint = textColor)
-            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar) { Text(stringResource(R.string.muestra_cancelar)) }
         }
-        Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = cardBg, border = BorderStroke(1.dp, borderColor)) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.form_manual_count_title), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textColor, letterSpacing = (-0.01).sp)
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        stringResource(R.string.form_reset),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = subTextColor,
-                        letterSpacing = (-0.01).sp,
-                        modifier = Modifier.clickable { onCountChange(0) }
-                    )
-                }
-                Text(stringResource(R.string.form_alive_units, individualCount), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textColor, letterSpacing = (-0.01).sp)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CounterButton("-5", Modifier.weight(1f)) { onCountChange((individualCount - 5).coerceAtLeast(0)) }
-                    CounterButton("-1", Modifier.weight(1f)) { onCountChange((individualCount - 1).coerceAtLeast(0)) }
-                    CounterButton("+1", Modifier.weight(1f)) { onCountChange(individualCount + 1) }
-                    CounterButton("+5", Modifier.weight(1f), isAccent = true) { onCountChange(individualCount + 5) }
-                }
-            }
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(stringResource(R.string.form_observations_label), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = subTextColor, letterSpacing = (-0.01).sp)
-            TextField(
-                value = observationsText,
-                onValueChange = onObservationsChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .border(1.dp, borderColor, RoundedCornerShape(12.dp)),
-                shape = RoundedCornerShape(12.dp),
-                textStyle = androidx.compose.ui.text.TextStyle(
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = textColor,
-                    letterSpacing = (-0.01).sp,
-                    lineHeight = 18.sp
-                ),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = cardBg,
-                    unfocusedContainerColor = cardBg,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = ColorEmber
-                )
-            )
-        }
-    }
-}
-
-@Composable
-private fun CounterButton(text: String, modifier: Modifier = Modifier, isAccent: Boolean = false, onClick: () -> Unit) {
-    val bgColor = if (isAccent) ColorEmber else ThemeManager.surfaceColor
-    val contentColor = if (isAccent) ColorPaper else ThemeManager.textColor
-    val borderColor = ThemeManager.borderColor
-
-    Button(
-        onClick = onClick,
-        modifier = modifier.height(44.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = bgColor,
-            contentColor = contentColor
-        ),
-        border = if (!isAccent) BorderStroke(1.dp, borderColor) else null,
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
     ) {
-        Text(text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.01).sp)
+        DatePicker(state = estado)
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DialogoHora(
+    fechaHora: Long,
+    onAceptar: (Int, Int) -> Unit,
+    onCancelar: () -> Unit
+) {
+    val cal = remember(fechaHora) { Calendar.getInstance().apply { timeInMillis = fechaHora } }
+    val estado = rememberTimePickerState(
+        initialHour = cal.get(Calendar.HOUR_OF_DAY),
+        initialMinute = cal.get(Calendar.MINUTE),
+        is24Hour = true
+    )
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        title = { Text(stringResource(R.string.muestra_hora_titulo)) },
+        text = { TimePicker(state = estado) },
+        confirmButton = {
+            TextButton(onClick = { onAceptar(estado.hour, estado.minute) }) {
+                Text(stringResource(R.string.muestra_aceptar))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar) { Text(stringResource(R.string.muestra_cancelar)) }
+        }
+    )
+}
+
+// ===========================================================================================
+// Ayudantes
+// ===========================================================================================
+
+private fun formatearFecha(millis: Long): String =
+    SimpleDateFormat("d MMM yyyy", LOCALE_CL).format(Date(millis))
+
+private fun formatearHora(millis: Long): String =
+    SimpleDateFormat("HH:mm", LOCALE_CL).format(Date(millis))
+
+/** El DatePicker trabaja con la medianoche en UTC del día elegido. */
+private fun medianocheUtc(millisLocal: Long): Long {
+    val local = Calendar.getInstance().apply { timeInMillis = millisLocal }
+    return Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+        clear()
+        set(local.get(Calendar.YEAR), local.get(Calendar.MONTH), local.get(Calendar.DAY_OF_MONTH))
+    }.timeInMillis
+}
+
+/** Archivo vacío donde la cámara del sistema escribirá la foto. */
+private fun crearArchivoFoto(context: Context): File {
+    val carpeta = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+    return File.createTempFile("muestra_${System.currentTimeMillis()}_", ".jpg", carpeta)
+}
+
+private fun uriDeArchivo(context: Context, archivo: File): Uri =
+    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)

@@ -172,4 +172,63 @@
     <string name="dashboard_oxi_valor">8.6 mg/L</string>
     <string name="dashboard_datos_ejemplo">Datos de ejemplo</string>
 
+    <!-- Formulario "Nueva muestra" (Tarea 2) -->
+    <string name="muestra_titulo">Nueva muestra</string>
+    <string name="muestra_id_label">ID de muestra</string>
+    <string name="muestra_id_ayuda">Se guarda en el teléfono aunque no haya señal.</string>
+    <string name="muestra_seccion_ubicacion">Ubicación</string>
+    <string name="muestra_seccion_registro">Fecha y operador</string>
+    <string name="muestra_seccion_conteo">Conteo</string>
+    <string name="muestra_seccion_foto">Foto de la muestra</string>
+    <string name="muestra_seccion_observaciones">Observaciones</string>
+    <string name="muestra_centro">Centro de cultivo</string>
+    <string name="muestra_concesion">Concesión</string>
+    <string name="muestra_concesion_ayuda">Opcional</string>
+    <string name="muestra_tren">Tren</string>
+    <string name="muestra_linea">Línea</string>
+    <string name="muestra_fecha">Fecha</string>
+    <string name="muestra_hora">Hora</string>
+    <string name="muestra_operador">Operador</string>
+    <string name="muestra_tramo">Largo del tramo</string>
+    <string name="muestra_tramo_sufijo">cm</string>
+    <string name="muestra_tramo_ayuda">Largo de cuerda contado, en centímetros</string>
+    <string name="muestra_cantidad">Cantidad de individuos</string>
+    <string name="muestra_cantidad_ayuda">Escríbela o ajústala con los botones</string>
+    <string name="muestra_observaciones_hint">Estado del cultivo, epibiontes, clima…</string>
+    <string name="muestra_contador_caracteres">%1$d/%2$d</string>
+    <string name="muestra_foto_tomar">Tomar foto</string>
+    <string name="muestra_foto_ayuda">Una foto del tramo contado</string>
+    <string name="muestra_foto_otra">Tomar otra</string>
+    <string name="muestra_foto_quitar">Quitar foto</string>
+    <string name="muestra_foto_descripcion">Foto de la muestra</string>
+    <string name="muestra_guardar_borrador">Guardar borrador</string>
+    <string name="muestra_enviar">Enviar a revisión</string>
+    <string name="muestra_guardada">Guardada</string>
+    <string name="muestra_aceptar">Aceptar</string>
+    <string name="muestra_cancelar">Cancelar</string>
+    <string name="muestra_elegir_fecha">Elegir fecha</string>
+    <string name="muestra_elegir_hora">Elegir hora</string>
+    <string name="muestra_hora_titulo">Hora de la muestra</string>
+    <string name="muestra_restar">Restar %1$d</string>
+    <string name="muestra_sumar">Sumar %1$d</string>
+
+    <!-- Errores del formulario -->
+    <string name="muestra_error_centro">Elige el centro de cultivo</string>
+    <string name="muestra_error_tren">Elige el tren</string>
+    <string name="muestra_error_linea">Elige la línea</string>
+    <string name="muestra_error_operador">Escribe el nombre del operador</string>
+    <string name="muestra_error_tramo_vacio">Escribe el largo del tramo en cm</string>
+    <string name="muestra_error_tramo_cero">El tramo debe ser mayor a 0 cm</string>
+    <string name="muestra_error_cantidad_vacia">Escribe la cantidad (puede ser 0)</string>
+    <string name="muestra_error_cantidad_negativa">La cantidad no puede ser negativa</string>
+    <string name="muestra_error_observaciones">Máximo %1$d caracteres</string>
+    <string name="muestra_error_foto">Toma una foto para enviar a revisión</string>
+
+    <!-- Avisos (Snackbar) -->
+    <string name="muestra_ok_borrador">Borrador guardado en el teléfono</string>
+    <string name="muestra_ok_enviada">Muestra enviada a revisión. Se sincronizará al tener conexión.</string>
+    <string name="muestra_aviso_errores">Faltan datos. Revisa los campos marcados.</string>
+    <string name="muestra_aviso_error_guardar">No se pudo guardar. Inténtalo de nuevo.</string>
+    <string name="muestra_aviso_permiso_camara">Para tomar la foto, permite el uso de la cámara.</string>
+
 </resources>
