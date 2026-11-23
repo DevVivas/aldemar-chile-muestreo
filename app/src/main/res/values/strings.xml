@@ -231,4 +231,38 @@
     <string name="muestra_aviso_error_guardar">No se pudo guardar. Inténtalo de nuevo.</string>
     <string name="muestra_aviso_permiso_camara">Para tomar la foto, permite el uso de la cámara.</string>
 
+    <!-- Historial (Tarea 3) -->
+    <string name="hist_filtro_estado">Estado</string>
+    <string name="hist_filtro_centro">Centro</string>
+    <string name="hist_filtro_tren">Tren</string>
+    <string name="hist_filtro_linea">Línea</string>
+    <string name="hist_filtro_fechas">Fechas</string>
+    <string name="hist_filtro_todos">Todos</string>
+    <string name="hist_filtro_rango">%1$s – %2$s</string>
+    <string name="hist_limpiar_filtros">Limpiar filtros</string>
+    <plurals name="hist_contador_total">
+        <item quantity="one">%1$d muestra</item>
+        <item quantity="other">%1$d muestras</item>
+    </plurals>
+    <plurals name="hist_contador_filtrado">
+        <item quantity="one">%1$d de %2$d muestra</item>
+        <item quantity="other">%1$d de %2$d muestras</item>
+    </plurals>
+    <string name="hist_estado_borrador">Borrador</string>
+    <string name="hist_estado_enviada">Enviada</string>
+    <string name="hist_estado_observada">Observada</string>
+    <string name="hist_estado_validada">Validada</string>
+    <string name="hist_ubicacion">%1$s · %2$s · %3$s</string>
+    <string name="hist_tramo">tramo</string>
+    <string name="hist_tramo_valor">%1$d cm</string>
+    <string name="hist_individuos">individuos</string>
+    <string name="hist_pendiente_sync">Pendiente de sincronización</string>
+    <string name="hist_sin_foto">Sin foto</string>
+    <string name="hist_vacio_titulo">Aún no hay muestras</string>
+    <string name="hist_vacio_texto">Las muestras que guardes aparecerán aquí, aunque no haya señal.</string>
+    <string name="hist_sin_resultados_titulo">Ninguna muestra coincide</string>
+    <string name="hist_sin_resultados_texto">Prueba con otros filtros o quita alguno.</string>
+    <string name="hist_rango_titulo">Rango de fechas</string>
+    <string name="hist_cargando">Cargando muestras</string>
+
 </resources>

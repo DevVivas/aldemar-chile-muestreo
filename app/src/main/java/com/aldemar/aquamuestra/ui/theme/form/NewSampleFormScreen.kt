@@ -59,8 +59,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -74,7 +72,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -97,7 +94,6 @@ import coil.compose.AsyncImage
 import com.aldemar.aquamuestra.R
 import com.aldemar.aquamuestra.data.local.EstadoRevision
 import com.aldemar.aquamuestra.ui.theme.SessionManager
-import com.aldemar.aquamuestra.ui.theme.ThemeManager
 import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.viewmodel.AppViewModelFactory
 import com.aldemar.aquamuestra.viewmodel.ErrorCampo
@@ -124,53 +120,6 @@ private const val PAUSA_CONFIRMACION_MS = 1_200L
 
 private val LOCALE_CL: Locale = Locale.forLanguageTag("es-CL")
 
-// -------------------------------------------------------------------------------------------
-// Paleta marina SOLO para esta pantalla (no se cambia Theme.kt).
-// Azul marino #003366 y teal #008080 del README, con tonos derivados para Material 3.
-// El fondo coincide con el de AppTopBar (blanco / #121212) para que no se vea una costura.
-// -------------------------------------------------------------------------------------------
-private val EsquemaMarinoClaro = lightColorScheme(
-    primary = Color(0xFF003366), onPrimary = Color.White,
-    primaryContainer = Color(0xFFD4E3F7), onPrimaryContainer = Color(0xFF0A2440),
-    secondary = Color(0xFF00696B), onSecondary = Color.White,
-    secondaryContainer = Color(0xFFCDEBEA), onSecondaryContainer = Color(0xFF0B3A3B),
-    tertiary = Color(0xFF8A4B00), onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFFFDDBA), onTertiaryContainer = Color(0xFF2D1600),
-    error = Color(0xFFBA1A1A), onError = Color.White,
-    errorContainer = Color(0xFFFFDAD6), onErrorContainer = Color(0xFF410002),
-    background = Color.White, onBackground = Color(0xFF1A2330),
-    surface = Color.White, onSurface = Color(0xFF1A2330),
-    surfaceVariant = Color(0xFFDEE4EB), onSurfaceVariant = Color(0xFF434E5A),
-    surfaceTint = Color(0xFF003366),
-    inverseSurface = Color(0xFF2C3440), inverseOnSurface = Color(0xFFEDF1F6), inversePrimary = Color(0xFFA4C9F0),
-    outline = Color(0xFF6F7A86), outlineVariant = Color(0xFFC3CBD4),
-    surfaceBright = Color.White, surfaceDim = Color(0xFFD8DEE4),
-    surfaceContainerLowest = Color.White, surfaceContainerLow = Color(0xFFF3F6F9),
-    surfaceContainer = Color(0xFFEDF1F5), surfaceContainerHigh = Color(0xFFE7ECF1),
-    surfaceContainerHighest = Color(0xFFE1E7ED)
-)
-
-private val EsquemaMarinoOscuro = darkColorScheme(
-    primary = Color(0xFFA4C9F0), onPrimary = Color(0xFF00315A),
-    primaryContainer = Color(0xFF0D4A7A), onPrimaryContainer = Color(0xFFD4E3F7),
-    secondary = Color(0xFF80D5D3), onSecondary = Color(0xFF003738),
-    secondaryContainer = Color(0xFF0F4F50), onSecondaryContainer = Color(0xFFCDEBEA),
-    tertiary = Color(0xFFFFB869), onTertiary = Color(0xFF4A2800),
-    tertiaryContainer = Color(0xFF6A3A00), onTertiaryContainer = Color(0xFFFFDDBA),
-    error = Color(0xFFFFB4AB), onError = Color(0xFF690005),
-    errorContainer = Color(0xFF93000A), onErrorContainer = Color(0xFFFFDAD6),
-    background = Color(0xFF121212), onBackground = Color(0xFFE2E8EE),
-    surface = Color(0xFF121212), onSurface = Color(0xFFE2E8EE),
-    surfaceVariant = Color(0xFF3F4852), onSurfaceVariant = Color(0xFFBFC8D2),
-    surfaceTint = Color(0xFFA4C9F0),
-    inverseSurface = Color(0xFFE2E8EE), inverseOnSurface = Color(0xFF2C3440), inversePrimary = Color(0xFF003366),
-    outline = Color(0xFF89939D), outlineVariant = Color(0xFF3F4852),
-    surfaceBright = Color(0xFF383B40), surfaceDim = Color(0xFF121212),
-    surfaceContainerLowest = Color(0xFF0C0F12), surfaceContainerLow = Color(0xFF1A1D21),
-    surfaceContainer = Color(0xFF1E2226), surfaceContainerHigh = Color(0xFF282C31),
-    surfaceContainerHighest = Color(0xFF33373C)
-)
-
 @Composable
 fun NewSampleFormScreen(
     modifier: Modifier = Modifier,
@@ -183,18 +132,12 @@ fun NewSampleFormScreen(
     // El operador parte con el usuario de la sesión (se puede editar).
     LaunchedEffect(Unit) { viewModel.precargarOperador(SessionManager.currentUser?.name) }
 
-    MaterialTheme(
-        colorScheme = if (ThemeManager.isDarkMode) EsquemaMarinoOscuro else EsquemaMarinoClaro,
-        typography = MaterialTheme.typography,
-        shapes = MaterialTheme.shapes
-    ) {
-        NewSampleFormContent(
-            state = state,
-            viewModel = viewModel,
-            onBackClick = onBackClick,
-            modifier = modifier
-        )
-    }
+    NewSampleFormContent(
+        state = state,
+        viewModel = viewModel,
+        onBackClick = onBackClick,
+        modifier = modifier
+    )
 }
 
 @Composable

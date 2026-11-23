@@ -55,24 +55,48 @@ object ThemeManager {
         @Composable get() = if (isDarkMode) ColorDarkBorder else ColorMist
 }
 
+// Paleta marina de la app: azul marino #003366 y teal #008080 (README), con tonos derivados
+// para Material 3. El fondo coincide con ThemeManager (blanco / #121212).
 private val DarkColorScheme = darkColorScheme(
-    primary = ColorEmber,
-    background = ColorDarkBackground,
-    surface = ColorDarkSurface,
-    surfaceVariant = ColorDarkSurface,
-    onBackground = ColorDarkTextPrimary,
-    onSurface = ColorDarkTextPrimary,
-    outline = ColorDarkBorder
+    primary = Color(0xFFA4C9F0), onPrimary = Color(0xFF00315A),
+    primaryContainer = Color(0xFF0D4A7A), onPrimaryContainer = Color(0xFFD4E3F7),
+    secondary = Color(0xFF80D5D3), onSecondary = Color(0xFF003738),
+    secondaryContainer = Color(0xFF0F4F50), onSecondaryContainer = Color(0xFFCDEBEA),
+    tertiary = Color(0xFFFFB869), onTertiary = Color(0xFF4A2800),
+    tertiaryContainer = Color(0xFF6A3A00), onTertiaryContainer = Color(0xFFFFDDBA),
+    error = Color(0xFFFFB4AB), onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A), onErrorContainer = Color(0xFFFFDAD6),
+    background = Color(0xFF121212), onBackground = Color(0xFFE2E8EE),
+    surface = Color(0xFF121212), onSurface = Color(0xFFE2E8EE),
+    surfaceVariant = Color(0xFF3F4852), onSurfaceVariant = Color(0xFFBFC8D2),
+    surfaceTint = Color(0xFFA4C9F0),
+    inverseSurface = Color(0xFFE2E8EE), inverseOnSurface = Color(0xFF2C3440), inversePrimary = Color(0xFF003366),
+    outline = Color(0xFF89939D), outlineVariant = Color(0xFF3F4852),
+    surfaceBright = Color(0xFF383B40), surfaceDim = Color(0xFF121212),
+    surfaceContainerLowest = Color(0xFF0C0F12), surfaceContainerLow = Color(0xFF1A1D21),
+    surfaceContainer = Color(0xFF1E2226), surfaceContainerHigh = Color(0xFF282C31),
+    surfaceContainerHighest = Color(0xFF33373C)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = ColorEmber,
-    background = ColorPaper,
-    surface = ColorPaper,
-    surfaceVariant = ColorFog,
-    onBackground = ColorInk,
-    onSurface = ColorInk,
-    outline = ColorMist
+    primary = Color(0xFF003366), onPrimary = Color.White,
+    primaryContainer = Color(0xFFD4E3F7), onPrimaryContainer = Color(0xFF0A2440),
+    secondary = Color(0xFF00696B), onSecondary = Color.White,
+    secondaryContainer = Color(0xFFCDEBEA), onSecondaryContainer = Color(0xFF0B3A3B),
+    tertiary = Color(0xFF8A4B00), onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFFFDDBA), onTertiaryContainer = Color(0xFF2D1600),
+    error = Color(0xFFBA1A1A), onError = Color.White,
+    errorContainer = Color(0xFFFFDAD6), onErrorContainer = Color(0xFF410002),
+    background = Color.White, onBackground = Color(0xFF1A2330),
+    surface = Color.White, onSurface = Color(0xFF1A2330),
+    surfaceVariant = Color(0xFFDEE4EB), onSurfaceVariant = Color(0xFF434E5A),
+    surfaceTint = Color(0xFF003366),
+    inverseSurface = Color(0xFF2C3440), inverseOnSurface = Color(0xFFEDF1F6), inversePrimary = Color(0xFFA4C9F0),
+    outline = Color(0xFF6F7A86), outlineVariant = Color(0xFFC3CBD4),
+    surfaceBright = Color.White, surfaceDim = Color(0xFFD8DEE4),
+    surfaceContainerLowest = Color.White, surfaceContainerLow = Color(0xFFF3F6F9),
+    surfaceContainer = Color(0xFFEDF1F5), surfaceContainerHigh = Color(0xFFE7ECF1),
+    surfaceContainerHighest = Color(0xFFE1E7ED)
 )
 
 @Composable

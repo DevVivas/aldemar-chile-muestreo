@@ -23,6 +23,9 @@ class AppViewModelFactory(context: Context) : ViewModelProvider.Factory {
         modelClass.isAssignableFrom(NewSampleViewModel::class.java) ->
             NewSampleViewModel(muestraRepository) as T
 
+        modelClass.isAssignableFrom(HistorialViewModel::class.java) ->
+            HistorialViewModel(muestraRepository) as T
+
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }
 }
