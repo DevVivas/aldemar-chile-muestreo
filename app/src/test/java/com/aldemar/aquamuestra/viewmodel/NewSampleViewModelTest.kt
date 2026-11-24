@@ -43,7 +43,7 @@ class NewSampleViewModelTest {
         onConcesionChange("  ")
         onTrenChange("Tren 1 - Módulo A")
         onLineaChange("Línea 10")
-        onOperadorChange("Operario Demo")
+        fijarOperador("Operario Demo")
         onTramoCmChange("100")
         onConteoGuardado(conteoMarcas = 140, ajusteManual = 10, marcasJson = "[]")
         onObservacionesChange(" ok ")
@@ -232,16 +232,27 @@ class NewSampleViewModelTest {
     }
 
     @Test
-    fun `dado un operador escrito cuando se precarga la sesion entonces no lo reemplaza`() {
+    fun `dada una muestra nueva cuando se fija el operador entonces queda el usuario de la sesion`() {
         // Arrange
         val vm = nuevoVm()
 
-        // Act + Assert
-        vm.precargarOperador("Operario Demo")
+        // Act + Assert: toma el nombre de la sesión; sin sesión no cambia nada
+        vm.fijarOperador(" Operario Demo ")
         assertEquals("Operario Demo", vm.uiState.value.operador)
-        vm.precargarOperador("Otro")
+        vm.fijarOperador(null)
         assertEquals("Operario Demo", vm.uiState.value.operador)
-        vm.precargarOperador(null)
+    }
+
+    @Test
+    fun `dada una muestra en correccion cuando se fija el operador entonces mantiene el de la muestra`() = runTest {
+        // Arrange
+        coEvery { repo.obtenerPorId("m-1") } returns muestra(operador = "Operario Demo", estado = EstadoRevision.OBSERVADA)
+        val vm = NewSampleViewModel(repo, muestraIdEditar = "m-1")
+
+        // Act
+        vm.fijarOperador("Otro Nombre")
+
+        // Assert
         assertEquals("Operario Demo", vm.uiState.value.operador)
     }
 

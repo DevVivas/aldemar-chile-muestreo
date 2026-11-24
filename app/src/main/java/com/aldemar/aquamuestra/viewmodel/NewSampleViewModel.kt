@@ -22,7 +22,7 @@ import java.util.UUID
 class NewSampleViewModel(
     private val repository: MuestraRepository,
     /** Si viene, el formulario abre esa muestra para editarla/corregirla (mismo ID). */
-    muestraIdEditar: String? = null,
+    private val muestraIdEditar: String? = null,
     private val reloj: () -> Long = { System.currentTimeMillis() },
     generarId: () -> String = { UUID.randomUUID().toString() }
 ) : ViewModel() {
@@ -80,7 +80,6 @@ class NewSampleViewModel(
     fun onConcesionChange(valor: String) = editar { copy(concesion = valor) }
     fun onTrenChange(valor: String) = editar { copy(tren = valor) }
     fun onLineaChange(valor: String) = editar { copy(linea = valor) }
-    fun onOperadorChange(valor: String) = editar { copy(operador = valor) }
     fun onObservacionesChange(valor: String) = editar { copy(observaciones = valor) }
 
     /** Solo acepta dígitos (el teclado es numérico, pero se puede pegar texto). */
@@ -90,9 +89,13 @@ class NewSampleViewModel(
         copy(conteoMarcas = conteoMarcas, ajusteManual = ajusteManual, marcasJson = marcasJson)
     }
 
-    /** Rellena el operador con el usuario de la sesión, solo si el campo está vacío. */
-    fun precargarOperador(nombre: String?) {
-        if (!nombre.isNullOrBlank() && _uiState.value.operador.isBlank()) onOperadorChange(nombre)
+    /**
+     * El operador es el usuario de la sesión y no se puede escribir a mano.
+     * En una muestra nueva se fija con ese nombre; al corregir se mantiene el de la muestra
+     * (que es el mismo, porque un operario solo corrige las suyas).
+     */
+    fun fijarOperador(nombre: String?) {
+        if (muestraIdEditar == null && !nombre.isNullOrBlank()) editar { copy(operador = nombre.trim()) }
     }
 
     /**

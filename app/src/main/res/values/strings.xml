@@ -46,6 +46,8 @@
     <string name="muestra_fecha">Fecha</string>
     <string name="muestra_hora">Hora</string>
     <string name="muestra_operador">Operador</string>
+    <string name="muestra_operador_ayuda">Se toma de tu sesión</string>
+    <string name="muestra_operador_bloqueado">Campo bloqueado</string>
     <string name="muestra_tramo">Largo del tramo</string>
     <string name="muestra_tramo_sufijo">cm</string>
     <string name="muestra_tramo_ayuda">Largo de cuerda contado, en centímetros</string>
@@ -70,7 +72,7 @@
     <string name="muestra_error_centro">Elige el centro de cultivo</string>
     <string name="muestra_error_tren">Elige el tren</string>
     <string name="muestra_error_linea">Elige la línea</string>
-    <string name="muestra_error_operador">Escribe el nombre del operador</string>
+    <string name="muestra_error_operador">No hay usuario en la sesión. Vuelve a iniciar sesión.</string>
     <string name="muestra_error_tramo_vacio">Escribe el largo del tramo en cm</string>
     <string name="muestra_error_tramo_cero">El tramo debe ser mayor a 0 cm</string>
     <string name="muestra_error_cantidad_negativa">La cantidad no puede ser negativa</string>

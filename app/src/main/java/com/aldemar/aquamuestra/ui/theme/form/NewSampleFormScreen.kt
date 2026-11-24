@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TouchApp
@@ -136,8 +137,8 @@ fun NewSampleFormScreen(
     val viewModel: NewSampleViewModel = viewModel(factory = AppViewModelFactory(context, muestraId))
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // El operador parte con el usuario de la sesión (se puede editar).
-    LaunchedEffect(Unit) { viewModel.precargarOperador(SessionManager.currentUser?.name) }
+    // El operador es siempre el usuario de la sesión (campo de solo lectura).
+    LaunchedEffect(Unit) { viewModel.fijarOperador(SessionManager.currentUser?.name) }
 
     // Resultados de la cámara y del conteo
     LaunchedEffect(fotoNueva, conteoNuevo) {
@@ -313,18 +314,26 @@ private fun NewSampleFormContent(
                         modifier = Modifier.weight(1f)
                     )
                 }
+                // Solo lectura: se toma de la sesión para que nadie registre a nombre de otro.
                 OutlinedTextField(
                     value = state.operador,
-                    onValueChange = viewModel::onOperadorChange,
+                    onValueChange = {},
+                    readOnly = true,
                     label = { Text(stringResource(R.string.muestra_operador)) },
+                    trailingIcon = {
+                        Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.muestra_operador_bloqueado))
+                    },
                     isError = errores.operador != null,
-                    supportingText = errores.operador?.let { { Text(stringResource(R.string.muestra_error_operador)) } },
+                    supportingText = {
+                        Text(
+                            stringResource(
+                                if (errores.operador != null) R.string.muestra_error_operador
+                                else R.string.muestra_operador_ayuda
+                            )
+                        )
+                    },
                     singleLine = true,
                     enabled = !bloqueado,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
-                        imeAction = ImeAction.Next
-                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
             }

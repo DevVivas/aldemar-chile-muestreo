@@ -49,7 +49,7 @@ class NewSampleFormScreenTest {
         verMensaje("Elige el centro de cultivo")
         verMensaje("Elige el tren")
         verMensaje("Elige la línea")
-        verMensaje("Escribe el nombre del operador")
+        verMensaje("No hay usuario en la sesión. Vuelve a iniciar sesión.")
         verMensaje("Escribe el largo del tramo en cm")
         verMensaje("Toma una foto para enviar a revisión")
     }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Al arrancar:
@@ -106,22 +107,22 @@ public class DatosIniciales implements CommandLineRunner {
         LocalDateTime ahora = LocalDateTime.now().withSecond(0).withNano(0);
 
         List<Muestra> muestras = List.of(
-                muestra("a0000000-0000-4000-8000-000000000001", "Calbuco Sur", "103B", "Tren 1 - Módulo A", "Línea 10",
+                muestra("Calbuco Sur", "103B", "Tren 1 - Módulo A", "Línea 10",
                         100, ahora.minusDays(27), "Operario Demo", 180, "Primer muestreo del mes",
                         EstadoRevision.VALIDADA, null, "Supervisor Demo"),
-                muestra("a0000000-0000-4000-8000-000000000002", "Calbuco Sur", "103B", "Tren 1 - Módulo A", "Línea 10",
+                muestra("Calbuco Sur", "103B", "Tren 1 - Módulo A", "Línea 10",
                         100, ahora.minusDays(13), "Operario Demo", 205, "Crecimiento homogéneo",
                         EstadoRevision.VALIDADA, null, "Supervisor Demo"),
-                muestra("a0000000-0000-4000-8000-000000000003", "Calbuco Sur", "103B", "Tren 2 - Módulo B", "Línea 15",
+                muestra("Calbuco Sur", "103B", "Tren 2 - Módulo B", "Línea 15",
                         80, ahora.minusDays(9), "Operario Demo", 140, "Presencia de epibiontes",
                         EstadoRevision.OBSERVADA, "Revisar el conteo: parece bajo para el tramo.", "Supervisor Demo"),
-                muestra("a0000000-0000-4000-8000-000000000004", "Centro Chiloé (Sector Huito)", null, "Tren 3 - Módulo B", "Línea 12",
+                muestra("Centro Chiloé (Sector Huito)", null, "Tren 3 - Módulo B", "Línea 12",
                         120, ahora.minusDays(6), "Operario Demo", 260, "",
                         EstadoRevision.ENVIADA, null, null),
-                muestra("a0000000-0000-4000-8000-000000000005", "Centro Chiloé (Sector Huito)", null, "Tren 3 - Módulo B", "Línea 18",
+                muestra("Centro Chiloé (Sector Huito)", null, "Tren 3 - Módulo B", "Línea 18",
                         90, ahora.minusDays(3), "Operario Demo", 150, "Marea alta durante el muestreo",
                         EstadoRevision.ENVIADA, null, null),
-                muestra("a0000000-0000-4000-8000-000000000006", "Centro Chiloé (Sector Huito)", null, "Tren 4 - Módulo C", "Línea 12",
+                muestra("Centro Chiloé (Sector Huito)", null, "Tren 4 - Módulo C", "Línea 12",
                         100, ahora.minusDays(1), "Operario Demo", 95, "Falta foto",
                         EstadoRevision.BORRADOR, null, null)
         );
@@ -129,11 +130,12 @@ public class DatosIniciales implements CommandLineRunner {
         log.info("Datos iniciales: se insertaron {} muestras de ejemplo.", muestras.size());
     }
 
-    private static Muestra muestra(String id, String centro, String concesion, String tren, String linea,
+    private static Muestra muestra(String centro, String concesion, String tren, String linea,
                                    int tramoCm, LocalDateTime fechaHora, String operador, int cantidad,
                                    String observaciones, EstadoRevision estado, String comentario, String revisadoPor) {
         Muestra m = new Muestra();
-        m.setId(id);
+        // UUID aleatorio, igual que los que genera la app (no IDs fijos tipo a0000000-...).
+        m.setId(UUID.randomUUID().toString());
         m.setCentro(centro);
         m.setConcesion(concesion);
         m.setTren(tren);

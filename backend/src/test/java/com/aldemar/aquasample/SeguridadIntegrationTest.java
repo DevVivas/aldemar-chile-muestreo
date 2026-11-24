@@ -1,5 +1,6 @@
 package com.aldemar.aquasample;
 
+import com.aldemar.aquasample.model.EstadoRevision;
 import com.aldemar.aquasample.model.Muestra;
 import com.aldemar.aquasample.repository.MuestraRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -28,14 +29,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class SeguridadIntegrationTest {
 
-    // Muestra de ejemplo en estado ENVIADA (ver DatosIniciales)
-    private static final String ID_ENVIADA = "a0000000-0000-4000-8000-000000000005";
-
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private MuestraRepository muestraRepository;
+
+    /**
+     * Los IDs de DatosIniciales son UUID aleatorios: se busca la muestra de ejemplo que cumpla la condición.
+     */
+    private Muestra muestraDeEjemplo(java.util.function.Predicate<Muestra> condicion) {
+        return muestraRepository.findAll().stream().filter(condicion).findFirst().orElseThrow();
+    }
+
+    private String idEnviada() {
+        return muestraDeEjemplo(m -> m.getEstado() == EstadoRevision.ENVIADA).getId();
+    }
 
     private static String muestraJson(String id, String estado) {
         return """
@@ -90,8 +99,8 @@ class SeguridadIntegrationTest {
     @Test
     @DisplayName("OPERARIO haciendo PUT sobre una muestra ya VALIDADA → 409 y no se modifica")
     void operarioPutSobreValidada409() throws Exception {
-        // a...0001 está VALIDADA en los datos iniciales, con cantidad 180
-        String id = "a0000000-0000-4000-8000-000000000001";
+        // En los datos iniciales hay una muestra VALIDADA con cantidad 180
+        String id = muestraDeEjemplo(m -> m.getEstado() == EstadoRevision.VALIDADA && m.getCantidad() == 180).getId();
         mockMvc.perform(put("/api/muestras/" + id)
                         .with(httpBasic("op01", "test-operario"))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -109,9 +118,9 @@ class SeguridadIntegrationTest {
     @Test
     @DisplayName("PUT sin fotoUrl conserva la fotoUrl que ya tenía la muestra")
     void putSinFotoUrlConservaLaFoto() throws Exception {
-        // a...0006 es un BORRADOR de los datos iniciales; se simula que ya tiene foto en el servidor
-        String id = "a0000000-0000-4000-8000-000000000006";
-        Muestra muestra = muestraRepository.findById(id).orElseThrow();
+        // Un BORRADOR de los datos iniciales; se simula que ya tiene foto en el servidor
+        Muestra muestra = muestraDeEjemplo(m -> m.getEstado() == EstadoRevision.BORRADOR);
+        String id = muestra.getId();
         muestra.setFotoUrl("/api/muestras/" + id + "/foto");
         muestraRepository.save(muestra);
 
@@ -128,7 +137,7 @@ class SeguridadIntegrationTest {
     @Test
     @DisplayName("SUPERVISOR observando sin comentario → 400")
     void supervisorObservaSinComentario400() throws Exception {
-        mockMvc.perform(patch("/api/muestras/" + ID_ENVIADA + "/estado")
+        mockMvc.perform(patch("/api/muestras/" + idEnviada() + "/estado")
                         .with(httpBasic("su01", "test-supervisor"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -141,7 +150,7 @@ class SeguridadIntegrationTest {
     @Test
     @DisplayName("SUPERVISOR validando → 200 y queda revisadoPor")
     void supervisorValida200() throws Exception {
-        mockMvc.perform(patch("/api/muestras/" + ID_ENVIADA + "/estado")
+        mockMvc.perform(patch("/api/muestras/" + idEnviada() + "/estado")
                         .with(httpBasic("su01", "test-supervisor"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
