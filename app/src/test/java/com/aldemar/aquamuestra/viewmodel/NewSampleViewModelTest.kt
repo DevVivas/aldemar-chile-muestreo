@@ -180,6 +180,9 @@ class NewSampleViewModelTest {
         assertEquals("80", s.tramoCm)
         assertEquals(12, s.cantidad)
         assertEquals("/fotos/m-1.jpg", s.fotoPath)
+        // Modo corrección: el formulario muestra arriba lo que pidió el supervisor y quién
+        assertEquals("Repetir", s.comentarioRevision)
+        assertEquals("Supervisor Demo", s.revisadoPor)
     }
 
     @Test

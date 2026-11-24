@@ -114,9 +114,9 @@ import java.util.TimeZone
 private val LOCALE_CL: Locale = Locale.forLanguageTag("es-CL")
 
 @Composable
-fun HistorialScreen(navController: NavController) {
+fun HistorialScreen(navController: NavController, estadoInicial: EstadoRevision? = null) {
     val context = LocalContext.current
-    val viewModel: HistorialViewModel = viewModel(factory = AppViewModelFactory(context))
+    val viewModel: HistorialViewModel = viewModel(factory = AppViewModelFactory(context, estadoHistorial = estadoInicial))
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val syncViewModel: SyncViewModel = viewModel(factory = AppViewModelFactory(context))
     val sync by syncViewModel.uiState.collectAsStateWithLifecycle()

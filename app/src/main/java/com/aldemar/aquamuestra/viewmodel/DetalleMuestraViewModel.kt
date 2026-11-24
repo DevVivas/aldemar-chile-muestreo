@@ -76,7 +76,7 @@ class DetalleMuestraViewModel(
                                 densidad = densidadPorMetro(muestra.cantidad, muestra.tramoCm),
                                 evolucion = EvolucionLinea.calcular(historico, muestra.id),
                                 rol = rol,
-                                acciones = AccionesRevision.disponibles(rol, muestra.estado)
+                                acciones = AccionesRevision.disponibles(rol, muestra.estado, muestra.operador, nombreUsuario)
                             )
                         }
                 }

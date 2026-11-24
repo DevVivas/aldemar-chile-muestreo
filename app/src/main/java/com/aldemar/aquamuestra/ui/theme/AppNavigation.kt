@@ -1,6 +1,7 @@
 package com.aldemar.aquamuestra.ui.theme
 
 import androidx.compose.runtime.Composable
+import com.aldemar.aquamuestra.data.local.EstadoRevision
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -30,7 +31,11 @@ sealed class AppRoutes(val ruta: String) {
         fun editar(muestraId: String) = "new_sample?muestraId=$muestraId"
     }
     object Inicio : AppRoutes("inicio_screen")
-    object Historial : AppRoutes("historial_screen")
+    object Historial : AppRoutes("historial_screen") {
+        /** Patrón con filtro de estado opcional: "historial_screen" muestra todas. */
+        const val PATRON = "historial_screen?estado={estado}"
+        fun filtrado(estado: EstadoRevision) = "historial_screen?estado=${estado.name}"
+    }
     object Dashboard : AppRoutes("dashboard_screen") // Solo supervisor
     object SampleDetail : AppRoutes("sample_detail_screen/{sampleId}") {
         fun createRoute(sampleId: String) = "sample_detail_screen/$sampleId"
@@ -178,8 +183,19 @@ fun AppNavigation() {
         }
 
         // 4. Pantalla de Historial
-        composable(AppRoutes.Historial.ruta) {
-            HistorialScreen(navController = navController)
+        composable(
+            route = AppRoutes.Historial.PATRON,
+            arguments = listOf(
+                navArgument("estado") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val estado = backStackEntry.arguments?.getString("estado")
+                ?.let { nombre -> EstadoRevision.entries.firstOrNull { it.name == nombre } }
+            HistorialScreen(navController = navController, estadoInicial = estado)
         }
 
         // 5. Dashboard (SUPERVISOR y ANALISTA). Otro rol que llegue aquí vuelve a Inicio.

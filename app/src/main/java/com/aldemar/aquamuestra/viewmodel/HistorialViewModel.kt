@@ -31,10 +31,12 @@ data class HistorialUiState(
  */
 class HistorialViewModel(
     repository: MuestraRepository,
-    private val reloj: () -> Long = { System.currentTimeMillis() }
+    private val reloj: () -> Long = { System.currentTimeMillis() },
+    /** Filtro de estado con el que se abre (p. ej. "Por revisar" desde Inicio abre las ENVIADAS). */
+    estadoInicial: EstadoRevision? = null
 ) : ViewModel() {
 
-    private val filtros = MutableStateFlow(FiltrosHistorial())
+    private val filtros = MutableStateFlow(FiltrosHistorial(estado = estadoInicial))
 
     val uiState: StateFlow<HistorialUiState> =
         combine(repository.obtenerTodas(), filtros) { todas, f ->

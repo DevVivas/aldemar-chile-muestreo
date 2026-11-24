@@ -10,6 +10,9 @@ data class NewSampleUiState(
     val cargando: Boolean = false,
     /** Estado que tenía la muestra al abrirla para editar; null = muestra nueva. */
     val estadoOriginal: EstadoRevision? = null,
+    /** Comentario del supervisor y quién lo escribió (modo corrección de una muestra observada). */
+    val comentarioRevision: String? = null,
+    val revisadoPor: String? = null,
     val centro: String = "",
     val concesion: String = "",
     val tren: String = "",

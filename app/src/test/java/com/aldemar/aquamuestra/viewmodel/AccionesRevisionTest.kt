@@ -30,16 +30,45 @@ class AccionesRevisionTest {
             (null to EstadoRevision.ENVIADA) to emptyList<AccionRevision>()
         )
 
-        // Act + Assert
+        // Act + Assert (la muestra es del mismo usuario que tiene la sesión)
         esperado.forEach { (entrada, acciones) ->
             val (rol, estado) = entrada
-            assertEquals("rol=$rol estado=$estado", acciones, AccionesRevision.disponibles(rol, estado))
+            assertEquals("rol=$rol estado=$estado", acciones, AccionesRevision.disponibles(rol, estado, "Operario Demo", "Operario Demo"))
         }
     }
 
     @Test
+    fun `dada una muestra de otro operario cuando la abre un operario entonces no puede editarla ni corregirla`() {
+        // Arrange: muestra registrada por "Operario Norte"; sesión de "Operario Demo"
+        val otro = "Operario Norte"
+
+        // Act + Assert
+        assertTrue(AccionesRevision.disponibles(UserRole.OPERARIO, EstadoRevision.BORRADOR, otro, "Operario Demo").isEmpty())
+        assertTrue(AccionesRevision.disponibles(UserRole.OPERARIO, EstadoRevision.OBSERVADA, otro, "Operario Demo").isEmpty())
+        assertTrue(AccionesRevision.disponibles(UserRole.OPERARIO, EstadoRevision.OBSERVADA, otro, null).isEmpty())
+    }
+
+    @Test
+    fun `dado el mismo nombre con otras mayusculas o espacios cuando se compara entonces es del usuario`() {
+        assertTrue(AccionesRevision.esDelUsuario(" operario demo ", "Operario Demo"))
+        assertFalse(AccionesRevision.esDelUsuario("Operario Demo", null))
+        assertEquals(
+            listOf(AccionRevision.EDITAR),
+            AccionesRevision.disponibles(UserRole.OPERARIO, EstadoRevision.OBSERVADA, "OPERARIO DEMO", "Operario Demo")
+        )
+    }
+
+    @Test
+    fun `dada una muestra de otro operario cuando la abre un supervisor entonces igual puede revisarla`() {
+        assertEquals(
+            listOf(AccionRevision.OBSERVAR, AccionRevision.VALIDAR),
+            AccionesRevision.disponibles(UserRole.SUPERVISOR, EstadoRevision.ENVIADA, "Operario Norte", "Supervisor Demo")
+        )
+    }
+
+    @Test
     fun `dado un operario cuando la muestra esta enviada entonces no puede validar`() {
-        assertFalse(AccionRevision.VALIDAR in AccionesRevision.disponibles(UserRole.OPERARIO, EstadoRevision.ENVIADA))
+        assertFalse(AccionRevision.VALIDAR in AccionesRevision.disponibles(UserRole.OPERARIO, EstadoRevision.ENVIADA, "Operario Demo", "Operario Demo"))
     }
 
     @Test

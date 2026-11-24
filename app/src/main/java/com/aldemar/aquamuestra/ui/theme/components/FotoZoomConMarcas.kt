@@ -24,6 +24,13 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
+import androidx.compose.foundation.Image
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.geometry.isSpecified
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
+import me.saket.telephoto.zoomable.ZoomableContentLocation
+import me.saket.telephoto.zoomable.zoomable
 import java.io.File
 
 /** Colores de las marcas: ámbar con doble borde (blanco + negro) para que se vean sobre cualquier foto. */
@@ -48,6 +55,9 @@ private val RADIO_TOQUE = 24.dp
  *
  * @param onToque si no es null, la foto es editable: recibe el toque en coordenadas de la imagen (0..1)
  *   y la tolerancia normalizada para decidir si se tocó una marca existente.
+ * @param zoomConDobleToque true = el doble toque amplía (detalle). false = solo pellizco y desplazamiento,
+ *   y cada toque llega al instante: con doble toque activo, Telephoto espera ~300 ms para saber si viene
+ *   un segundo toque, y marcar se siente lento (conteo).
  */
 // transformedContentBounds está marcado como obsoleto en Telephoto 0.19 (lo reemplaza
 // coordinateSystem.contentBounds, que devuelve un SpatialRect). Sigue funcionando y es más simple de explicar.
@@ -58,7 +68,8 @@ fun FotoZoomConMarcas(
     marcas: List<Punto>,
     descripcion: String,
     modifier: Modifier = Modifier,
-    onToque: ((x: Float, y: Float, toleranciaX: Float, toleranciaY: Float) -> Unit)? = null
+    onToque: ((x: Float, y: Float, toleranciaX: Float, toleranciaY: Float) -> Unit)? = null,
+    zoomConDobleToque: Boolean = true
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -68,27 +79,48 @@ fun FotoZoomConMarcas(
     val archivo = remember(fotoPath) { File(fotoPath) }
 
     Box(modifier = modifier) {
-        ZoomableAsyncImage(
-            // La clave incluye la fecha del archivo: si se reemplaza la foto, Coil no usa la vieja de su caché.
-            model = remember(fotoPath, archivo.lastModified()) {
-                ImageRequest.Builder(context).data(archivo).build()
-            },
-            contentDescription = descripcion,
-            state = imageState,
-            onClick = onToque?.let { callback ->
-                { posicion: Offset ->
-                    val limites = zoomState.transformedContentBounds
-                    if (limites.width > 0f && limites.height > 0f) {
-                        // Pantalla → imagen: qué fracción del ancho y del alto de la foto se tocó
-                        val x = (posicion.x - limites.left) / limites.width
-                        val y = (posicion.y - limites.top) / limites.height
-                        val radio = with(density) { RADIO_TOQUE.toPx() }
-                        callback(x, y, radio / limites.width, radio / limites.height)
-                    }
+        val alTocar: ((Offset) -> Unit)? = onToque?.let { callback ->
+            { posicion: Offset ->
+                val limites = zoomState.transformedContentBounds
+                if (limites.width > 0f && limites.height > 0f) {
+                    // Pantalla → imagen: qué fracción del ancho y del alto de la foto se tocó
+                    val x = (posicion.x - limites.left) / limites.width
+                    val y = (posicion.y - limites.top) / limites.height
+                    val radio = with(density) { RADIO_TOQUE.toPx() }
+                    callback(x, y, radio / limites.width, radio / limites.height)
                 }
-            },
-            modifier = Modifier.matchParentSize()
-        )
+            }
+        }
+        // La clave incluye la fecha del archivo: si se reemplaza la foto, Coil no usa la vieja de su caché.
+        val solicitud = remember(fotoPath, archivo.lastModified()) {
+            ImageRequest.Builder(context).data(archivo).build()
+        }
+
+        if (zoomConDobleToque) {
+            ZoomableAsyncImage(
+                model = solicitud,
+                contentDescription = descripcion,
+                state = imageState,
+                onClick = alTocar,
+                modifier = Modifier.matchParentSize()
+            )
+        } else {
+            // Sin doble toque: imagen normal + Modifier.zoomable(onDoubleClick = null).
+            // Hay que decirle a Telephoto dónde queda la foto dentro del recuadro (ContentScale.Fit).
+            val pintor = rememberAsyncImagePainter(solicitud)
+            val tamano = pintor.intrinsicSize
+            LaunchedEffect(tamano) {
+                if (tamano.isSpecified) zoomState.setContentLocation(ZoomableContentLocation.scaledToFitAndCenterAligned(tamano))
+            }
+            Image(
+                painter = pintor,
+                contentDescription = descripcion,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .matchParentSize()
+                    .zoomable(state = zoomState, onClick = alTocar, onDoubleClick = null)
+            )
+        }
 
         // Capa de marcas: solo dibuja, no recibe toques (los toques los maneja Telephoto).
         Canvas(modifier = Modifier.matchParentSize()) {

@@ -139,6 +139,8 @@ fun ConteoScreen(
                     marcas = state.conteo.marcas,
                     descripcion = stringResource(R.string.conteo_foto_descripcion, state.conteo.conteoMarcas),
                     onToque = viewModel::tocar,
+                    // Cada toque marca al instante: zoom solo con pellizco (el detalle sí usa doble toque)
+                    zoomConDobleToque = false,
                     modifier = Modifier.fillMaxSize()
                 )
                 // Ayuda: se ve hasta la primera marca

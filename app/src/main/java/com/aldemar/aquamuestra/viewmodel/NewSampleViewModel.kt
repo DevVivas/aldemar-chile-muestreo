@@ -54,6 +54,8 @@ class NewSampleViewModel(
                     s.copy(
                         cargando = false,
                         estadoOriginal = m.estado,
+                        comentarioRevision = m.comentarioRevision,
+                        revisadoPor = m.revisadoPor,
                         centro = m.centro,
                         concesion = m.concesion.orEmpty(),
                         tren = m.tren,

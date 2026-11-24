@@ -60,6 +60,16 @@ class DetalleMuestraViewModelTest {
     }
 
     @Test
+    fun `dada una muestra observada cuando la abre su operario entonces puede corregirla y otro operario no`() = runTest {
+        // Arrange: la muestra la registró "Operario Demo"
+        val observada = muestra(estado = EstadoRevision.OBSERVADA, operador = "Operario Demo")
+
+        // Act + Assert
+        assertEquals(listOf(AccionRevision.EDITAR), crear(observada, UserRole.OPERARIO, nombre = "Operario Demo").uiState.value.acciones)
+        assertTrue(crear(observada, UserRole.OPERARIO, nombre = "Operario Norte").uiState.value.acciones.isEmpty())
+    }
+
+    @Test
     fun `dado un supervisor cuando valida entonces llama al repositorio y avisa AccionOk`() = runTest {
         // Arrange
         val vm = crear(muestra(estado = EstadoRevision.ENVIADA), UserRole.SUPERVISOR)

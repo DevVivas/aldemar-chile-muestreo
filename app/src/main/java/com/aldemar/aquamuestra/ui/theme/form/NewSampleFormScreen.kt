@@ -1,5 +1,6 @@
 package com.aldemar.aquamuestra.ui.theme.form
 
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -240,6 +241,13 @@ private fun NewSampleFormContent(
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
             if (state.cargando) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+
+            // Modo corrección: lo primero que se ve es qué pidió el supervisor y quién lo pidió
+            val comentario = state.comentarioRevision
+            if (state.estadoOriginal == EstadoRevision.OBSERVADA && !comentario.isNullOrBlank()) {
+                ComentarioSupervisor(comentario = comentario, autor = state.revisadoPor)
+            }
+
             FichaId(id = state.id)
 
             // ---------------------------------------------------------------- Ubicación
@@ -417,6 +425,37 @@ private fun NewSampleFormContent(
 // ===========================================================================================
 
 /** Ficha con el ID de la muestra: el único bloque destacado de la pantalla. */
+/** Bloque destacado con la observación del supervisor (mismo estilo que en el detalle). */
+@Composable
+private fun ComentarioSupervisor(comentario: String, autor: String?) {
+    Surface(
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Icon(Icons.Filled.Flag, contentDescription = null, modifier = Modifier.size(22.dp))
+            Spacer(Modifier.width(12.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    stringResource(R.string.muestra_correccion_titulo),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.semantics { heading() }
+                )
+                Text(comentario, style = MaterialTheme.typography.bodyLarge)
+                if (!autor.isNullOrBlank()) {
+                    Text(
+                        stringResource(R.string.muestra_correccion_por, autor),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun FichaId(id: String) {
     Surface(

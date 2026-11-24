@@ -24,7 +24,11 @@ object AccionesRevision {
 
     const val MAX_COMENTARIO = 300
 
-    fun disponibles(rol: UserRole?, estado: EstadoRevision): List<AccionRevision> = when {
+    /**
+     * @param operador quien registró la muestra.
+     * @param usuario nombre de quien tiene la sesión abierta.
+     */
+    fun disponibles(rol: UserRole?, estado: EstadoRevision, operador: String, usuario: String?): List<AccionRevision> = when {
         // Una muestra validada queda cerrada: solo lectura para todos.
         estado == EstadoRevision.VALIDADA -> emptyList()
 
@@ -34,12 +38,18 @@ object AccionesRevision {
         rol == UserRole.SUPERVISOR && estado == EstadoRevision.ENVIADA ->
             listOf(AccionRevision.OBSERVAR, AccionRevision.VALIDAR)
 
+        // El operario solo edita o corrige SUS muestras (las de otro operario las ve, pero no las toca).
         rol == UserRole.OPERARIO &&
-            (estado == EstadoRevision.BORRADOR || estado == EstadoRevision.OBSERVADA) ->
+            (estado == EstadoRevision.BORRADOR || estado == EstadoRevision.OBSERVADA) &&
+            esDelUsuario(operador, usuario) ->
             listOf(AccionRevision.EDITAR)
 
         else -> emptyList()
     }
+
+    /** La muestra es de quien tiene la sesión (mismo nombre, sin importar mayúsculas ni espacios). */
+    fun esDelUsuario(operador: String, usuario: String?): Boolean =
+        usuario != null && operador.trim().equals(usuario.trim(), ignoreCase = true)
 
     /** Observar exige un comentario con texto (y no más largo de lo permitido). */
     fun comentarioValido(comentario: String): Boolean =

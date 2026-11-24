@@ -113,6 +113,7 @@ fun SampleDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var mostrarObservar by rememberSaveable { mutableStateOf(false) }
+    var mostrarValidar by rememberSaveable { mutableStateOf(false) }
 
     val msgValidada = stringResource(R.string.det_ok_validada)
     val msgObservada = stringResource(R.string.det_ok_observada)
@@ -142,7 +143,8 @@ fun SampleDetailScreen(
                         acciones = state.acciones,
                         estado = muestra.estado,
                         habilitado = !state.procesando,
-                        onValidar = viewModel::validar,
+                        // Validar no se puede deshacer: se pide confirmación antes
+                        onValidar = { mostrarValidar = true },
                         onObservar = { mostrarObservar = true },
                         onEditar = { navController.navigate(AppRoutes.NewSample.editar(muestra.id)) }
                     )
@@ -170,6 +172,18 @@ fun SampleDetailScreen(
                 else -> ContenidoDetalle(muestra = muestra, state = state)
             }
         }
+    }
+
+    val muestraValidar = state.muestra
+    if (mostrarValidar && muestraValidar != null) {
+        DialogoValidar(
+            idCorto = muestraValidar.id.take(8).uppercase(),
+            onConfirmar = {
+                viewModel.validar()
+                mostrarValidar = false
+            },
+            onCancelar = { mostrarValidar = false }
+        )
     }
 
     if (mostrarObservar) {
@@ -616,6 +630,27 @@ private fun BarraAcciones(
 }
 
 /** Diálogo para observar: el comentario es obligatorio y el error se explica bajo el campo. */
+/** Confirmación de validar: la muestra queda en solo lectura (no hay "deshacer"). */
+@Composable
+private fun DialogoValidar(idCorto: String, onConfirmar: () -> Unit, onCancelar: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        icon = { Icon(Icons.Filled.CheckCircle, contentDescription = null) },
+        title = { Text(stringResource(R.string.det_validar_dialogo_titulo, idCorto)) },
+        text = { Text(stringResource(R.string.det_validar_dialogo_texto)) },
+        confirmButton = {
+            TextButton(onClick = onConfirmar, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.det_validar_confirmar))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.muestra_cancelar))
+            }
+        }
+    )
+}
+
 @Composable
 private fun DialogoObservar(onConfirmar: (String) -> Unit, onCancelar: () -> Unit) {
     var comentario by rememberSaveable { mutableStateOf("") }

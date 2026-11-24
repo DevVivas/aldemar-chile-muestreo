@@ -4,13 +4,16 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.aldemar.aquamuestra.data.local.AppDatabase
+import com.aldemar.aquamuestra.data.local.EstadoRevision
 import com.aldemar.aquamuestra.data.remote.RetrofitClient
 import com.aldemar.aquamuestra.data.remote.marine.CacheMarinoDataStore
 import com.aldemar.aquamuestra.data.remote.marine.MarineClient
 import com.aldemar.aquamuestra.data.remote.marine.MarineRepository
 import com.aldemar.aquamuestra.data.repository.AuthRepository
 import com.aldemar.aquamuestra.data.repository.MuestraRepository
+import com.aldemar.aquamuestra.data.sync.CompresorFoto
 import com.aldemar.aquamuestra.data.sync.ConectividadObserver
+import com.aldemar.aquamuestra.data.sync.SincronizadorMuestras
 import com.aldemar.aquamuestra.data.sync.SyncScheduler
 import com.aldemar.aquamuestra.ui.theme.SessionManager
 
@@ -22,7 +25,9 @@ import com.aldemar.aquamuestra.ui.theme.SessionManager
  */
 class AppViewModelFactory(
     context: Context,
-    private val muestraId: String? = null
+    private val muestraId: String? = null,
+    /** Filtro de estado inicial del historial (opcional). */
+    private val estadoHistorial: EstadoRevision? = null
 ) : ViewModelProvider.Factory {
 
     private val appContext = context.applicationContext
@@ -43,7 +48,7 @@ class AppViewModelFactory(
             NewSampleViewModel(muestraRepository, muestraIdEditar = muestraId) as T
 
         modelClass.isAssignableFrom(HistorialViewModel::class.java) ->
-            HistorialViewModel(muestraRepository) as T
+            HistorialViewModel(muestraRepository, estadoInicial = estadoHistorial) as T
 
         modelClass.isAssignableFrom(DetalleMuestraViewModel::class.java) ->
             DetalleMuestraViewModel(
@@ -70,6 +75,23 @@ class AppViewModelFactory(
                 hayInternet = ConectividadObserver(appContext).hayInternet,
                 estadoSync = syncScheduler.estado(),
                 sincronizador = syncScheduler
+            ) as T
+
+        modelClass.isAssignableFrom(InicioViewModel::class.java) ->
+            InicioViewModel(
+                repository = muestraRepository,
+                rol = SessionManager.currentUser?.role,
+                nombreUsuario = SessionManager.currentUser?.name,
+                hayInternet = ConectividadObserver(appContext).hayInternet,
+                // "Sincronizar y salir" espera el resultado: corre la misma lógica que SyncWorker
+                // (el Mutex de SincronizadorMuestras evita chocar con un worker que ya esté corriendo).
+                sincronizar = {
+                    SincronizadorMuestras(
+                        api = RetrofitClient.api,
+                        repository = MuestraRepository(AppDatabase.getInstance(appContext).muestraDao()),
+                        comprimirFoto = { original -> CompresorFoto.comprimir(original, appContext.cacheDir) }
+                    ).ejecutar()
+                }
             ) as T
 
         modelClass.isAssignableFrom(DashboardViewModel::class.java) ->

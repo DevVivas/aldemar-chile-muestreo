@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
+/** Solo guarda la preferencia de modo oscuro. Los colores salen de MaterialTheme.colorScheme. */
 object ThemeManager {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var store: PreferenciasStore? = null
@@ -50,26 +51,10 @@ object ThemeManager {
             }
         }
     }
-
-    // Getters dinámicos para utilizar en cualquier composable de la app
-    val backgroundColor: Color
-        @Composable get() = if (isDarkMode) ColorDarkBackground else ColorPaper
-
-    val surfaceColor: Color
-        @Composable get() = if (isDarkMode) ColorDarkSurface else ColorFog
-
-    val textColor: Color
-        @Composable get() = if (isDarkMode) ColorDarkTextPrimary else ColorInk
-
-    val secondaryTextColor: Color
-        @Composable get() = if (isDarkMode) ColorDarkTextSecondary else ColorGraphite
-
-    val borderColor: Color
-        @Composable get() = if (isDarkMode) ColorDarkBorder else ColorMist
 }
 
 // Paleta marina de la app: azul marino #003366 y teal #008080 (README), con tonos derivados
-// para Material 3. El fondo coincide con ThemeManager (blanco / #121212).
+// para Material 3. Fondo blanco / #121212.
 private val DarkColorScheme = darkColorScheme(
     primary = Color(0xFFA4C9F0), onPrimary = Color(0xFF00315A),
     primaryContainer = Color(0xFF0D4A7A), onPrimaryContainer = Color(0xFFD4E3F7),

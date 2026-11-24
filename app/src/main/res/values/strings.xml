@@ -1,176 +1,33 @@
 <resources>
     <string name="app_name">AquaMuestra</string>
 
-    <!--  Login  -->
-    <string name="login_keep_session_title">Mantener sesión activa</string>
-    <string name="login_keep_session_desc">Guardar credenciales en este dispositivo</string>
-    <string name="cd_cambiar_rol">Cambiar rol</string>
-
-    <!--  Compartidos (Historial y Detalle)  -->
-    <string name="lote_label">Lote #%1$s</string>
-
-    <!-- Textos para el Login -->
-    <string name="label_user">Usuario / Correo</string>
-    <string name="label_password">Contraseña</string>
-    <string name="btn_login">Iniciar Sesión</string>
-    <string name="keep_session_title">Mantener sesión iniciada</string>
-    <string name="keep_session_desc">No pedir credenciales en este dispositivo</string>
-
     <!-- Navegación -->
     <string name="nav_inicio">Inicio</string>
     <string name="nav_historial">Historial</string>
 
     <!-- Content Descriptions -->
     <string name="cd_volver">Volver</string>
-    <string name="cd_perfil">Perfil</string>
     <string name="cd_opciones">Opciones</string>
-    <string name="cd_disminuir">Disminuir</string>
-    <string name="cd_aumentar">Aumentar</string>
 
     <!-- InicioScreen -->
-    <string name="inicio_titulo">Bienvenido</string>
-    <string name="inicio_subtitulo">¿Qué deseas hacer hoy?</string>
-    <string name="inicio_card_nueva_titulo">Nueva Muestra</string>
-    <string name="inicio_card_nueva_sub">Registrar datos en terreno</string>
-    <string name="inicio_card_historial_titulo">Ver Historial</string>
-    <string name="inicio_card_historial_sub">Revisar y exportar registros</string>
-    <string name="menu_modo_claro">Modo Claro</string>
-    <string name="menu_modo_oscuro">Modo Oscuro</string>
-    <string name="menu_sincronizar">Sincronizar</string>
-    <string name="menu_cerrar_sesion">Cerrar Sesión</string>
+    <string name="inicio_titulo">Inicio</string>
+    <string name="menu_modo_oscuro">Modo oscuro</string>
+    <string name="menu_sincronizar">Sincronizar ahora</string>
+    <string name="menu_cerrar_sesion">Cerrar sesión</string>
 
     <!-- HistorialScreen -->
-    <string name="historial_titulo">Historial de Muestras</string>
-    <string name="fab_agregar_desc">Agregar nueva muestra</string>
-    <string name="historial_estado_sincronizado">Sincronizado</string>
-    <string name="historial_estado_pendiente">Pendiente</string>
+    <string name="historial_titulo">Historial de muestras</string>
 
     <!-- NewSampleFormScreen -->
     <string name="detail_title">Detalle de muestra</string>
-    <string name="detail_density_optimal">Óptima</string>
-    <string name="detail_photo_counter">Foto %1$d de %2$d</string>
-    <string name="detail_comments_counter">%1$d / %2$d</string>
-    <string name="form_title">Nueva Muestra</string>
-    <string name="form_draft_saved">Borrador guardado localmente</string>
-    <string name="form_location_info">Información de Ubicación</string>
-    <string name="form_gps_fixed">GPS FIJADO</string>
-    <string name="form_datetime_label">Fecha y Hora de Muestreo (Automático)</string>
-    <string name="form_center_label">Centro de Cultivo</string>
-    <string name="form_tren_label">Tren / Módulo de Concesión</string>
-    <string name="form_line_label">Línea de Cultivo</string>
-    <string name="form_species_label">Especie</string>
-    <string name="form_biometrics_title">Medición y Biometría</string>
-    <string name="form_sernapesca_norm">NORMA SERNAPESCA</string>
-    <string name="form_length_label">Longitud del Tramo Medido</string>
-    <string name="form_manual_count_title">Conteo Manual de Individuos</string>
-    <string name="form_reset">Reiniciar</string>
-    <string name="form_alive_units">EJEMPLARES VIVOS: %1$d ind</string>
-    <string name="form_observations_label">Observaciones</string>
-    <string name="form_evidence_title">Evidencia Fotográfica</string>
-    <string name="form_photo_counter">%1$d de 5 Fotos</string>
-    <string name="form_geostamp">Geostampa</string>
-    <string name="form_capture_photo">Capturar Fotografía Adicional</string>
-    <string name="form_save_draft">Guardar Borrador</string>
-    <string name="form_finish_reg">Finalizar Registro</string>
 
-    <!-- Detalle Revisión -->
-    <string name="detail_titler">Detalle Revisión</string>
-    <string name="detail_status_label">ESTADO ACTUAL</string>
-    <string name="detail_status_pending">Pendiente de Revisión</string>
-    <string name="detail_batch">Lote #089</string>
-    <string name="detail_biometric_sheet">Ficha Biométrica</string>
-    <string name="detail_sernapesca_cert">Certificado Sernapesca</string>
-    <string name="detail_center_label">CENTRO</string>
-    <string name="detail_concession_label">CONCESIÓN / TREN</string>
-    <string name="detail_line_label">LÍNEA DE CULTIVO</string>
-    <string name="detail_species_label">ESPECIE</string>
-    <string name="detail_datetime_label">FECHA Y HORA</string>
-    <string name="detail_operator_label">OPERADOR</string>
-    <string name="detail_rope_section_label">TRAMO DE CUERDA</string>
-    <string name="detail_effective_count_label">CONTEO EFECTIVO</string>
-    <string name="detail_density_estimated">DENSIDAD ESTIMADA</string>
-    <string name="detail_density_value">300 ind / metro lineal</string>
-    <string name="detail_field_evidence">Evidencia de Terreno</string>
-    <string name="detail_approval_panel">Panel de Aprobación Técnica</string>
-    <string name="detail_supervisor_role">SUPERVISOR</string>
-    <string name="detail_quality_resolution">Resolución de calidad y biomasa</string>
-    <string name="detail_validate">Validar</string>
-    <string name="detail_observe">Observar</string>
-    <string name="detail_correct">Corregir</string>
-    <string name="detail_supervisor_comments">Comentarios del Supervisor *</string>
-    <string name="detail_legal_disclaimer">Este dictamen se adjuntará permanentemente a la bitácora electrónica del centro.</string>
-    <string name="detail_update_status_btn">Actualizar Estado de Revisión</string>
-
-
-    <!-- Muestreo y Operador -->
-    <string name="form_operator_label">Operador / Técnico *</string>
-    <string name="form_concession_label">Concesión</string>
-
-
-    <!-- Diálogo de Vista Previa -->
-    <string name="dialog_preview_title">Vista Previa</string>
-    <string name="dialog_close">Cerrar</string>
-    <string name="dialog_delete">Eliminar</string>
-
-    <!-- Mensajes de Notificación / Snackbar -->
-    <string name="msg_photo_success">Fotografía capturada con éxito (%1$d/5)</string>
-    <string name="msg_photo_permission_denied">Permiso de cámara denegado</string>
-    <string name="msg_max_photos_reached">Máximo 5 fotos alcanzado</string>
-    <string name="msg_draft_saved_success">¡Borrador guardado localmente con éxito!</string>
-    <string name="msg_finish_reg_success">¡Registro finalizado y sincronizado en búfer offline!</string>
-    <string name="msg_photo_deleted">Fotografía eliminada</string>
-    <string name="msg_required_fields_error">Debes completar todos los datos obligatorios.</string>
-
-    <!--  Formulario de nueva muestra  -->
-    <string name="form_required">Requerido</string>
-    <string name="form_photo_required">Fotografía requerida (*)</string>
-    <string name="form_draft_time_initial">hace 2 min</string>
-    <string name="form_draft_time_now">hace un momento</string>
-
-
-    <string name="label_email">Correo electrónico</string>
-    <string name="login_error_invalid">Correo o contraseña incorrectos</string>
     <!--  Roles  -->
     <string name="role_supervisor">Supervisor de Calidad</string>
     <string name="role_operario">Operador de Muestreo</string>
     <!--  BottomNavBar / Inicio (solo supervisor)  -->
     <string name="nav_dashboard">Dashboard</string>
-    <string name="inicio_card_dashboard_titulo">Dashboard</string>
-    <string name="inicio_card_dashboard_sub">Resumen operativo del centro</string>
     <!--  Dashboard  -->
     <string name="dashboard_titulo">Dashboard</string>
-    <string name="dashboard_centro">Centro: %1$s</string>
-    <string name="dashboard_role_line">%1$s • Turno A</string>
-    <string name="dashboard_resumen">Resumen Operativo</string>
-    <string name="dashboard_hoy">Hoy, %1$s</string>
-    <string name="dashboard_muestras_hoy">MUESTRAS HOY</string>
-    <string name="dashboard_lotes_completados">Lotes completados</string>
-    <string name="dashboard_vs_ayer" formatted="false">+20% vs ayer (10)</string>
-    <string name="dashboard_revisiones">REVISIONES</string>
-    <string name="dashboard_validadas">Validadas</string>
-    <string name="dashboard_pendientes">Pendientes</string>
-    <string name="dashboard_supervision">Supervisión en pontón</string>
-    <string name="dashboard_ultima_muestra">Última Muestra Registrada</string>
-    <string name="dashboard_reciente">Reciente</string>
-    <string name="dashboard_ultima_linea">Línea A-04</string>
-    <string name="dashboard_ultima_detalle">Hace 25 min • Profundidad 6.5 m</string>
-    <string name="dashboard_ultima_medida">150 ind / 0.5 m</string>
-    <string name="dashboard_ultima_calibre">Calibre: 42 mm</string>
-    <string name="dashboard_ver_historial">Ver Historial</string>
-    <string name="dashboard_registros">Registros históricos</string>
-    <string name="dashboard_total">%1$d total</string>
-    <string name="dashboard_sincronizacion">Sincronización</string>
-    <string name="dashboard_sync_btn">Sincronizar ahora</string>
-    <string name="dashboard_sync_done">Datos sincronizados (simulación)</string>
-    <string name="dashboard_telemetria">Telemetría de Centro</string>
-    <string name="dashboard_sonda">Sonda Buoy-02</string>
-    <string name="dashboard_temp_agua">Temp Agua</string>
-    <string name="dashboard_salinidad">Salinidad</string>
-    <string name="dashboard_oxigeno">Oxígeno</string>
-    <string name="dashboard_temp_valor">11.4°C</string>
-    <string name="dashboard_sal_valor">32.8 PSU</string>
-    <string name="dashboard_oxi_valor">8.6 mg/L</string>
-    <string name="dashboard_datos_ejemplo">Datos de ejemplo</string>
 
     <!-- Formulario "Nueva muestra" (Tarea 2) -->
     <string name="muestra_titulo">Nueva muestra</string>
@@ -193,7 +50,6 @@
     <string name="muestra_tramo_sufijo">cm</string>
     <string name="muestra_tramo_ayuda">Largo de cuerda contado, en centímetros</string>
     <string name="muestra_cantidad">Cantidad de individuos</string>
-    <string name="muestra_cantidad_ayuda">Escríbela o ajústala con los botones</string>
     <string name="muestra_observaciones_hint">Estado del cultivo, epibiontes, clima…</string>
     <string name="muestra_contador_caracteres">%1$d/%2$d</string>
     <string name="muestra_foto_tomar">Tomar foto</string>
@@ -209,8 +65,6 @@
     <string name="muestra_elegir_fecha">Elegir fecha</string>
     <string name="muestra_elegir_hora">Elegir hora</string>
     <string name="muestra_hora_titulo">Hora de la muestra</string>
-    <string name="muestra_restar">Restar %1$d</string>
-    <string name="muestra_sumar">Sumar %1$d</string>
 
     <!-- Errores del formulario -->
     <string name="muestra_error_centro">Elige el centro de cultivo</string>
@@ -219,7 +73,6 @@
     <string name="muestra_error_operador">Escribe el nombre del operador</string>
     <string name="muestra_error_tramo_vacio">Escribe el largo del tramo en cm</string>
     <string name="muestra_error_tramo_cero">El tramo debe ser mayor a 0 cm</string>
-    <string name="muestra_error_cantidad_vacia">Escribe la cantidad (puede ser 0)</string>
     <string name="muestra_error_cantidad_negativa">La cantidad no puede ser negativa</string>
     <string name="muestra_error_observaciones">Máximo %1$d caracteres</string>
     <string name="muestra_error_foto">Toma una foto para enviar a revisión</string>
@@ -229,7 +82,6 @@
     <string name="muestra_ok_enviada">Muestra enviada a revisión. Se sincronizará al tener conexión.</string>
     <string name="muestra_aviso_errores">Faltan datos. Revisa los campos marcados.</string>
     <string name="muestra_aviso_error_guardar">No se pudo guardar. Inténtalo de nuevo.</string>
-    <string name="muestra_aviso_permiso_camara">Para tomar la foto, permite el uso de la cámara.</string>
 
     <!-- Historial (Tarea 3) -->
     <string name="hist_filtro_estado">Estado</string>
@@ -423,7 +275,6 @@
     <string name="mar_error_cache">No pudimos actualizar. Último dato disponible: %1$s</string>
     <string name="mar_reintentar">Reintentar</string>
 
-
     <!-- Dashboard con datos reales (Tarea 11) -->
     <string name="dash_hola">Hola, %1$s</string>
     <string name="dash_periodo_7">7 días</string>
@@ -463,4 +314,57 @@
     <string name="pdf_error">No se pudo guardar el PDF.</string>
     <string name="pdf_sin_visor">No hay una app para abrir PDF en este teléfono.</string>
     <string name="pdf_generado_por">%1$s (%2$s)</string>
+
+    <!-- Inicio por rol (Tarea 12) -->
+    <string name="inicio_hola">Hola, %1$s</string>
+    <string name="inicio_rol_operario">Operario</string>
+    <string name="inicio_rol_supervisor">Supervisor</string>
+    <string name="inicio_rol_analista">Analista</string>
+    <string name="inicio_cd_rol">Rol: %1$s</string>
+    <string name="inicio_acciones">¿Qué quieres hacer?</string>
+    <string name="inicio_nueva">Nueva muestra</string>
+    <string name="inicio_nueva_sub">Registra un muestreo en terreno</string>
+    <string name="inicio_mis_muestras">Mis muestras</string>
+    <string name="inicio_mis_muestras_sub">Revisa, corrige o continúa tus borradores</string>
+    <string name="inicio_por_revisar">Por revisar (%1$d)</string>
+    <plurals name="inicio_por_revisar_sub">
+        <item quantity="one">%1$d muestra enviada espera tu revisión</item>
+        <item quantity="other">%1$d muestras enviadas esperan tu revisión</item>
+    </plurals>
+    <string name="inicio_por_revisar_cero">No hay muestras esperando revisión</string>
+    <string name="inicio_dashboard">Dashboard</string>
+    <string name="inicio_dashboard_sub">Indicadores y gráficos por centro y línea</string>
+    <string name="inicio_historial">Historial</string>
+    <string name="inicio_historial_sub">Busca y filtra todas las muestras</string>
+    <string name="inicio_exportar">Exportar reporte</string>
+    <string name="inicio_exportar_sub">PDF de muestras validadas, desde el dashboard</string>
+    <string name="inicio_ultimas">Últimas muestras</string>
+    <string name="inicio_ver_todas">Ver todas</string>
+    <string name="inicio_sin_muestras">Aún no hay muestras. Las nuevas aparecerán aquí.</string>
+    <string name="inicio_individuos">%1$s ind.</string>
+
+    <!-- Cerrar sesión con pendientes -->
+    <plurals name="cierre_titulo">
+        <item quantity="one">Tienes %1$d muestra sin sincronizar</item>
+        <item quantity="other">Tienes %1$d muestras sin sincronizar</item>
+    </plurals>
+    <string name="cierre_texto">Si sales ahora, quedan guardadas en este teléfono y se subirán la próxima vez que inicies sesión.</string>
+    <string name="cierre_sin_conexion">No hay conexión. Conéctate a internet para sincronizar o sal igual.</string>
+    <plurals name="cierre_quedan">
+        <item quantity="one">No se pudo subir %1$d muestra. Revisa la conexión e inténtalo otra vez.</item>
+        <item quantity="other">No se pudieron subir %1$d muestras. Revisa la conexión e inténtalo otra vez.</item>
+    </plurals>
+    <string name="cierre_sincronizar_salir">Sincronizar y salir</string>
+    <string name="cierre_sincronizando">Sincronizando…</string>
+    <string name="cierre_salir_igual">Salir igual</string>
+    <string name="cierre_cancelar">Cancelar</string>
+
+    <!-- Confirmar validación -->
+    <string name="det_validar_dialogo_titulo">¿Validar la muestra %1$s?</string>
+    <string name="det_validar_dialogo_texto">Quedará en solo lectura: nadie podrá editarla ni observarla después.</string>
+    <string name="det_validar_confirmar">Validar muestra</string>
+
+    <!-- Formulario en modo corrección -->
+    <string name="muestra_correccion_titulo">Corrige lo que pidió el supervisor</string>
+    <string name="muestra_correccion_por">Observación de %1$s</string>
 </resources>

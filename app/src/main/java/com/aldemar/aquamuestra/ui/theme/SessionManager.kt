@@ -52,7 +52,6 @@ object SessionManager {
     val currentUser: AppUser? get() = _currentUser
     val isLoggedIn: Boolean get() = currentUser != null
     val rol: UserRole? get() = currentUser?.role
-    val isSupervisor: Boolean get() = rol == UserRole.SUPERVISOR
 
     // ---- Permisos de navegación por rol
     /** Nueva muestra: solo OPERARIO. */

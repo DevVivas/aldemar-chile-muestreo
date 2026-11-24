@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -20,10 +21,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.aldemar.aquamuestra.R
 import com.aldemar.aquamuestra.ui.theme.AppRoutes
-import com.aldemar.aquamuestra.ui.theme.ColorDarkBorder
-import com.aldemar.aquamuestra.ui.theme.ColorFog
 import com.aldemar.aquamuestra.ui.theme.SessionManager
-import com.aldemar.aquamuestra.ui.theme.ThemeManager
 
 /**
  * Navega a una pestaña de la barra inferior.
@@ -44,22 +42,20 @@ fun BottomNavBar(navController: NavController) {
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val barColor = ThemeManager.backgroundColor
-    val lineColor = ThemeManager.borderColor
-    val selectedColor = ThemeManager.textColor
-    val unselectedColor = ThemeManager.secondaryTextColor
-    val indicatorColor = if (ThemeManager.isDarkMode) ColorDarkBorder else ColorFog
+    val colores = MaterialTheme.colorScheme
+    val lineColor = colores.outlineVariant
 
+    // Indicador con el color secundario de la marca; texto e icono con contraste AA en ambos modos
     val itemColors = NavigationBarItemDefaults.colors(
-        selectedIconColor = selectedColor,
-        selectedTextColor = selectedColor,
-        indicatorColor = indicatorColor,
-        unselectedIconColor = unselectedColor,
-        unselectedTextColor = unselectedColor
+        selectedIconColor = colores.onSecondaryContainer,
+        selectedTextColor = colores.onSurface,
+        indicatorColor = colores.secondaryContainer,
+        unselectedIconColor = colores.onSurfaceVariant,
+        unselectedTextColor = colores.onSurfaceVariant
     )
 
     NavigationBar(
-        containerColor = barColor,
+        containerColor = colores.surface,
         tonalElevation = 0.dp,
         modifier = Modifier.drawBehind {
             drawLine(
@@ -89,10 +85,10 @@ fun BottomNavBar(navController: NavController) {
             icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
             label = { Text(stringResource(R.string.nav_historial), fontWeight = FontWeight.Medium) },
             // Historial también se marca como activo mientras ves el detalle de una muestra
-            selected = currentRoute == AppRoutes.Historial.ruta ||
+            selected = currentRoute == AppRoutes.Historial.PATRON ||
                     currentRoute == AppRoutes.SampleDetail.ruta,
             onClick = {
-                if (currentRoute != AppRoutes.Historial.ruta) {
+                if (currentRoute != AppRoutes.Historial.PATRON) {
                     navController.navigateToTab(AppRoutes.Historial.ruta)
                 }
             },
