@@ -20,6 +20,32 @@ val marineBaseUrl: String = (project.findProperty("MARINE_BASE_URL") as String?)
     ?: localProperties.getProperty("MARINE_BASE_URL")
     ?: "https://marine-api.open-meteo.com/"
 
+// ---------------------------------------------------------------- Firma de la APK release
+// Los datos del keystore NUNCA van en este archivo ni en git. Se leen de local.properties
+// (que está en .gitignore) o, si ahí no están, de variables de entorno con el mismo nombre
+// (útil en un servidor de CI). Un valor vacío cuenta como "no está".
+fun datoFirma(clave: String): String? =
+    localProperties.getProperty(clave)?.takeIf { it.isNotBlank() }
+        ?: System.getenv(clave)?.takeIf { it.isNotBlank() }
+
+val keystorePath = datoFirma("KEYSTORE_PATH")
+val keystorePassword = datoFirma("KEYSTORE_PASSWORD")
+val keyAliasFirma = datoFirma("KEY_ALIAS")
+val keyPasswordFirma = datoFirma("KEY_PASSWORD")
+
+/** Qué falta para poder firmar (lista vacía = todo listo). */
+val faltanParaFirmar: List<String> = buildList {
+    if (keystorePath == null) add("KEYSTORE_PATH")
+    else if (!file(keystorePath).exists()) add("KEYSTORE_PATH (no existe el archivo $keystorePath)")
+    if (keystorePassword == null) add("KEYSTORE_PASSWORD")
+    if (keyAliasFirma == null) add("KEY_ALIAS")
+    if (keyPasswordFirma == null) add("KEY_PASSWORD")
+}
+
+// Versión de la app (una sola fuente: se usa en defaultConfig y en el nombre del archivo).
+val appVersionCode = 1
+val appVersionName = "1.0.0"
+
 android {
     namespace = "com.aldemar.aquamuestra"
     compileSdk {
@@ -30,8 +56,10 @@ android {
         applicationId = "com.aldemar.aquamuestra"
         minSdk = 24
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        // versionCode: número interno que debe SUBIR en cada entrega (Android lo usa para saber qué es más nuevo).
+        // versionName: lo que ve el usuario ("1.0.0" = mayor.menor.parche).
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -39,8 +67,23 @@ android {
         buildConfigField("String", "MARINE_BASE_URL", "\"$marineBaseUrl\"")
     }
 
+    signingConfigs {
+        create("release") {
+            // Solo se rellenan si existen; si falta algo, la tarea verificarFirmaRelease detiene el build.
+            if (faltanParaFirmar.isEmpty()) {
+                storeFile = file(keystorePath!!)
+                storePassword = keystorePassword
+                keyAlias = keyAliasFirma
+                keyPassword = keyPasswordFirma
+            }
+        }
+    }
+
     buildTypes {
         release {
+            // Se firma SIEMPRE con el keystore propio (nunca con la llave debug).
+            signingConfig = signingConfigs.getByName("release")
+            // R8 (minify) sigue desactivado: activarlo exige reglas para Gson/Retrofit/Room y probarlo a fondo.
             optimization {
                 enable = false
             }
@@ -55,6 +98,29 @@ android {
         buildConfig = true
     }
 }
+
+// Nombre de la APK: aquamuestra-v1.0.0-release.apk (y aquamuestra-v1.0.0-debug.apk).
+// AGP arma el nombre como "<archivesName>-<buildType>.apk".
+base {
+    archivesName = "aquamuestra-v$appVersionName"
+}
+
+// Si faltan datos de firma, cualquier build release falla con un mensaje claro
+// (en vez de generar una APK sin firmar o firmada con la llave debug).
+val verificarFirmaRelease by tasks.registering {
+    description = "Comprueba que estén los datos del keystore para firmar la release."
+    val faltan = faltanParaFirmar
+    doLast {
+        if (faltan.isNotEmpty()) {
+            throw GradleException(
+                "No se puede firmar la APK release. Falta: ${faltan.joinToString()}. " +
+                    "Complétalo en local.properties (ver local.properties.example) " +
+                    "o como variables de entorno con el mismo nombre."
+            )
+        }
+    }
+}
+tasks.matching { it.name == "preReleaseBuild" }.configureEach { dependsOn(verificarFirmaRelease) }
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))

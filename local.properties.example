@@ -1,0 +1,19 @@
+## Copia este archivo como local.properties y completa los valores.
+## local.properties NO se sube a git (está en .gitignore): ahí van las rutas y contraseñas reales.
+
+# Ruta del Android SDK (Android Studio la escribe sola)
+sdk.dir=C:/Users/TU_USUARIO/AppData/Local/Android/Sdk
+
+# URL del backend Spring Boot. 10.0.2.2 = localhost del PC visto desde el emulador.
+# En un teléfono real usa la IP del PC en la red local, p. ej. http://192.168.1.50:8080/
+API_BASE_URL=http://10.0.2.2:8080/
+
+# API externa Open-Meteo Marine (opcional; este es el valor por defecto)
+MARINE_BASE_URL=https://marine-api.open-meteo.com/
+
+# Firma de la APK release. En las rutas usa / (aqui la barra invertida es caracter de escape). También se pueden dar como variables de entorno con el mismo nombre.
+# Si falta alguna, ./gradlew :app:assembleRelease falla con un mensaje que dice cuál.
+KEYSTORE_PATH=C:/ruta/a/tu/keystore.jks
+KEYSTORE_PASSWORD=
+KEY_ALIAS=tu_alias
+KEY_PASSWORD=
