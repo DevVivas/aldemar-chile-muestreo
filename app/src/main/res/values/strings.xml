@@ -225,7 +225,7 @@
 
     <!-- Conteo asistido (Tarea 6) -->
     <string name="conteo_titulo">Contar individuos</string>
-    <string name="conteo_ayuda">Toca cada chorito para marcarlo. Toca una marca para quitarla. Pellizca o toca dos veces para ampliar.</string>
+    <string name="conteo_ayuda">Toca cada chorito para marcarlo. Toca una marca para quitarla. Pellizca para ampliar.</string>
     <string name="conteo_foto_descripcion">Foto de la muestra con %1$d marcas</string>
     <string name="conteo_marcados">Marcados</string>
     <string name="conteo_ajuste">Ajuste</string>

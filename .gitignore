@@ -44,6 +44,10 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# Variables de entorno con secretos (en cualquier carpeta); las plantillas sí se suben
+.env
+!.env.example
+
 # Backend Spring Boot
 backend/.env
 backend/target/

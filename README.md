@@ -9,19 +9,20 @@ AquaMuestra permite a los equipos de ALDEMAR SpA registrar en terreno los muestr
 ## Tabla de contenidos
 
 1. [Problemática y solución](#problemática-y-solución)
-2. [Integrantes](#integrantes)
-3. [Stack tecnológico](#stack-tecnológico)
-4. [Arquitectura](#arquitectura)
-5. [Roles y permisos](#roles-y-permisos)
-6. [Funcionalidades por pantalla](#funcionalidades-por-pantalla)
-7. [Backend](#backend)
-8. [API externa: Open-Meteo Marine](#api-externa-open-meteo-marine)
-9. [Modo offline y sincronización](#modo-offline-y-sincronización)
-10. [Instalación](#instalación)
-11. [Pruebas](#pruebas)
-12. [Capturas](#capturas)
-13. [Seguridad](#seguridad)
-14. [Planificación](#planificación)
+2. [Identidad visual](#identidad-visual)
+3. [Integrantes](#integrantes)
+4. [Stack tecnológico](#stack-tecnológico)
+5. [Arquitectura](#arquitectura)
+6. [Roles y permisos](#roles-y-permisos)
+7. [Funcionalidades por pantalla](#funcionalidades-por-pantalla)
+8. [Backend](#backend)
+9. [API externa: Open-Meteo Marine](#api-externa-open-meteo-marine)
+10. [Modo offline y sincronización](#modo-offline-y-sincronización)
+11. [Instalación](#instalación)
+12. [Pruebas](#pruebas)
+13. [Capturas](#capturas)
+14. [Seguridad](#seguridad)
+15. [Planificación](#planificación)
 
 ---
 
@@ -47,13 +48,35 @@ AquaMuestra permite a los equipos de ALDEMAR SpA registrar en terreno los muestr
 
 ---
 
+## Identidad visual
+
+El diseño de la aplicación está inspirado en el entorno marítimo, priorizando la legibilidad en terreno bajo luz natural.
+
+**Logotipo**
+
+<img width="430" height="334" alt="logo_aquamuestra" src="https://github.com/user-attachments/assets/98f48975-6a4b-443f-844f-baebc7210f63" />
+
+**Paleta de colores**
+
+| Uso | Color | Código |
+|---|---|---|
+| Principal | Azul Marino | `#003366` |
+| Secundario | Verde Teal | `#008080` |
+| Fondo | Gris Claro | `#F5F5F5` |
+| Texto | Gris Oscuro | `#212121` |
+| Adicional (alertas) | Naranja | `#FF9800` |
+
+---
+
 ## Integrantes
+
+**Equipo Tridente N°18 · Sección 005-V**
 
 | Integrante | Rol en el proyecto |
 |---|---|
-| `<Nombre Apellido>` | `<rol en el proyecto>` |
-| `<Nombre Apellido>` | `<rol en el proyecto>` |
-| `<Nombre Apellido>` | `<rol en el proyecto>` |
+| Daniel Villamizar | `<rol en el proyecto>` |
+| Abraham Vivas | `<rol en el proyecto>` |
+| Renato Uribe | `<rol en el proyecto>` |
 
 ---
 
@@ -77,6 +100,12 @@ AquaMuestra permite a los equipos de ALDEMAR SpA registrar en terreno los muestr
 ---
 
 ## Arquitectura
+
+### Flujo de usuario (UML)
+
+Flujo principal de navegación, representado con un Diagrama de Actividad UML:
+
+<img width="935" height="394" alt="flujo-usuario-uml" src="https://github.com/user-attachments/assets/3aebd5e9-3ebb-439d-8267-56571ba8cf29" />
 
 ### App: capas MVVM
 
