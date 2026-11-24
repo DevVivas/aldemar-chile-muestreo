@@ -80,6 +80,14 @@ public record MuestraDto(
         String revisadoPor,
 
         @Schema(description = "Lo completa el servidor al guardar", accessMode = Schema.AccessMode.READ_ONLY)
-        LocalDateTime actualizadoEn
+        LocalDateTime actualizadoEn,
+
+        @Schema(description = "Individuos marcados sobre la foto en la app (conteo asistido). Opcional", example = "148")
+        @PositiveOrZero(message = "Los individuos marcados no pueden ser negativos")
+        Integer conteoMarcas,
+
+        @Schema(description = "Ajuste manual del operador sobre el conteo; puede ser negativo. "
+                + "cantidad = conteoMarcas + ajusteManual. Opcional", example = "2")
+        Integer ajusteManual
 ) {
 }

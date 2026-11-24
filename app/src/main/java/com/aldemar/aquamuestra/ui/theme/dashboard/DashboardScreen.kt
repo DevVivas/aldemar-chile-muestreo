@@ -43,6 +43,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -66,6 +67,12 @@ import com.aldemar.aquamuestra.ui.theme.ThemeManager
 import com.aldemar.aquamuestra.data.local.UserRole
 import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.ui.theme.components.BottomNavBar
+import com.aldemar.aquamuestra.ui.theme.components.TarjetaCondicionesMarinas
+import com.aldemar.aquamuestra.viewmodel.AppViewModelFactory
+import com.aldemar.aquamuestra.viewmodel.MarineViewModel
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -82,6 +89,9 @@ private const val ID_ULTIMA_MUESTRA = "1001"
 @Composable
 fun DashboardScreen(navController: NavController) {
     val user = SessionManager.currentUser
+    val context = LocalContext.current
+    val marineViewModel: MarineViewModel = viewModel(factory = AppViewModelFactory(context))
+    val marino by marineViewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val syncDoneMsg = stringResource(R.string.dashboard_sync_done)
@@ -190,7 +200,12 @@ fun DashboardScreen(navController: NavController) {
                 )
             }
 
-            TelemetryCard()
+            // Antes: telemetría con valores de ejemplo. Ahora: condiciones marinas reales (Open-Meteo)
+            TarjetaCondicionesMarinas(
+                state = marino,
+                onCentro = marineViewModel::recargar,
+                onRecargar = { marineViewModel.recargar() }
+            )
         }
     }
 }
@@ -484,88 +499,6 @@ private fun SyncCard(modifier: Modifier = Modifier, onSyncClick: () -> Unit) {
                 maxLines = 1,
                 softWrap = false,
                 overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-@Composable
-private fun TelemetryCard() {
-    DashCard(modifier = Modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconBox(Icons.Filled.Thermostat)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = stringResource(R.string.dashboard_telemetria),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = ThemeManager.textColor,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = stringResource(R.string.dashboard_sonda),
-                fontSize = 11.sp,
-                color = ThemeManager.secondaryTextColor
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TelemetryItem(
-                label = stringResource(R.string.dashboard_temp_agua),
-                value = stringResource(R.string.dashboard_temp_valor),
-                modifier = Modifier.weight(1f)
-            )
-            TelemetryItem(
-                label = stringResource(R.string.dashboard_salinidad),
-                value = stringResource(R.string.dashboard_sal_valor),
-                modifier = Modifier.weight(1f)
-            )
-            TelemetryItem(
-                label = stringResource(R.string.dashboard_oxigeno),
-                value = stringResource(R.string.dashboard_oxi_valor),
-                valueColor = ColorEmber,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = stringResource(R.string.dashboard_datos_ejemplo),
-            fontSize = 11.sp,
-            color = ThemeManager.secondaryTextColor
-        )
-    }
-}
-
-@Composable
-private fun TelemetryItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    valueColor: Color = ThemeManager.textColor
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(10.dp),
-        color = ThemeManager.backgroundColor,
-        border = BorderStroke(1.dp, ThemeManager.borderColor)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp, vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = label, fontSize = 11.sp, color = ThemeManager.secondaryTextColor, textAlign = TextAlign.Center)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = value,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = valueColor,
-                textAlign = TextAlign.Center,
-                maxLines = 1
             )
         }
     }

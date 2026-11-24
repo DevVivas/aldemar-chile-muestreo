@@ -45,8 +45,20 @@ interface MuestraDao {
     )
 
     /** Muestras con cambios locales que aún no llegan al servidor. */
-    @Query("SELECT * FROM muestras WHERE pendienteSync = 1")
+    @Query("SELECT * FROM muestras WHERE pendienteSync = 1 ORDER BY fechaHora ASC")
     suspend fun obtenerPendientesSync(): List<MuestraEntity>
+
+    /** Cuántas muestras faltan por sincronizar (para el banner). Se actualiza solo. */
+    @Query("SELECT COUNT(*) FROM muestras WHERE pendienteSync = 1")
+    fun contarPendientes(): Flow<Int>
+
+    /**
+     * Marca la muestra como sincronizada SOLO si no cambió desde que se envió
+     * (mismo actualizadoEn). Si el usuario la editó mientras se subía, sigue pendiente
+     * y se enviará de nuevo en la próxima sincronización.
+     */
+    @Query("UPDATE muestras SET pendienteSync = 0 WHERE id = :id AND actualizadoEn = :actualizadoEn")
+    suspend fun marcarSincronizadaSiNoCambio(id: String, actualizadoEn: Long): Int
 
     @Query("UPDATE muestras SET pendienteSync = 0 WHERE id = :id")
     suspend fun marcarSincronizada(id: String)

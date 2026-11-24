@@ -13,7 +13,8 @@ import androidx.room.TypeConverters
 @Database(
     entities = [MuestraEntity::class],
     // v2: se agregan comentarioRevision y revisadoPor a "muestras".
-    version = 2,
+    // v3: se agregan conteoMarcas, ajusteManual y marcasJson (conteo asistido).
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

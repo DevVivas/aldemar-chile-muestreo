@@ -5,13 +5,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.aldemar.aquamuestra.data.local.AppDatabase
 import com.aldemar.aquamuestra.data.remote.RetrofitClient
+import com.aldemar.aquamuestra.data.remote.marine.MarineClient
+import com.aldemar.aquamuestra.data.remote.marine.MarineRepository
 import com.aldemar.aquamuestra.data.repository.AuthRepository
 import com.aldemar.aquamuestra.data.repository.MuestraRepository
+import com.aldemar.aquamuestra.data.sync.ConectividadObserver
+import com.aldemar.aquamuestra.data.sync.SyncScheduler
 import com.aldemar.aquamuestra.ui.theme.SessionManager
 
 /**
  * Crea los ViewModels de la app "a mano" (sin Hilt ni Koin):
- * BD -> DAO -> Repository -> ViewModel.
+ * BD -> DAO -> Repository (+ SyncScheduler) -> ViewModel.
  *
  * @param muestraId ID de la muestra para el detalle o para editar en el formulario (opcional).
  */
@@ -22,8 +26,14 @@ class AppViewModelFactory(
 
     private val appContext = context.applicationContext
 
+    private val syncScheduler: SyncScheduler by lazy { SyncScheduler.getInstance(appContext) }
+
+    /** Cada cambio que guarda el Repository le pide al SyncScheduler que lo envíe al servidor. */
     private val muestraRepository: MuestraRepository by lazy {
-        MuestraRepository(AppDatabase.getInstance(appContext).muestraDao())
+        MuestraRepository(
+            dao = AppDatabase.getInstance(appContext).muestraDao(),
+            sincronizador = syncScheduler
+        )
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -45,8 +55,27 @@ class AppViewModelFactory(
         modelClass.isAssignableFrom(LoginViewModel::class.java) ->
             LoginViewModel(
                 auth = AuthRepository(RetrofitClient.api),
-                guardarSesion = SessionManager::iniciarSesion
+                guardarSesion = { sesion ->
+                    SessionManager.iniciarSesion(sesion)
+                    // Recién iniciada la sesión: subir lo pendiente y traer lo del servidor
+                    syncScheduler.sincronizarAhora()
+                    syncScheduler.programarPeriodico()
+                }
             ) as T
+
+        modelClass.isAssignableFrom(SyncViewModel::class.java) ->
+            SyncViewModel(
+                repository = muestraRepository,
+                hayInternet = ConectividadObserver(appContext).hayInternet,
+                estadoSync = syncScheduler.estado(),
+                sincronizador = syncScheduler
+            ) as T
+
+        modelClass.isAssignableFrom(ConteoViewModel::class.java) -> ConteoViewModel() as T
+
+        // API externa: usa MarineClient (Retrofit separado, sin credenciales del backend)
+        modelClass.isAssignableFrom(MarineViewModel::class.java) ->
+            MarineViewModel(MarineRepository(MarineClient.api, appContext)) as T
 
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }

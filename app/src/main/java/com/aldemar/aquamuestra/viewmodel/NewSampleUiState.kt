@@ -16,7 +16,12 @@ data class NewSampleUiState(
     val linea: String = "",
     val operador: String = "",
     val tramoCm: String = "",
-    val cantidad: String = "0",
+    /** Individuos marcados sobre la foto (pantalla de conteo). */
+    val conteoMarcas: Int = 0,
+    /** Ajuste manual del conteo (puede ser negativo). */
+    val ajusteManual: Int = 0,
+    /** Posiciones de las marcas (JSON, coordenadas 0..1 de la imagen). */
+    val marcasJson: String? = null,
     val observaciones: String = "",
     /** Fecha y hora de la muestra en milisegundos (epoch millis). */
     val fechaHora: Long = 0L,
@@ -31,7 +36,10 @@ data class NewSampleUiState(
     val intentoFallido: EstadoRevision? = null,
     /** Evento de un solo uso para la pantalla (Snackbar, volver atrás). */
     val evento: NewSampleEvento? = null
-)
+) {
+    /** Cantidad de individuos = marcados + ajuste. Ya no se escribe a mano: sale del conteo. */
+    val cantidad: Int get() = conteoMarcas + ajusteManual
+}
 
 sealed interface NewSampleEvento {
     /** La muestra quedó guardada en Room con este estado. */

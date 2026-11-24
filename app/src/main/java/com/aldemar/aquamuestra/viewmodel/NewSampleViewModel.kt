@@ -60,7 +60,9 @@ class NewSampleViewModel(
                         linea = m.linea,
                         operador = m.operador,
                         tramoCm = m.tramoCm.toString(),
-                        cantidad = m.cantidad.toString(),
+                        conteoMarcas = m.conteoMarcas,
+                        ajusteManual = m.ajusteManual,
+                        marcasJson = m.marcasJson,
                         observaciones = m.observaciones,
                         fechaHora = m.fechaHora,
                         fotoPath = m.fotoPath
@@ -81,12 +83,9 @@ class NewSampleViewModel(
 
     /** Solo acepta dígitos (el teclado es numérico, pero se puede pegar texto). */
     fun onTramoCmChange(valor: String) = editar { copy(tramoCm = valor.filter(Char::isDigit).take(6)) }
-    fun onCantidadChange(valor: String) = editar { copy(cantidad = valor.filter(Char::isDigit).take(6)) }
-
-    /** Suma o resta al conteo con los botones ±. Nunca baja de 0. */
-    fun onCantidadAjustar(delta: Int) = editar {
-        val actual = cantidad.toIntOrNull() ?: 0
-        copy(cantidad = (actual + delta).coerceAtLeast(0).toString())
+    /** Resultado de la pantalla de conteo. */
+    fun onConteoGuardado(conteoMarcas: Int, ajusteManual: Int, marcasJson: String) = editar {
+        copy(conteoMarcas = conteoMarcas, ajusteManual = ajusteManual, marcasJson = marcasJson)
     }
 
     /** Rellena el operador con el usuario de la sesión, solo si el campo está vacío. */
@@ -119,8 +118,16 @@ class NewSampleViewModel(
         copy(fechaHora = nuevo.timeInMillis)
     }
 
-    fun onFotoCapturada(path: String) = editar { copy(fotoPath = path) }
-    fun onFotoQuitada() = editar { copy(fotoPath = null) }
+    /**
+     * Foto nueva desde la cámara. Las marcas anteriores apuntaban a otra imagen, así que se borran
+     * (el ajuste manual se conserva).
+     */
+    fun onFotoCapturada(path: String) = editar {
+        copy(fotoPath = path, conteoMarcas = 0, marcasJson = null, ajusteManual = ajusteManual.coerceAtLeast(0))
+    }
+    fun onFotoQuitada() = editar {
+        copy(fotoPath = null, conteoMarcas = 0, marcasJson = null, ajusteManual = ajusteManual.coerceAtLeast(0))
+    }
 
     // ---------------------------------------------------------------- Guardar
 
@@ -175,7 +182,7 @@ class NewSampleViewModel(
         linea = s.linea,
         operador = s.operador,
         tramoCm = s.tramoCm,
-        cantidad = s.cantidad,
+        cantidad = s.cantidad.toString(),
         observaciones = s.observaciones,
         fotoPath = s.fotoPath,
         paraEnviar = paraEnviar
@@ -190,7 +197,10 @@ class NewSampleViewModel(
         tramoCm = tramoCm.trim().toInt(),
         fechaHora = fechaHora,
         operador = operador.trim(),
-        cantidad = cantidad.trim().toInt(),
+        cantidad = cantidad,
+        conteoMarcas = conteoMarcas,
+        ajusteManual = ajusteManual,
+        marcasJson = marcasJson,
         observaciones = observaciones.trim(),
         estado = estado,
         fotoPath = fotoPath,

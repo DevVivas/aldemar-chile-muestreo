@@ -1,11 +1,5 @@
 package com.aldemar.aquamuestra.ui.theme.form
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -33,6 +27,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -87,8 +82,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
@@ -102,6 +95,7 @@ import com.aldemar.aquamuestra.viewmodel.MuestraFormValidator
 import com.aldemar.aquamuestra.viewmodel.NewSampleEvento
 import com.aldemar.aquamuestra.viewmodel.NewSampleUiState
 import com.aldemar.aquamuestra.viewmodel.NewSampleViewModel
+import com.aldemar.aquamuestra.viewmodel.ResultadoConteo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
@@ -126,6 +120,14 @@ fun NewSampleFormScreen(
     modifier: Modifier = Modifier,
     /** null = muestra nueva; con valor = editar/corregir esa muestra (mismo ID). */
     muestraId: String? = null,
+    /** Ruta de la foto que devolvió la pantalla de cámara (null si no hay nada nuevo). */
+    fotoNueva: String? = null,
+    /** Resultado que devolvió la pantalla de conteo (null si no hay nada nuevo). */
+    conteoNuevo: ResultadoConteo? = null,
+    /** Avisa que ya se usaron fotoNueva / conteoNuevo, para no aplicarlos dos veces. */
+    onResultadosUsados: () -> Unit = {},
+    onAbrirCamara: (idMuestra: String) -> Unit = {},
+    onAbrirConteo: (fotoPath: String, marcasJson: String?, ajusteManual: Int) -> Unit = { _, _, _ -> },
     onBackClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -135,10 +137,19 @@ fun NewSampleFormScreen(
     // El operador parte con el usuario de la sesión (se puede editar).
     LaunchedEffect(Unit) { viewModel.precargarOperador(SessionManager.currentUser?.name) }
 
+    // Resultados de la cámara y del conteo
+    LaunchedEffect(fotoNueva, conteoNuevo) {
+        fotoNueva?.let(viewModel::onFotoCapturada)
+        conteoNuevo?.let { viewModel.onConteoGuardado(it.conteoMarcas, it.ajusteManual, it.marcasJson) }
+        if (fotoNueva != null || conteoNuevo != null) onResultadosUsados()
+    }
+
     NewSampleFormContent(
         state = state,
         viewModel = viewModel,
         onBackClick = onBackClick,
+        onTomarFoto = { onAbrirCamara(state.id) },
+        onContar = { state.fotoPath?.let { onAbrirConteo(it, state.marcasJson, state.ajusteManual) } },
         modifier = modifier
     )
 }
@@ -148,9 +159,10 @@ private fun NewSampleFormContent(
     state: NewSampleUiState,
     viewModel: NewSampleViewModel,
     onBackClick: () -> Unit,
+    onTomarFoto: () -> Unit,
+    onContar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -158,7 +170,6 @@ private fun NewSampleFormContent(
     val msgEnviada = stringResource(R.string.muestra_ok_enviada)
     val msgErrores = stringResource(R.string.muestra_aviso_errores)
     val msgErrorGuardar = stringResource(R.string.muestra_aviso_error_guardar)
-    val msgPermiso = stringResource(R.string.muestra_aviso_permiso_camara)
 
     // ---- Eventos de un solo uso que manda el ViewModel
     LaunchedEffect(state.evento) {
@@ -179,31 +190,6 @@ private fun NewSampleFormContent(
             }
             null -> Unit
         }
-    }
-
-    // ---- Cámara (se mantiene TakePicture; CameraX llegará en otra tarea)
-    var rutaFotoPendiente by rememberSaveable { mutableStateOf<String?>(null) }
-
-    val takePictureLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-        val ruta = rutaFotoPendiente
-        if (ok && ruta != null) viewModel.onFotoCapturada(ruta) else ruta?.let { File(it).delete() }
-        rutaFotoPendiente = null
-    }
-
-    fun abrirCamara() {
-        val archivo = crearArchivoFoto(context)
-        rutaFotoPendiente = archivo.absolutePath
-        takePictureLauncher.launch(uriDeArchivo(context, archivo))
-    }
-
-    val permisoCamaraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { concedido ->
-        if (concedido) abrirCamara() else scope.launch { snackbarHostState.showSnackbar(msgPermiso) }
-    }
-
-    val onTomarFoto = {
-        val tienePermiso = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
-            PackageManager.PERMISSION_GRANTED
-        if (tienePermiso) abrirCamara() else permisoCamaraLauncher.launch(Manifest.permission.CAMERA)
     }
 
     var mostrarFecha by rememberSaveable { mutableStateOf(false) }
@@ -356,16 +342,16 @@ private fun NewSampleFormContent(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     modifier = Modifier.fillMaxWidth()
                 )
-                ContadorIndividuos(
-                    cantidad = state.cantidad,
+                ResumenConteo(
+                    conteoMarcas = state.conteoMarcas,
+                    ajusteManual = state.ajusteManual,
+                    hayFoto = state.fotoPath != null,
                     error = when (errores.cantidad) {
-                        ErrorCampo.OBLIGATORIO -> stringResource(R.string.muestra_error_cantidad_vacia)
                         null -> null
                         else -> stringResource(R.string.muestra_error_cantidad_negativa)
                     },
                     habilitado = !bloqueado,
-                    onCantidadChange = viewModel::onCantidadChange,
-                    onAjustar = viewModel::onCantidadAjustar
+                    onContar = onContar
                 )
             }
 
@@ -552,51 +538,50 @@ private fun CampoToque(
     )
 }
 
+/**
+ * Cantidad de individuos: ya no se escribe ni se suma a mano. Sale del conteo sobre la foto
+ * (marcados + ajuste) y aquí solo se muestra, con el botón para ir a contar.
+ */
 @Composable
-private fun ContadorIndividuos(
-    cantidad: String,
+private fun ResumenConteo(
+    conteoMarcas: Int,
+    ajusteManual: Int,
+    hayFoto: Boolean,
     error: String?,
     habilitado: Boolean,
-    onCantidadChange: (String) -> Unit,
-    onAjustar: (Int) -> Unit
+    onContar: () -> Unit
 ) {
+    val total = conteoMarcas + ajusteManual
+    val ajusteTexto = if (ajusteManual > 0) "+$ajusteManual" else ajusteManual.toString()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
-            value = cantidad,
-            onValueChange = onCantidadChange,
+            value = total.toString(),
+            onValueChange = {},
+            readOnly = true,
             label = { Text(stringResource(R.string.muestra_cantidad)) },
             textStyle = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
             isError = error != null,
-            supportingText = { Text(error ?: stringResource(R.string.muestra_cantidad_ayuda)) },
+            supportingText = {
+                Text(error ?: stringResource(R.string.muestra_desglose, conteoMarcas, ajusteTexto, total))
+            },
             singleLine = true,
             enabled = habilitado,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
             modifier = Modifier.fillMaxWidth()
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(-5, -1, 1, 5).forEach { delta ->
-                val descripcion = if (delta < 0) {
-                    stringResource(R.string.muestra_restar, -delta)
-                } else {
-                    stringResource(R.string.muestra_sumar, delta)
-                }
-                FilledTonalButton(
-                    onClick = { onAjustar(delta) },
-                    enabled = habilitado,
-                    shape = RoundedCornerShape(14.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp)
-                        .semantics { contentDescription = descripcion }
-                ) {
-                    Text(
-                        text = if (delta < 0) "−${-delta}" else "+$delta",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
+        FilledTonalButton(
+            onClick = onContar,
+            enabled = habilitado && hayFoto,
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Icon(Icons.Filled.TouchApp, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(
+                stringResource(if (hayFoto) R.string.muestra_contar else R.string.muestra_contar_sin_foto),
+                style = MaterialTheme.typography.titleSmall
+            )
         }
     }
 }
@@ -838,12 +823,3 @@ private fun medianocheUtc(millisLocal: Long): Long {
         set(local.get(Calendar.YEAR), local.get(Calendar.MONTH), local.get(Calendar.DAY_OF_MONTH))
     }.timeInMillis
 }
-
-/** Archivo vacío donde la cámara del sistema escribirá la foto. */
-private fun crearArchivoFoto(context: Context): File {
-    val carpeta = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
-    return File.createTempFile("muestra_${System.currentTimeMillis()}_", ".jpg", carpeta)
-}
-
-private fun uriDeArchivo(context: Context, archivo: File): Uri =
-    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)

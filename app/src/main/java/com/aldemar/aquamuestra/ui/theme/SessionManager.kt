@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Usuario con sesión iniciada (lo que necesita la UI; nunca incluye la contraseña). */
@@ -73,6 +74,18 @@ object SessionManager {
                 cargado = true
             }
         }
+    }
+
+    /**
+     * Lee la sesión guardada y la deja lista para AuthInterceptor, esperando a DataStore.
+     * La usa SyncWorker, que puede correr con la app cerrada (sin que MainActivity la haya cargado).
+     * @return la sesión, o null si nadie inició sesión.
+     */
+    suspend fun cargarSesion(context: Context): Sesion? {
+        init(context)
+        val guardada = sesion.first()
+        credencial = guardada?.credencialBasic
+        return guardada
     }
 
     /** Guarda la sesión tras un login correcto. El estado se actualiza al tiro para poder navegar. */

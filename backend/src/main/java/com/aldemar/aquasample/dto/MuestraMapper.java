@@ -24,7 +24,9 @@ public final class MuestraMapper {
                 m.getFotoUrl(),
                 m.getComentarioRevision(),
                 m.getRevisadoPor(),
-                m.getActualizadoEn()
+                m.getActualizadoEn(),
+                m.getConteoMarcas(),
+                m.getAjusteManual()
         );
     }
 
@@ -43,9 +45,15 @@ public final class MuestraMapper {
         m.setCantidad(dto.cantidad());
         m.setObservaciones(dto.observaciones() == null ? "" : dto.observaciones().trim());
         m.setEstado(dto.estado());
-        m.setFotoUrl(vacioANull(dto.fotoUrl()));
+        // Si la app no manda fotoUrl (por ejemplo al sincronizar), se conserva la que ya había:
+        // la foto se sube aparte con POST /foto y no debe perderse por un PUT de datos.
+        if (vacioANull(dto.fotoUrl()) != null) {
+            m.setFotoUrl(dto.fotoUrl().trim());
+        }
         m.setComentarioRevision(vacioANull(dto.comentarioRevision()));
         m.setRevisadoPor(vacioANull(dto.revisadoPor()));
+        m.setConteoMarcas(dto.conteoMarcas());
+        m.setAjusteManual(dto.ajusteManual());
     }
 
     private static String vacioANull(String valor) {

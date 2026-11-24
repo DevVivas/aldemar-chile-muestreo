@@ -32,7 +32,12 @@ data class MuestraDto(
     val comentarioRevision: String?,
     val revisadoPor: String?,
     /** Lo completa el servidor; al enviar puede ir null. */
-    val actualizadoEn: String?
+    val actualizadoEn: String?,
+    /** Individuos marcados sobre la foto. null en muestras antiguas del servidor. */
+    val conteoMarcas: Int? = null,
+    /** Ajuste manual del conteo (puede ser negativo). */
+    val ajusteManual: Int? = null
+    // marcasJson NO se envía: las posiciones de las marcas solo se guardan en el teléfono.
 )
 
 /** Cuerpo de PATCH /api/muestras/{id}/estado. */

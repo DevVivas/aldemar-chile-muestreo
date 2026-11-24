@@ -1,5 +1,7 @@
 package com.aldemar.aquasample;
 
+import com.aldemar.aquasample.model.Muestra;
+import com.aldemar.aquasample.repository.MuestraRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ class SeguridadIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private MuestraRepository muestraRepository;
 
     private static String muestraJson(String id, String estado) {
         return """
@@ -99,6 +104,25 @@ class SeguridadIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value("VALIDADA"))
                 .andExpect(jsonPath("$.cantidad").value(180));
+    }
+
+    @Test
+    @DisplayName("PUT sin fotoUrl conserva la fotoUrl que ya tenía la muestra")
+    void putSinFotoUrlConservaLaFoto() throws Exception {
+        // a...0006 es un BORRADOR de los datos iniciales; se simula que ya tiene foto en el servidor
+        String id = "a0000000-0000-4000-8000-000000000006";
+        Muestra muestra = muestraRepository.findById(id).orElseThrow();
+        muestra.setFotoUrl("/api/muestras/" + id + "/foto");
+        muestraRepository.save(muestra);
+
+        // La app sincroniza los datos sin mandar fotoUrl (viene null en el JSON)
+        mockMvc.perform(put("/api/muestras/" + id)
+                        .with(httpBasic("op01", "test-operario"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(muestraJson(id, "ENVIADA")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("ENVIADA"))
+                .andExpect(jsonPath("$.fotoUrl").value("/api/muestras/" + id + "/foto"));
     }
 
     @Test

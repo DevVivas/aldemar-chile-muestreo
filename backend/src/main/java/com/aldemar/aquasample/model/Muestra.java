@@ -69,6 +69,14 @@ public class Muestra {
     @Column(name = "revisado_por", length = 100)
     private String revisadoPor;
 
+    /** Individuos marcados sobre la foto en la app (conteo asistido). null en muestras antiguas. */
+    @Column(name = "conteo_marcas")
+    private Integer conteoMarcas;
+
+    /** Ajuste manual del operador sobre el conteo (puede ser negativo). cantidad = conteoMarcas + ajusteManual. */
+    @Column(name = "ajuste_manual")
+    private Integer ajusteManual;
+
     /** Cuándo recibió el servidor el último cambio. */
     @Column(name = "actualizado_en", nullable = false)
     private LocalDateTime actualizadoEn;
@@ -120,6 +128,12 @@ public class Muestra {
 
     public String getRevisadoPor() { return revisadoPor; }
     public void setRevisadoPor(String revisadoPor) { this.revisadoPor = revisadoPor; }
+
+    public Integer getConteoMarcas() { return conteoMarcas; }
+    public void setConteoMarcas(Integer conteoMarcas) { this.conteoMarcas = conteoMarcas; }
+
+    public Integer getAjusteManual() { return ajusteManual; }
+    public void setAjusteManual(Integer ajusteManual) { this.ajusteManual = ajusteManual; }
 
     public LocalDateTime getActualizadoEn() { return actualizadoEn; }
     public void setActualizadoEn(LocalDateTime actualizadoEn) { this.actualizadoEn = actualizadoEn; }

@@ -59,7 +59,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -74,7 +73,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.aldemar.aquamuestra.R
 import com.aldemar.aquamuestra.data.local.EstadoRevision
 import com.aldemar.aquamuestra.data.local.MuestraEntity
@@ -83,6 +81,8 @@ import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.ui.theme.components.BottomNavBar
 import com.aldemar.aquamuestra.ui.theme.components.ChipEstado
 import com.aldemar.aquamuestra.ui.theme.components.EtiquetaPendiente
+import com.aldemar.aquamuestra.ui.theme.components.FotoZoomConMarcas
+import com.aldemar.aquamuestra.viewmodel.ConteoMarcas
 import com.aldemar.aquamuestra.viewmodel.AccionRevision
 import com.aldemar.aquamuestra.viewmodel.AccionesRevision
 import com.aldemar.aquamuestra.viewmodel.AppViewModelFactory
@@ -201,7 +201,18 @@ private fun ContenidoDetalle(muestra: MuestraEntity, state: DetalleUiState) {
             LineaValidada(muestra.revisadoPor)
         }
 
-        Cifras(cantidad = muestra.cantidad, densidad = state.densidad, tramoCm = muestra.tramoCm)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Cifras(cantidad = muestra.cantidad, densidad = state.densidad, tramoCm = muestra.tramoCm)
+            // "X marcados + ajuste Y = Z"
+            val ajuste = if (muestra.ajusteManual > 0) "+${muestra.ajusteManual}" else muestra.ajusteManual.toString()
+            Text(
+                stringResource(R.string.muestra_desglose, muestra.conteoMarcas, ajuste, muestra.cantidad),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         DatosMuestreo(muestra)
         Observaciones(muestra.observaciones)
         Evolucion(state.evolucion)
@@ -220,12 +231,14 @@ private fun FotoGrande(muestra: MuestraEntity) {
         .fillMaxWidth()
         .aspectRatio(4f / 3f)
         .clip(forma)
-    if (muestra.fotoPath != null) {
-        AsyncImage(
-            model = File(muestra.fotoPath),
-            contentDescription = stringResource(R.string.det_foto_descripcion, muestra.id.take(8).uppercase(LOCALE_CL)),
-            contentScale = ContentScale.Crop,
-            modifier = modifier
+    if (muestra.fotoPath != null && File(muestra.fotoPath).exists()) {
+        // Telephoto: pellizcar o tocar dos veces para ampliar. Las marcas del conteo van encima (solo lectura).
+        val marcas = remember(muestra.marcasJson) { ConteoMarcas.marcasDesdeJson(muestra.marcasJson) }
+        FotoZoomConMarcas(
+            fotoPath = muestra.fotoPath,
+            marcas = marcas,
+            descripcion = stringResource(R.string.det_foto_descripcion, muestra.id.take(8).uppercase(LOCALE_CL)),
+            modifier = modifier.background(MaterialTheme.colorScheme.inverseSurface)
         )
     } else {
         Column(

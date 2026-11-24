@@ -45,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -53,6 +54,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.aldemar.aquamuestra.R
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.aldemar.aquamuestra.ui.theme.components.BannerSincronizacion
+import com.aldemar.aquamuestra.viewmodel.AppViewModelFactory
+import com.aldemar.aquamuestra.viewmodel.SyncViewModel
+import com.aldemar.aquamuestra.viewmodel.MarineViewModel
+import com.aldemar.aquamuestra.ui.theme.components.TarjetaCondicionesMarinas
+import com.aldemar.aquamuestra.data.sync.SyncScheduler
 import com.aldemar.aquamuestra.ui.theme.AppRoutes
 import com.aldemar.aquamuestra.ui.theme.ColorEmber
 import com.aldemar.aquamuestra.ui.theme.ColorGraphite
@@ -65,6 +74,11 @@ import com.aldemar.aquamuestra.ui.theme.components.BottomNavBar
 @Composable
 fun InicioScreen(navController: NavController) {
     var showMenu by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val syncViewModel: SyncViewModel = viewModel(factory = AppViewModelFactory(context))
+    val sync by syncViewModel.uiState.collectAsStateWithLifecycle()
+    val marineViewModel: MarineViewModel = viewModel(factory = AppViewModelFactory(context))
+    val marino by marineViewModel.uiState.collectAsStateWithLifecycle()
 
     val isDark = ThemeManager.isDarkMode
     val backgroundColor = ThemeManager.backgroundColor
@@ -160,6 +174,8 @@ fun InicioScreen(navController: NavController) {
                                 },
                                 onClick = {
                                     showMenu = false
+                                    // Nada debe seguir sincronizando con las credenciales de este usuario
+                                    SyncScheduler.getInstance(context).cancelar()
                                     SessionManager.logout()
                                     navController.navigate(AppRoutes.Login.ruta) {
                                         popUpTo(AppRoutes.Inicio.ruta) { inclusive = true }
@@ -183,6 +199,8 @@ fun InicioScreen(navController: NavController) {
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            BannerSincronizacion(estado = sync.banner, onSincronizar = syncViewModel::sincronizarAhora)
+
             Text(
                 text = stringResource(R.string.inicio_subtitulo),
                 fontSize = 16.sp,
@@ -228,6 +246,13 @@ fun InicioScreen(navController: NavController) {
                     onClick = { navController.navigate(AppRoutes.Dashboard.ruta) }
                 )
             }
+
+            // Condiciones marinas (API externa Open-Meteo)
+            TarjetaCondicionesMarinas(
+                state = marino,
+                onCentro = marineViewModel::recargar,
+                onRecargar = { marineViewModel.recargar() }
+            )
         }
     }
 }

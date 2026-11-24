@@ -335,4 +335,92 @@
     <string name="ingreso_ayuda_usuario">¿No tienes usuario? Pídelo a tu supervisor.</string>
     <string name="role_analista">Analista de Datos</string>
 
+    <!-- Banner de sincronización (Tarea 5b) -->
+    <plurals name="sync_sin_conexion">
+        <item quantity="one">Sin conexión · %1$d muestra pendiente de sincronización</item>
+        <item quantity="other">Sin conexión · %1$d muestras pendientes de sincronización</item>
+    </plurals>
+    <string name="sync_sin_conexion_cero">Sin conexión · Lo que guardes se enviará al volver la señal</string>
+    <plurals name="sync_sincronizando">
+        <item quantity="one">Sincronizando %1$d muestra…</item>
+        <item quantity="other">Sincronizando %1$d muestras…</item>
+    </plurals>
+    <string name="sync_actualizando">Actualizando con el servidor…</string>
+    <plurals name="sync_pendientes">
+        <item quantity="one">%1$d pendiente</item>
+        <item quantity="other">%1$d pendientes</item>
+    </plurals>
+    <string name="sync_sincronizar_ahora">Sincronizar ahora</string>
+    <string name="sync_todo_ok">Todo sincronizado</string>
+
+    <!-- Cámara (Tarea 6) -->
+    <string name="cam_cerrar">Cerrar cámara</string>
+    <string name="cam_flash_encendido">Flash encendido. Toca para apagarlo</string>
+    <string name="cam_flash_apagado">Flash apagado. Toca para encenderlo</string>
+    <string name="cam_obturador">Tomar foto</string>
+    <string name="cam_ayuda">Encuadra el tramo de cuerda completo</string>
+    <string name="cam_repetir">Repetir</string>
+    <string name="cam_usar">Usar foto</string>
+    <string name="cam_vista_previa">Vista previa de la foto tomada</string>
+    <string name="cam_error_captura">No se pudo guardar la foto. Inténtalo de nuevo.</string>
+    <string name="cam_permiso_titulo">Necesitamos la cámara</string>
+    <string name="cam_permiso_texto">La foto del tramo es la evidencia de la muestra y sirve para contar los choritos. Se guarda solo en esta app.</string>
+    <string name="cam_permiso_permitir">Permitir cámara</string>
+    <string name="cam_permiso_bloqueado">El permiso de cámara está desactivado. Actívalo en Ajustes → Permisos → Cámara.</string>
+    <string name="cam_permiso_ajustes">Abrir Ajustes</string>
+
+    <!-- Conteo asistido (Tarea 6) -->
+    <string name="conteo_titulo">Contar individuos</string>
+    <string name="conteo_ayuda">Toca cada chorito para marcarlo. Toca una marca para quitarla. Pellizca o toca dos veces para ampliar.</string>
+    <string name="conteo_foto_descripcion">Foto de la muestra con %1$d marcas</string>
+    <string name="conteo_marcados">Marcados</string>
+    <string name="conteo_ajuste">Ajuste</string>
+    <string name="conteo_total">Total</string>
+    <string name="conteo_resumen_cd">Marcados %1$d, ajuste %2$s, total %3$d</string>
+    <string name="conteo_deshacer">Deshacer</string>
+    <string name="conteo_limpiar">Limpiar</string>
+    <string name="conteo_restar">Restar 1 al ajuste</string>
+    <string name="conteo_sumar">Sumar 1 al ajuste</string>
+    <string name="conteo_guardar">Guardar conteo</string>
+    <string name="conteo_limpiar_titulo">¿Borrar todas las marcas?</string>
+    <string name="conteo_limpiar_texto">Se borrarán %1$d marcas. El ajuste manual se mantiene.</string>
+    <string name="conteo_limpiar_confirmar">Borrar marcas</string>
+    <string name="conteo_salir_titulo">¿Salir sin guardar?</string>
+    <string name="conteo_salir_texto">Los cambios del conteo se perderán.</string>
+    <string name="conteo_salir_confirmar">Salir sin guardar</string>
+    <string name="conteo_seguir">Seguir contando</string>
+    <string name="conteo_sin_foto">Esta muestra no tiene foto.</string>
+
+    <!-- Formulario: conteo (Tarea 6) -->
+    <string name="muestra_contar">Contar sobre la foto</string>
+    <string name="muestra_contar_sin_foto">Toma una foto para poder contar</string>
+    <string name="muestra_desglose">%1$d marcados + ajuste %2$s = %3$d</string>
+
+    <!-- Condiciones marinas: Open-Meteo (Tarea 7) -->
+    <string name="mar_titulo">Condiciones marinas</string>
+    <string name="mar_actualizar">Actualizar condiciones marinas</string>
+    <string name="mar_centro_cd">Centro %1$s</string>
+    <string name="mar_ola">Altura de ola</string>
+    <string name="mar_periodo">Período %1$s s</string>
+    <string name="mar_direccion">Dirección de la ola</string>
+    <string name="mar_desde">Desde %1$s</string>
+    <string name="mar_temperatura">Temperatura del mar</string>
+    <string name="mar_corriente">Corriente</string>
+    <string name="mar_hacia">Hacia %1$s</string>
+    <string name="mar_sin_dato">Sin dato</string>
+    <string name="mar_ola_cd">Altura de ola %1$s metros, período %2$s segundos</string>
+    <string name="mar_direccion_cd">Las olas vienen desde el %1$s, %2$s grados</string>
+    <string name="mar_temperatura_cd">Temperatura del mar %1$s grados</string>
+    <string name="mar_corriente_cd">Corriente de %1$s kilómetros por hora hacia el %2$s</string>
+    <string name="mar_dato_de">Dato del %1$s</string>
+    <string name="mar_coordenadas">Coordenadas aprox.: %1$s</string>
+    <string name="mar_leyenda">Dato estimado de Open-Meteo, no es una medición del centro.</string>
+    <string name="mar_fuente">Fuente: Open-Meteo Marine API</string>
+    <string name="mar_cargando">Cargando condiciones marinas</string>
+    <string name="mar_sin_conexion_cache">Sin conexión · Último dato disponible: %1$s</string>
+    <string name="mar_sin_conexion_vacio">Sin conexión. Aún no hay datos guardados para este centro.</string>
+    <string name="mar_error">No pudimos obtener las condiciones marinas.</string>
+    <string name="mar_error_cache">No pudimos actualizar. Último dato disponible: %1$s</string>
+    <string name="mar_reintentar">Reintentar</string>
+
 </resources>

@@ -82,6 +82,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.aldemar.aquamuestra.R
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import com.aldemar.aquamuestra.ui.theme.components.BannerSincronizacion
+import com.aldemar.aquamuestra.viewmodel.SyncUiState
+import com.aldemar.aquamuestra.viewmodel.SyncViewModel
 import com.aldemar.aquamuestra.data.local.EstadoRevision
 import com.aldemar.aquamuestra.data.local.MuestraEntity
 import com.aldemar.aquamuestra.ui.theme.AppRoutes
@@ -108,6 +112,8 @@ fun HistorialScreen(navController: NavController) {
     val context = LocalContext.current
     val viewModel: HistorialViewModel = viewModel(factory = AppViewModelFactory(context))
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val syncViewModel: SyncViewModel = viewModel(factory = AppViewModelFactory(context))
+    val sync by syncViewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -122,22 +128,33 @@ fun HistorialScreen(navController: NavController) {
         HistorialContenido(
             state = state,
             viewModel = viewModel,
+            sync = sync,
+            onSincronizar = syncViewModel::sincronizarAhora,
             onAbrirMuestra = { id -> navController.navigate(AppRoutes.SampleDetail.createRoute(id)) },
             modifier = Modifier.padding(padding)
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HistorialContenido(
     state: HistorialUiState,
     viewModel: HistorialViewModel,
+    sync: SyncUiState,
+    onSincronizar: () -> Unit,
     onAbrirMuestra: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var mostrarRango by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize()) {
+        BannerSincronizacion(
+            estado = sync.banner,
+            onSincronizar = onSincronizar,
+            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 4.dp)
+        )
+
         // Barra de filtros: fija arriba, la lista se desplaza debajo.
         if (state.total > 0) {
             BarraFiltros(
@@ -158,32 +175,39 @@ private fun HistorialContenido(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
 
-        when {
-            state.cargando -> Cargando()
-            state.total == 0 -> EstadoVacio(
-                icono = Icons.Filled.Inventory2,
-                titulo = stringResource(R.string.hist_vacio_titulo),
-                texto = stringResource(R.string.hist_vacio_texto)
-            )
-            state.muestras.isEmpty() -> EstadoVacio(
-                icono = Icons.Filled.FilterAltOff,
-                titulo = stringResource(R.string.hist_sin_resultados_titulo),
-                texto = stringResource(R.string.hist_sin_resultados_texto),
-                accion = stringResource(R.string.hist_limpiar_filtros),
-                onAccion = viewModel::limpiarFiltros
-            )
-            else -> LazyColumn(
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(state.muestras, key = { it.id }) { muestra ->
-                    TarjetaMuestra(
-                        muestra = muestra,
-                        onClick = { onAbrirMuestra(muestra.id) },
-                        // Al filtrar, las tarjetas entran, salen y se reacomodan con una animación suave.
-                        modifier = Modifier.animateItem()
-                    )
+        // Deslizar hacia abajo sobre la lista = sincronizar ahora (subir pendientes y traer cambios).
+        PullToRefreshBox(
+            isRefreshing = sync.sincronizando,
+            onRefresh = onSincronizar,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when {
+                state.cargando -> Cargando()
+                state.total == 0 -> EstadoVacio(
+                    icono = Icons.Filled.Inventory2,
+                    titulo = stringResource(R.string.hist_vacio_titulo),
+                    texto = stringResource(R.string.hist_vacio_texto)
+                )
+                state.muestras.isEmpty() -> EstadoVacio(
+                    icono = Icons.Filled.FilterAltOff,
+                    titulo = stringResource(R.string.hist_sin_resultados_titulo),
+                    texto = stringResource(R.string.hist_sin_resultados_texto),
+                    accion = stringResource(R.string.hist_limpiar_filtros),
+                    onAccion = viewModel::limpiarFiltros
+                )
+                else -> LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(state.muestras, key = { it.id }) { muestra ->
+                        TarjetaMuestra(
+                            muestra = muestra,
+                            onClick = { onAbrirMuestra(muestra.id) },
+                            // Al filtrar, las tarjetas entran, salen y se reacomodan con una animación suave.
+                            modifier = Modifier.animateItem()
+                        )
+                    }
                 }
             }
         }

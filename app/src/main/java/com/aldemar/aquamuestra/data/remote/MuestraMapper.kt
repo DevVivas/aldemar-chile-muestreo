@@ -44,14 +44,17 @@ object MuestraMapper {
         fotoUrl = fotoUrl,
         comentarioRevision = entidad.comentarioRevision,
         revisadoPor = entidad.revisadoPor,
-        actualizadoEn = null // lo pone el servidor
+        actualizadoEn = null, // lo pone el servidor
+        conteoMarcas = entidad.conteoMarcas,
+        ajusteManual = entidad.ajusteManual
     )
 
     /**
      * Para guardar en Room algo que vino del backend. Queda como ya sincronizado (pendienteSync = false).
      * @param fotoPathLocal ruta de la foto en este teléfono, si existe (se conserva la que ya había).
+     * @param marcasJsonLocal posiciones de las marcas en este teléfono (el servidor no las guarda).
      */
-    fun aEntidad(dto: MuestraDto, fotoPathLocal: String? = null): MuestraEntity = MuestraEntity(
+    fun aEntidad(dto: MuestraDto, fotoPathLocal: String? = null, marcasJsonLocal: String? = null): MuestraEntity = MuestraEntity(
         id = dto.id,
         centro = dto.centro,
         concesion = dto.concesion,
@@ -67,6 +70,11 @@ object MuestraMapper {
         pendienteSync = false,
         actualizadoEn = dto.actualizadoEn?.let { desdeIso(it) } ?: System.currentTimeMillis(),
         comentarioRevision = dto.comentarioRevision,
-        revisadoPor = dto.revisadoPor
+        revisadoPor = dto.revisadoPor,
+        // Muestras antiguas del servidor no traen el desglose: todo el total queda como ajuste,
+        // así se mantiene cantidad = conteoMarcas + ajusteManual.
+        conteoMarcas = dto.conteoMarcas ?: 0,
+        ajusteManual = dto.ajusteManual ?: (dto.cantidad - (dto.conteoMarcas ?: 0)),
+        marcasJson = marcasJsonLocal
     )
 }
