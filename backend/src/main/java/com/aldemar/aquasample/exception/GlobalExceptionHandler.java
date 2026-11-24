@@ -96,6 +96,12 @@ public class GlobalExceptionHandler {
         return respuesta(HttpStatus.NOT_FOUND, ex.getMessage(), req, null);
     }
 
+    /** 409: un operario intentó modificar una muestra ya validada. */
+    @ExceptionHandler(MuestraYaValidadaException.class)
+    public ResponseEntity<ErrorRespuesta> yaValidada(MuestraYaValidadaException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.CONFLICT, ex.getMessage(), req, null);
+    }
+
     /** 409: se intentó crear (POST) un id que ya existe. */
     @ExceptionHandler(MuestraDuplicadaException.class)
     public ResponseEntity<ErrorRespuesta> duplicada(MuestraDuplicadaException ex, HttpServletRequest req) {

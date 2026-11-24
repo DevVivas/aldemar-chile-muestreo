@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Seguridad de red de AquaSample.
+
+    Por defecto Android bloquea HTTP sin cifrar (cleartext). El backend de desarrollo corre en
+    http://...:8080, así que se permite HTTP SOLO para estas direcciones. Cualquier otra exige HTTPS.
+
+    PARA PROBAR EN UN TELÉFONO FÍSICO (misma red Wi-Fi que el PC):
+      1. En el PC, busca tu IP local: en PowerShell ejecuta  ipconfig  y copia la "Dirección IPv4"
+         del adaptador Wi-Fi (por ejemplo 192.168.1.50).
+      2. Agrega esa IP como un <domain> más dentro del bloque de abajo, por ejemplo:
+             <domain includeSubdomains="false">192.168.1.50</domain>
+      3. En local.properties (raíz del proyecto) pon:  API_BASE_URL=http://192.168.1.50:8080/
+      4. Si Windows pregunta, permite a Java recibir conexiones en el firewall (red privada).
+      5. Vuelve a compilar e instalar la app.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Emulador de Android: 10.0.2.2 es el "localhost" del PC -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <!-- IP del PC en la red local (paso 2 de arriba). Descomenta y cámbiala: -->
+        <!-- <domain includeSubdomains="false">192.168.1.50</domain> -->
+    </domain-config>
+</network-security-config>

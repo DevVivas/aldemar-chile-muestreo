@@ -192,7 +192,8 @@ fun InicioScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            ActionCard(
+            // Solo el operario registra muestras nuevas
+            if (SessionManager.puedeCrearMuestras) ActionCard(
                 title = stringResource(R.string.inicio_card_nueva_titulo),
                 subtitle = stringResource(R.string.inicio_card_nueva_sub),
                 icon = Icons.Filled.Add,
@@ -214,8 +215,8 @@ fun InicioScreen(navController: NavController) {
                 onClick = { navController.navigate(AppRoutes.Historial.ruta) }
             )
 
-            // Solo el supervisor ve esta card
-            if (SessionManager.isSupervisor) {
+            // Supervisor y analista ven el dashboard
+            if (SessionManager.puedeVerDashboard) {
                 ActionCard(
                     title = stringResource(R.string.inicio_card_dashboard_titulo),
                     subtitle = stringResource(R.string.inicio_card_dashboard_sub),

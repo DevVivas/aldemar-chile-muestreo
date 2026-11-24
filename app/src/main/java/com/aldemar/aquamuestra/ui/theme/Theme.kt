@@ -1,41 +1,54 @@
 package com.aldemar.aquamuestra.ui.theme
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.aldemar.aquamuestra.data.local.PreferenciasStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 object ThemeManager {
-    private const val PREFS_NAME = "aquamuestra_prefs"
-    private const val KEY_DARK_MODE = "dark_mode"
-
-    private var prefs: SharedPreferences? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var store: PreferenciasStore? = null
     private val _isDarkMode = mutableStateOf(false)
 
+    /** true cuando ya se leyó la preferencia de DataStore (evita mostrar un tema y cambiar al otro). */
+    var cargado by mutableStateOf(false)
+        private set
+
     /**
-     * Estado del modo oscuro. Al asignarlo se guarda en el dispositivo,
+     * Estado del modo oscuro. Al asignarlo se guarda en DataStore,
      * por lo que se mantiene hasta que el usuario lo cambie de nuevo.
      */
     var isDarkMode: Boolean
         get() = _isDarkMode.value
         set(value) {
             _isDarkMode.value = value
-            prefs?.edit()?.putBoolean(KEY_DARK_MODE, value)?.apply()
+            scope.launch { store?.guardarModoOscuro(value) }
         }
 
-    /** Carga la preferencia guardada. Es seguro llamarla varias veces. */
+    /** Empieza a escuchar la preferencia guardada. Es seguro llamarla varias veces. */
     fun init(context: Context) {
-        if (prefs != null) return
-        val p = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs = p
-        _isDarkMode.value = p.getBoolean(KEY_DARK_MODE, false)
+        if (store != null) return
+        val s = PreferenciasStore.getInstance(context)
+        store = s
+        scope.launch {
+            s.modoOscuro.collect {
+                _isDarkMode.value = it
+                cargado = true
+            }
+        }
     }
 
     // Getters dinámicos para utilizar en cualquier composable de la app

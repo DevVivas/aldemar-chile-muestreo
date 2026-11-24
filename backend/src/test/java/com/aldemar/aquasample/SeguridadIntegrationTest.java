@@ -83,6 +83,25 @@ class SeguridadIntegrationTest {
     }
 
     @Test
+    @DisplayName("OPERARIO haciendo PUT sobre una muestra ya VALIDADA → 409 y no se modifica")
+    void operarioPutSobreValidada409() throws Exception {
+        // a...0001 está VALIDADA en los datos iniciales, con cantidad 180
+        String id = "a0000000-0000-4000-8000-000000000001";
+        mockMvc.perform(put("/api/muestras/" + id)
+                        .with(httpBasic("op01", "test-operario"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(muestraJson(id, "ENVIADA")))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.mensaje").value("La muestra ya fue validada por un supervisor"));
+
+        // Sigue igual que antes
+        mockMvc.perform(get("/api/muestras/" + id).with(httpBasic("op01", "test-operario")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("VALIDADA"))
+                .andExpect(jsonPath("$.cantidad").value(180));
+    }
+
+    @Test
     @DisplayName("SUPERVISOR observando sin comentario → 400")
     void supervisorObservaSinComentario400() throws Exception {
         mockMvc.perform(patch("/api/muestras/" + ID_ENVIADA + "/estado")

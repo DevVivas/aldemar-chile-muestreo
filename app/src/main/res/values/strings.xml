@@ -317,4 +317,22 @@
     <string name="det_obs_contador">%1$d/%2$d</string>
     <string name="det_obs_confirmar">Observar</string>
 
+    <!-- Login con el backend (Tarea 5a) -->
+    <string name="ingreso_subtitulo">Registro de muestras en terreno</string>
+    <string name="ingreso_usuario">Usuario</string>
+    <string name="ingreso_password">Contraseña</string>
+    <string name="ingreso_boton">Iniciar sesión</string>
+    <string name="ingreso_cargando">Ingresando…</string>
+    <string name="ingreso_mostrar_password">Mostrar contraseña</string>
+    <string name="ingreso_ocultar_password">Ocultar contraseña</string>
+    <string name="ingreso_error_usuario_vacio">Escribe tu usuario</string>
+    <string name="ingreso_error_password_vacia">Escribe tu contraseña</string>
+    <string name="ingreso_error_credenciales">Usuario o contraseña incorrectos</string>
+    <string name="ingreso_error_sin_conexion">Sin conexión con el servidor. Revisa tu red.</string>
+    <string name="ingreso_error_permiso_red">Para conectarte al servidor, permite el acceso a la red local. Vuelve a tocar Iniciar sesión.</string>
+    <string name="ingreso_error_servidor">El servidor no pudo responder. Inténtalo de nuevo en unos minutos.</string>
+    <string name="ingreso_ayuda_terreno">Después del primer ingreso puedes usar la app sin señal.</string>
+    <string name="ingreso_ayuda_usuario">¿No tienes usuario? Pídelo a tu supervisor.</string>
+    <string name="role_analista">Analista de Datos</string>
+
 </resources>

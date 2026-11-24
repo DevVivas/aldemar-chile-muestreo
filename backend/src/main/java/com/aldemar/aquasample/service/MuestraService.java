@@ -7,6 +7,7 @@ import com.aldemar.aquasample.exception.AccionNoPermitidaException;
 import com.aldemar.aquasample.exception.IdNoCoincideException;
 import com.aldemar.aquasample.exception.MuestraDuplicadaException;
 import com.aldemar.aquasample.exception.MuestraNoEncontradaException;
+import com.aldemar.aquasample.exception.MuestraYaValidadaException;
 import com.aldemar.aquasample.exception.ValidacionCampoException;
 import com.aldemar.aquasample.model.EstadoRevision;
 import com.aldemar.aquasample.model.Muestra;
@@ -84,8 +85,15 @@ public class MuestraService {
         if (!id.equals(dto.id())) {
             throw new IdNoCoincideException(id, dto.id());
         }
-        verificarEstadoPermitido(usuarioService.obtener(username).getRol(), dto.estado());
+        Rol rol = usuarioService.obtener(username).getRol();
+        verificarEstadoPermitido(rol, dto.estado());
         Muestra existente = repository.findById(id).orElse(null);
+
+        // Una muestra que el supervisor ya validó queda cerrada para el operario:
+        // si su teléfono sincroniza una versión vieja, no debe pisar la validación.
+        if (existente != null && existente.getEstado() == EstadoRevision.VALIDADA && rol == Rol.OPERARIO) {
+            throw new MuestraYaValidadaException();
+        }
         boolean creada = existente == null;
 
         Muestra muestra = creada ? new Muestra() : existente;

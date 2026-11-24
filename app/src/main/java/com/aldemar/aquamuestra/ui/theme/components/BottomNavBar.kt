@@ -99,8 +99,8 @@ fun BottomNavBar(navController: NavController) {
             colors = itemColors
         )
 
-        // Opción: DASHBOARD (solo supervisor)
-        if (SessionManager.isSupervisor) {
+        // Opción: DASHBOARD (supervisor y analista)
+        if (SessionManager.puedeVerDashboard) {
             NavigationBarItem(
                 icon = { Icon(Icons.Filled.Dashboard, contentDescription = null) },
                 label = { Text(stringResource(R.string.nav_dashboard), fontWeight = FontWeight.Medium) },

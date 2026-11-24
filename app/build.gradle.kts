@@ -1,8 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+
+// URL del backend: se lee de local.properties (API_BASE_URL=...), que NO se sube a git.
+// Por defecto 10.0.2.2, que en el emulador apunta al localhost del PC.
+val localProperties = Properties().apply {
+    val archivo = rootProject.file("local.properties")
+    if (archivo.exists()) archivo.inputStream().use { load(it) }
+}
+val apiBaseUrl: String = localProperties.getProperty("API_BASE_URL") ?: "http://10.0.2.2:8080/"
 
 android {
     namespace = "com.aldemar.aquamuestra"
@@ -18,6 +28,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
     buildTypes {
@@ -33,6 +45,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -60,6 +73,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp.logging.interceptor)
+
+    // Sesión y preferencias
+    implementation(libs.androidx.datastore.preferences)
 
     // Sincronización en segundo plano
     implementation(libs.androidx.work.runtime.ktx)

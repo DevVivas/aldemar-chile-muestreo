@@ -2,7 +2,7 @@ package com.aldemar.aquamuestra.viewmodel
 
 import com.aldemar.aquamuestra.data.local.EstadoRevision
 import com.aldemar.aquamuestra.data.local.MuestraEntity
-import com.aldemar.aquamuestra.ui.theme.UserRole
+import com.aldemar.aquamuestra.data.local.UserRole
 
 /** Acciones que se pueden hacer sobre una muestra desde el detalle. */
 enum class AccionRevision {
@@ -27,6 +27,9 @@ object AccionesRevision {
     fun disponibles(rol: UserRole?, estado: EstadoRevision): List<AccionRevision> = when {
         // Una muestra validada queda cerrada: solo lectura para todos.
         estado == EstadoRevision.VALIDADA -> emptyList()
+
+        // El analista solo consulta: nunca crea, edita ni revisa.
+        rol == UserRole.ANALISTA -> emptyList()
 
         rol == UserRole.SUPERVISOR && estado == EstadoRevision.ENVIADA ->
             listOf(AccionRevision.OBSERVAR, AccionRevision.VALIDAR)

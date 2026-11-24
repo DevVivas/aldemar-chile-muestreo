@@ -63,7 +63,7 @@ import com.aldemar.aquamuestra.ui.theme.ColorEmber
 import com.aldemar.aquamuestra.ui.theme.ColorPaper
 import com.aldemar.aquamuestra.ui.theme.SessionManager
 import com.aldemar.aquamuestra.ui.theme.ThemeManager
-import com.aldemar.aquamuestra.ui.theme.UserRole
+import com.aldemar.aquamuestra.data.local.UserRole
 import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.ui.theme.components.BottomNavBar
 import kotlinx.coroutines.launch
@@ -90,6 +90,7 @@ fun DashboardScreen(navController: NavController) {
     val roleLabel = when (user?.role) {
         UserRole.SUPERVISOR -> stringResource(R.string.role_supervisor)
         UserRole.OPERARIO -> stringResource(R.string.role_operario)
+        UserRole.ANALISTA -> stringResource(R.string.role_analista)
         null -> ""
     }
 

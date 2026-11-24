@@ -8,20 +8,28 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.aldemar.aquamuestra.ui.theme.AppNavigation
 import com.aldemar.aquamuestra.ui.theme.AquaMuestraTheme
-
-// Asegúrate de que el paquete coincida con el tuyo
+import com.aldemar.aquamuestra.ui.theme.SessionManager
+import com.aldemar.aquamuestra.ui.theme.ThemeManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Empiezan a leer DataStore (sesión y modo oscuro) en segundo plano.
+        SessionManager.init(applicationContext)
+        ThemeManager.init(applicationContext)
+
         setContent {
-            // AquaMuestraTheme escuchará los cambios globales de ThemeManager.isDarkMode
-            AquaMuestraTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppNavigation() // Tu NavHost con todas las rutas de la app
+            // Hasta que DataStore responda (unos milisegundos) no se dibuja nada: así no aparece
+            // el Login un instante a alguien que ya tiene sesión, ni el tema claro antes del oscuro.
+            if (SessionManager.cargado && ThemeManager.cargado) {
+                AquaMuestraTheme {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppNavigation() // NavHost con todas las rutas de la app
+                    }
                 }
             }
         }

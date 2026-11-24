@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.aldemar.aquamuestra.data.local.AppDatabase
+import com.aldemar.aquamuestra.data.remote.RetrofitClient
+import com.aldemar.aquamuestra.data.repository.AuthRepository
 import com.aldemar.aquamuestra.data.repository.MuestraRepository
 import com.aldemar.aquamuestra.ui.theme.SessionManager
 
@@ -38,6 +40,12 @@ class AppViewModelFactory(
                 repository = muestraRepository,
                 rol = SessionManager.currentUser?.role,
                 nombreUsuario = SessionManager.currentUser?.name
+            ) as T
+
+        modelClass.isAssignableFrom(LoginViewModel::class.java) ->
+            LoginViewModel(
+                auth = AuthRepository(RetrofitClient.api),
+                guardarSesion = SessionManager::iniciarSesion
             ) as T
 
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")

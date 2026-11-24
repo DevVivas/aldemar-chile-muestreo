@@ -9,10 +9,15 @@
     <!-- Permisos de red (sincronización con el backend y Open-Meteo) -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Android 17+ (targetSdk 37): sin este permiso (que el usuario debe aceptar) la app NO puede
+         conectarse a direcciones de la red local, como 10.0.2.2 en el emulador o la IP del PC en
+         la red Wi-Fi, que es donde corre el backend de desarrollo. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <application
         android:enableOnBackInvokedCallback="false"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"

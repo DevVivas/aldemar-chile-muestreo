@@ -49,3 +49,23 @@ El proyecto está diseñado para ser implementado con las siguientes tecnología
 * **UI Toolkit:** Jetpack Compose
 * **Sistema de Diseño:** Material Design 3 (M3)
 * **Arquitectura base:** MVVM (Model-View-ViewModel)
+
+## Conexión con el backend
+
+La app se conecta al backend Spring Boot de la carpeta `backend/` (ver `backend/README-backend.md`).
+
+La URL del backend se configura en `local.properties` (raíz del proyecto, **no se sube a git**):
+
+```properties
+# Emulador de Android (valor por defecto si no se define): 10.0.2.2 es el localhost del PC
+API_BASE_URL=http://10.0.2.2:8080/
+
+# Teléfono físico en la misma red Wi-Fi: usa la IP del PC (ver ipconfig)
+# API_BASE_URL=http://192.168.1.50:8080/
+```
+
+Para un teléfono físico, agrega también esa IP en `app/src/main/res/xml/network_security_config.xml` (el archivo explica los pasos).
+
+En Android 17 o superior, la primera vez que inicies sesión la app pide el permiso de **dispositivos cercanos / red local**: sin él no puede conectarse a un servidor de la red local.
+
+**Login:** usa los usuarios del backend (`op01`, `su01`, `an01`); las contraseñas están en `backend/.env`. Después del primer ingreso la sesión queda guardada y la app abre aunque no haya señal.

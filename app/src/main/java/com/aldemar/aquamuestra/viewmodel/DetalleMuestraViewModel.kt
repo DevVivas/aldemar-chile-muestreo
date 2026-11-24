@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.aldemar.aquamuestra.data.local.EstadoRevision
 import com.aldemar.aquamuestra.data.local.MuestraEntity
 import com.aldemar.aquamuestra.data.repository.MuestraRepository
-import com.aldemar.aquamuestra.ui.theme.UserRole
+import com.aldemar.aquamuestra.data.local.UserRole
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

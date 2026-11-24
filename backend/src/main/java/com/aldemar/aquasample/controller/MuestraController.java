@@ -134,6 +134,8 @@ public class MuestraController {
             @ApiResponse(responseCode = "200", description = "Muestra actualizada"),
             @ApiResponse(responseCode = "201", description = "Muestra creada"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos o id distinto al de la URL",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "409", description = "Un OPERARIO intentó modificar una muestra ya VALIDADA",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     })
     public ResponseEntity<MuestraDto> crearOActualizar(

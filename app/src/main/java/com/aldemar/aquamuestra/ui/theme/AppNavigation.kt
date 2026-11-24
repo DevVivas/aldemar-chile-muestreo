@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -36,7 +37,8 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val context = LocalContext.current
 
-    // Se calcula UNA sola vez: si hay una sesión guardada entra directo a Inicio, si no, al Login.
+    // Se calcula UNA sola vez. MainActivity ya leyó la sesión de DataStore: si hay una guardada,
+    // entra directo a Inicio aunque no haya internet (modo terreno); si no, al Login.
     val startDestination = remember {
         SessionManager.init(context)
         if (SessionManager.isLoggedIn) AppRoutes.Inicio.ruta else AppRoutes.Login.ruta
@@ -75,6 +77,11 @@ fun AppNavigation() {
                 }
             )
         ) { backStackEntry ->
+            // Solo el OPERARIO crea o corrige muestras. Otro rol que llegue aquí vuelve a Inicio.
+            if (!SessionManager.puedeCrearMuestras) {
+                VolverAInicio(navController)
+                return@composable
+            }
             NewSampleFormScreen(
                 muestraId = backStackEntry.arguments?.getString("muestraId"),
                 onBackClick = {
@@ -88,17 +95,12 @@ fun AppNavigation() {
             HistorialScreen(navController = navController)
         }
 
-        // 5. Dashboard (solo supervisor). Si un operario llegara aquí, se le devuelve a Inicio.
+        // 5. Dashboard (SUPERVISOR y ANALISTA). Otro rol que llegue aquí vuelve a Inicio.
         composable(AppRoutes.Dashboard.ruta) {
-            if (SessionManager.isSupervisor) {
+            if (SessionManager.puedeVerDashboard) {
                 DashboardScreen(navController = navController)
             } else {
-                LaunchedEffect(Unit) {
-                    navController.navigate(AppRoutes.Inicio.ruta) {
-                        popUpTo(AppRoutes.Inicio.ruta) { inclusive = false }
-                        launchSingleTop = true
-                    }
-                }
+                VolverAInicio(navController)
             }
         }
 
@@ -114,6 +116,17 @@ fun AppNavigation() {
                 sampleId = sampleId,
                 navController = navController
             )
+        }
+    }
+}
+
+/** Redirige a Inicio (para rutas que el rol actual no puede ver). */
+@Composable
+private fun VolverAInicio(navController: NavHostController) {
+    LaunchedEffect(Unit) {
+        navController.navigate(AppRoutes.Inicio.ruta) {
+            popUpTo(AppRoutes.Inicio.ruta) { inclusive = false }
+            launchSingleTop = true
         }
     }
 }

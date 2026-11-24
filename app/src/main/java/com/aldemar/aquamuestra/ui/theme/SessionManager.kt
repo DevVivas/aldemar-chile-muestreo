@@ -1,82 +1,91 @@
 package com.aldemar.aquamuestra.ui.theme
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.aldemar.aquamuestra.data.local.PreferenciasStore
+import com.aldemar.aquamuestra.data.local.Sesion
+import com.aldemar.aquamuestra.data.local.UserRole
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
-enum class UserRole { SUPERVISOR, OPERARIO }
-
+/** Usuario con sesión iniciada (lo que necesita la UI; nunca incluye la contraseña). */
 data class AppUser(
-    val email: String,
-    val password: String,
+    val username: String,
     val name: String,
     val role: UserRole
 )
 
 /**
- * Sesión de la app (SOLO PARA DEMO): los usuarios están escritos en el código.
- * Para una app real las credenciales deben validarse contra un servidor.
+ * Sesión de la app. Ya no hay usuarios escritos en el código: el login lo valida el backend
+ * (GET /api/auth/me) y la sesión se guarda en DataStore (PreferenciasStore).
+ *
+ * Expone:
+ *  - [sesion]: la sesión como Flow (fuente de verdad, desde DataStore).
+ *  - [currentUser]: copia en un estado de Compose, para que la UI la lea directo y se redibuje sola.
+ *  - [credencial]: la cabecera "Basic ..." que usa AuthInterceptor en cada petición.
  */
 object SessionManager {
-    private const val PREFS_NAME = "aquamuestra_prefs"
-    private const val KEY_SESSION_EMAIL = "session_email"
 
-    // Usuarios ficticios
-    val demoUsers = listOf(
-        AppUser(
-            email = "su01",
-            password = "123",
-            name = "Supervisor Demo",
-            role = UserRole.SUPERVISOR
-        ),
-        AppUser(
-            email = "op01",
-            password = "123",
-            name = "Operador Demo1",
-            role = UserRole.OPERARIO
-        ),
-        AppUser(
-            email = "op02",
-            password = "123",
-            name = "Operador Demo2",
-            role = UserRole.OPERARIO
-        )
-    )
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var store: PreferenciasStore? = null
 
-    private var prefs: SharedPreferences? = null
-    private val _currentUser = mutableStateOf<AppUser?>(null)
+    lateinit var sesion: Flow<Sesion?>
+        private set
 
-    /** Usuario con sesión iniciada (null si no hay). Es un estado: la UI se actualiza sola. */
-    val currentUser: AppUser? get() = _currentUser.value
+    private var _currentUser by mutableStateOf<AppUser?>(null)
 
+    /** true cuando ya se leyó DataStore al menos una vez (antes de eso no se sabe si hay sesión). */
+    var cargado by mutableStateOf(false)
+        private set
+
+    /** Cabecera Authorization de la sesión actual. La lee OkHttp desde otro hilo, por eso @Volatile. */
+    @Volatile
+    var credencial: String? = null
+        private set
+
+    val currentUser: AppUser? get() = _currentUser
     val isLoggedIn: Boolean get() = currentUser != null
+    val rol: UserRole? get() = currentUser?.role
+    val isSupervisor: Boolean get() = rol == UserRole.SUPERVISOR
 
-    val isSupervisor: Boolean get() = currentUser?.role == UserRole.SUPERVISOR
+    // ---- Permisos de navegación por rol
+    /** Nueva muestra: solo OPERARIO. */
+    val puedeCrearMuestras: Boolean get() = rol == UserRole.OPERARIO
 
-    /** Carga la sesión guardada (si el usuario marcó "Mantener sesión activa"). Se puede llamar varias veces. */
+    /** Dashboard: SUPERVISOR y ANALISTA. */
+    val puedeVerDashboard: Boolean get() = rol == UserRole.SUPERVISOR || rol == UserRole.ANALISTA
+
+    /** Empieza a escuchar DataStore. Se puede llamar varias veces; solo actúa la primera. */
     fun init(context: Context) {
-        if (prefs != null) return
-        val p = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs = p
-        val savedEmail = p.getString(KEY_SESSION_EMAIL, null)
-        _currentUser.value = demoUsers.firstOrNull { it.email == savedEmail }
+        if (store != null) return
+        val s = PreferenciasStore.getInstance(context)
+        store = s
+        sesion = s.sesion
+        scope.launch {
+            s.sesion.collect { guardada ->
+                _currentUser = guardada?.let { AppUser(it.username, it.nombre, it.rol) }
+                credencial = guardada?.credencialBasic
+                cargado = true
+            }
+        }
     }
 
-    /** Devuelve true si el correo y la contraseña son correctos. */
-    fun login(email: String, password: String, keepSession: Boolean): Boolean {
-        val user = demoUsers.firstOrNull {
-            it.email.equals(email.trim(), ignoreCase = true) && it.password == password
-        } ?: return false
-
-        _currentUser.value = user
-        prefs?.edit()?.apply {
-            if (keepSession) putString(KEY_SESSION_EMAIL, user.email) else remove(KEY_SESSION_EMAIL)
-        }?.apply()
-        return true
+    /** Guarda la sesión tras un login correcto. El estado se actualiza al tiro para poder navegar. */
+    suspend fun iniciarSesion(nueva: Sesion) {
+        _currentUser = AppUser(nueva.username, nueva.nombre, nueva.rol)
+        credencial = nueva.credencialBasic
+        store?.guardarSesion(nueva)
     }
 
+    /** Cerrar sesión: borra la sesión de DataStore. */
     fun logout() {
-        _currentUser.value = null
-        prefs?.edit()?.remove(KEY_SESSION_EMAIL)?.apply()
+        _currentUser = null
+        credencial = null
+        scope.launch { store?.borrarSesion() }
     }
 }
