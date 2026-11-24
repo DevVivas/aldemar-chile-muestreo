@@ -55,8 +55,9 @@ public class Muestra {
     @Column(length = 300)
     private String observaciones;
 
+    // varchar y no ENUM de MySQL: así agregar un estado nuevo no obliga a cambiar la columna.
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, columnDefinition = "varchar(20)")
     private EstadoRevision estado;
 
     @Column(name = "foto_url", length = 500)

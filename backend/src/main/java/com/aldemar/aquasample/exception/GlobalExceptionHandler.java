@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -53,6 +55,44 @@ public class GlobalExceptionHandler {
     /** 404: la muestra no existe. */
     @ExceptionHandler(MuestraNoEncontradaException.class)
     public ResponseEntity<ErrorRespuesta> noEncontrada(MuestraNoEncontradaException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.NOT_FOUND, ex.getMessage(), req, null);
+    }
+
+    /** 400: validación que depende de otros datos (p. ej. comentario obligatorio al observar). */
+    @ExceptionHandler(ValidacionCampoException.class)
+    public ResponseEntity<ErrorRespuesta> validacionCampo(ValidacionCampoException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.BAD_REQUEST, "Hay campos con errores", req, Map.of(ex.getCampo(), ex.getMessage()));
+    }
+
+    /** 400: la foto no es JPEG/PNG, viene vacía o pesa demasiado. */
+    @ExceptionHandler(FotoInvalidaException.class)
+    public ResponseEntity<ErrorRespuesta> fotoInvalida(FotoInvalidaException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.BAD_REQUEST, ex.getMessage(), req, Map.of("archivo", ex.getMessage()));
+    }
+
+    /** 400: el formulario multipart no trae el campo "archivo". */
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorRespuesta> faltaArchivo(MissingServletRequestPartException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.BAD_REQUEST, "Falta el archivo", req,
+                Map.of(ex.getRequestPartName(), "Adjunta una imagen JPEG o PNG"));
+    }
+
+    /** 413: la subida supera el límite de spring.servlet.multipart.max-file-size. */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorRespuesta> archivoGrande(MaxUploadSizeExceededException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.CONTENT_TOO_LARGE, "La foto supera el máximo de 5 MB", req,
+                Map.of("archivo", "La foto supera el máximo de 5 MB"));
+    }
+
+    /** 403: regla de negocio (por ejemplo, un operario intentando validar). */
+    @ExceptionHandler(AccionNoPermitidaException.class)
+    public ResponseEntity<ErrorRespuesta> accionNoPermitida(AccionNoPermitidaException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.FORBIDDEN, ex.getMessage(), req, null);
+    }
+
+    /** 404: la muestra existe pero no tiene foto. */
+    @ExceptionHandler(FotoNoEncontradaException.class)
+    public ResponseEntity<ErrorRespuesta> fotoNoEncontrada(FotoNoEncontradaException ex, HttpServletRequest req) {
         return respuesta(HttpStatus.NOT_FOUND, ex.getMessage(), req, null);
     }
 

@@ -42,3 +42,4 @@ Desktop.ini
 # Backend Spring Boot
 backend/.env
 backend/target/
+backend/uploads/
