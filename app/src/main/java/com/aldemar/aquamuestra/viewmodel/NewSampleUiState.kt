@@ -6,6 +6,10 @@ import com.aldemar.aquamuestra.data.local.EstadoRevision
 data class NewSampleUiState(
     /** UUID de la muestra, generado al abrir el formulario. Solo lectura. */
     val id: String = "",
+    /** true mientras se carga una muestra existente para editarla. */
+    val cargando: Boolean = false,
+    /** Estado que tenía la muestra al abrirla para editar; null = muestra nueva. */
+    val estadoOriginal: EstadoRevision? = null,
     val centro: String = "",
     val concesion: String = "",
     val tren: String = "",

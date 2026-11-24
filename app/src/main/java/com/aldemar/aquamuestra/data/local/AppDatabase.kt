@@ -12,7 +12,8 @@ import androidx.room.TypeConverters
  */
 @Database(
     entities = [MuestraEntity::class],
-    version = 1,
+    // v2: se agregan comentarioRevision y revisadoPor a "muestras".
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -30,7 +31,11 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "aquamuestra.db"
-                ).build().also { INSTANCE = it }
+                )
+                    // SOLO EN DESARROLLO: si cambia la versión, borra y recrea las tablas
+                    // (se pierden los datos locales). Antes de producción hay que escribir Migrations.
+                    .fallbackToDestructiveMigration(dropAllTables = true)
+                    .build().also { INSTANCE = it }
             }
     }
 }

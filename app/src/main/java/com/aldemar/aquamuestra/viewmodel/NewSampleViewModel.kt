@@ -21,14 +21,54 @@ import java.util.UUID
  */
 class NewSampleViewModel(
     private val repository: MuestraRepository,
+    /** Si viene, el formulario abre esa muestra para editarla/corregirla (mismo ID). */
+    muestraIdEditar: String? = null,
     private val reloj: () -> Long = { System.currentTimeMillis() },
     generarId: () -> String = { UUID.randomUUID().toString() }
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
-        NewSampleUiState(id = generarId(), fechaHora = reloj())
+        if (muestraIdEditar == null) {
+            NewSampleUiState(id = generarId(), fechaHora = reloj())
+        } else {
+            NewSampleUiState(id = muestraIdEditar, cargando = true)
+        }
     )
     val uiState: StateFlow<NewSampleUiState> = _uiState.asStateFlow()
+
+    /** La muestra tal como estaba en Room al abrir la edición (para conservar sus datos de revisión). */
+    private var original: MuestraEntity? = null
+
+    init {
+        if (muestraIdEditar != null) cargarParaEditar(muestraIdEditar)
+    }
+
+    private fun cargarParaEditar(id: String) {
+        viewModelScope.launch {
+            val m = repository.obtenerPorId(id)
+            original = m
+            _uiState.update { s ->
+                if (m == null) {
+                    s.copy(cargando = false)
+                } else {
+                    s.copy(
+                        cargando = false,
+                        estadoOriginal = m.estado,
+                        centro = m.centro,
+                        concesion = m.concesion.orEmpty(),
+                        tren = m.tren,
+                        linea = m.linea,
+                        operador = m.operador,
+                        tramoCm = m.tramoCm.toString(),
+                        cantidad = m.cantidad.toString(),
+                        observaciones = m.observaciones,
+                        fechaHora = m.fechaHora,
+                        fotoPath = m.fotoPath
+                    )
+                }
+            }
+        }
+    }
 
     // ---------------------------------------------------------------- Cambios de campos
 
@@ -93,7 +133,7 @@ class NewSampleViewModel(
 
     private fun guardar(estado: EstadoRevision) {
         val actual = _uiState.value
-        if (actual.isSaving) return
+        if (actual.isSaving || actual.cargando) return
 
         val errores = validar(actual, paraEnviar = estado == EstadoRevision.ENVIADA)
         if (errores.hayErrores) {
@@ -155,6 +195,10 @@ class NewSampleViewModel(
         estado = estado,
         fotoPath = fotoPath,
         pendienteSync = true,
-        actualizadoEn = reloj()
+        actualizadoEn = reloj(),
+        // Al reenviar a revisión se limpia la observación del supervisor; en borrador se conserva
+        // para que el operador la siga viendo.
+        comentarioRevision = if (estado == EstadoRevision.ENVIADA) null else original?.comentarioRevision,
+        revisadoPor = original?.revisadoPor
     )
 }

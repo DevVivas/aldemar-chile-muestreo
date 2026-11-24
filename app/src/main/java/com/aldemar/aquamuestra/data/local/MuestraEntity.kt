@@ -29,5 +29,9 @@ data class MuestraEntity(
     /** true = hay cambios locales que todavía no se envían al servidor. */
     val pendienteSync: Boolean = true,
     /** Última modificación en milisegundos (epoch millis). */
-    val actualizadoEn: Long
+    val actualizadoEn: Long,
+    /** Comentario del supervisor al observar la muestra (null si no hay). */
+    val comentarioRevision: String? = null,
+    /** Nombre del supervisor que hizo la última revisión (observar o validar). */
+    val revisadoPor: String? = null
 )

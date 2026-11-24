@@ -265,4 +265,56 @@
     <string name="hist_rango_titulo">Rango de fechas</string>
     <string name="hist_cargando">Cargando muestras</string>
 
+    <!-- Formulario en modo edición (Tarea 3b) -->
+    <string name="muestra_titulo_editar">Editar muestra</string>
+    <string name="muestra_titulo_corregir">Corregir muestra</string>
+
+    <!-- Detalle de muestra (Tarea 3b) -->
+    <string name="det_sin_foto">Sin foto</string>
+    <string name="det_foto_descripcion">Foto de la muestra %1$s</string>
+    <string name="det_observacion_titulo">Observación del supervisor</string>
+    <string name="det_observacion_por">— por %1$s</string>
+    <string name="det_validada_por">Validada por %1$s</string>
+    <string name="det_cantidad">individuos</string>
+    <string name="det_densidad">ind/m</string>
+    <string name="det_tramo">cm de tramo</string>
+    <string name="det_seccion_datos">Datos del muestreo</string>
+    <string name="det_centro">Centro</string>
+    <string name="det_concesion">Concesión</string>
+    <string name="det_tren">Tren</string>
+    <string name="det_linea">Línea</string>
+    <string name="det_fecha_hora">Fecha y hora</string>
+    <string name="det_responsable">Responsable</string>
+    <string name="det_sin_dato">Sin dato</string>
+    <string name="det_seccion_observaciones">Observaciones</string>
+    <string name="det_sin_observaciones">Sin observaciones.</string>
+    <string name="det_seccion_evolucion">Evolución de esta línea</string>
+    <string name="det_evolucion_ayuda">Densidad (individuos por metro) en cada muestreo de esta línea.</string>
+    <string name="det_evolucion_primero">Es el primer muestreo de esta línea. Los próximos se compararán con este.</string>
+    <string name="det_esta_muestra">Esta muestra</string>
+    <string name="det_cantidad_corta">%1$d ind.</string>
+    <string name="det_variacion_sube">Subió %1$s respecto al anterior</string>
+    <string name="det_variacion_baja">Bajó %1$s respecto al anterior</string>
+    <string name="det_validar">Validar</string>
+    <string name="det_observar">Observar</string>
+    <string name="det_corregir">Corregir muestra</string>
+    <string name="det_editar_borrador">Editar borrador</string>
+    <string name="det_ok_validada">Muestra validada</string>
+    <string name="det_ok_observada">Muestra observada. El operador verá tu comentario.</string>
+    <string name="det_error_guardar">No se pudo guardar. Inténtalo de nuevo.</string>
+    <string name="det_no_encontrada_titulo">No encontramos esta muestra</string>
+    <string name="det_no_encontrada_texto">Puede que se haya borrado de este teléfono.</string>
+    <string name="det_error_titulo">No se pudo cargar la muestra</string>
+    <string name="det_error_texto">Vuelve atrás e inténtalo de nuevo.</string>
+    <string name="det_volver">Volver</string>
+    <string name="det_cargando">Cargando muestra</string>
+
+    <!-- Diálogo Observar -->
+    <string name="det_obs_dialogo_titulo">Observar muestra</string>
+    <string name="det_obs_dialogo_texto">Explica qué debe corregir el operador. Verá este comentario junto a la muestra.</string>
+    <string name="det_obs_comentario">Comentario</string>
+    <string name="det_obs_error_vacio">Escribe qué debe corregir el operador</string>
+    <string name="det_obs_contador">%1$d/%2$d</string>
+    <string name="det_obs_confirmar">Observar</string>
+
 </resources>

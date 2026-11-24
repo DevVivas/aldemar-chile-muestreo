@@ -18,7 +18,11 @@ import com.aldemar.aquamuestra.ui.theme.login.LoginScreen
 
 sealed class AppRoutes(val ruta: String) {
     object Login : AppRoutes("login")
-    object NewSample : AppRoutes("new_sample")
+    object NewSample : AppRoutes("new_sample") {
+        /** Patrón con argumento opcional: "new_sample" abre una muestra nueva. */
+        const val PATRON = "new_sample?muestraId={muestraId}"
+        fun editar(muestraId: String) = "new_sample?muestraId=$muestraId"
+    }
     object Inicio : AppRoutes("inicio_screen")
     object Historial : AppRoutes("historial_screen")
     object Dashboard : AppRoutes("dashboard_screen") // Solo supervisor
@@ -61,8 +65,18 @@ fun AppNavigation() {
         }
 
         // 3. Pantalla de Nueva Muestra
-        composable(AppRoutes.NewSample.ruta) {
+        composable(
+            route = AppRoutes.NewSample.PATRON,
+            arguments = listOf(
+                navArgument("muestraId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
             NewSampleFormScreen(
+                muestraId = backStackEntry.arguments?.getString("muestraId"),
                 onBackClick = {
                     navController.popBackStack()
                 }

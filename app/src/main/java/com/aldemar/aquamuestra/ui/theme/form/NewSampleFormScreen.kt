@@ -48,6 +48,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -123,10 +124,12 @@ private val LOCALE_CL: Locale = Locale.forLanguageTag("es-CL")
 @Composable
 fun NewSampleFormScreen(
     modifier: Modifier = Modifier,
+    /** null = muestra nueva; con valor = editar/corregir esa muestra (mismo ID). */
+    muestraId: String? = null,
     onBackClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val viewModel: NewSampleViewModel = viewModel(factory = AppViewModelFactory(context))
+    val viewModel: NewSampleViewModel = viewModel(factory = AppViewModelFactory(context, muestraId))
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     // El operador parte con el usuario de la sesión (se puede editar).
@@ -210,13 +213,20 @@ private fun NewSampleFormContent(
     var accionEnCurso by remember { mutableStateOf<EstadoRevision?>(null) }
 
     val guardado = state.evento as? NewSampleEvento.GuardadoOk
-    val bloqueado = state.isSaving || guardado != null
+    val bloqueado = state.isSaving || guardado != null || state.cargando
     val errores = state.errores
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { AppTopBar(title = stringResource(R.string.muestra_titulo), onBackClick = onBackClick) },
+        topBar = {
+            val titulo = when (state.estadoOriginal) {
+                null -> R.string.muestra_titulo
+                EstadoRevision.BORRADOR -> R.string.muestra_titulo_editar
+                else -> R.string.muestra_titulo_corregir
+            }
+            AppTopBar(title = stringResource(titulo), onBackClick = onBackClick)
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             BarraAcciones(
@@ -242,6 +252,7 @@ private fun NewSampleFormContent(
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
+            if (state.cargando) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             FichaId(id = state.id)
 
             // ---------------------------------------------------------------- Ubicación

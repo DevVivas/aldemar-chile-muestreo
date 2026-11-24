@@ -38,6 +38,23 @@ class MuestraRepository(
         dao.cambiarEstado(id, nuevoEstado, reloj())
     }
 
+    /** La muestra como Flow: la pantalla se actualiza sola cuando cambia (p. ej. tras validar). */
+    fun observarPorId(id: String): Flow<MuestraEntity?> = dao.observarPorId(id)
+
+    /** Muestreos de la misma línea (centro + tren + línea), del más antiguo al más nuevo. */
+    fun obtenerHistoricoLinea(centro: String, tren: String, linea: String): Flow<List<MuestraEntity>> =
+        dao.obtenerHistoricoLinea(centro, tren, linea)
+
+    /** El supervisor aprueba la muestra. Se borra el comentario de una observación anterior. */
+    suspend fun validar(id: String, supervisor: String) {
+        dao.registrarRevision(id, EstadoRevision.VALIDADA, comentario = null, revisadoPor = supervisor, actualizadoEn = reloj())
+    }
+
+    /** El supervisor devuelve la muestra al operador con un comentario de qué corregir. */
+    suspend fun observar(id: String, supervisor: String, comentario: String) {
+        dao.registrarRevision(id, EstadoRevision.OBSERVADA, comentario.trim(), supervisor, reloj())
+    }
+
     suspend fun obtenerPendientesSync(): List<MuestraEntity> = dao.obtenerPendientesSync()
 
     suspend fun marcarSincronizada(id: String) = dao.marcarSincronizada(id)

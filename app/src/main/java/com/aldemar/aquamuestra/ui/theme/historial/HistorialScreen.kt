@@ -87,6 +87,9 @@ import com.aldemar.aquamuestra.data.local.MuestraEntity
 import com.aldemar.aquamuestra.ui.theme.AppRoutes
 import com.aldemar.aquamuestra.ui.theme.components.AppTopBar
 import com.aldemar.aquamuestra.ui.theme.components.BottomNavBar
+import com.aldemar.aquamuestra.ui.theme.components.ChipEstado
+import com.aldemar.aquamuestra.ui.theme.components.EtiquetaPendiente
+import com.aldemar.aquamuestra.ui.theme.components.textoEstado
 import com.aldemar.aquamuestra.viewmodel.AppViewModelFactory
 import com.aldemar.aquamuestra.viewmodel.FiltrosHistorial
 import com.aldemar.aquamuestra.viewmodel.HistorialUiState
@@ -502,63 +505,6 @@ private fun Miniatura(fotoPath: String?) {
                 modifier = Modifier.size(24.dp)
             )
         }
-    }
-}
-
-private data class EstiloEstado(val fondo: Color, val contenido: Color, val icono: ImageVector)
-
-@Composable
-private fun estiloEstado(estado: EstadoRevision): EstiloEstado {
-    val c = MaterialTheme.colorScheme
-    return when (estado) {
-        EstadoRevision.BORRADOR -> EstiloEstado(c.surfaceContainerHighest, c.onSurfaceVariant, Icons.Filled.Edit)
-        EstadoRevision.ENVIADA -> EstiloEstado(c.primaryContainer, c.onPrimaryContainer, Icons.AutoMirrored.Filled.Send)
-        EstadoRevision.OBSERVADA -> EstiloEstado(c.tertiaryContainer, c.onTertiaryContainer, Icons.Filled.Flag)
-        EstadoRevision.VALIDADA -> EstiloEstado(c.secondaryContainer, c.onSecondaryContainer, Icons.Filled.CheckCircle)
-    }
-}
-
-@Composable
-private fun textoEstado(estado: EstadoRevision): String = stringResource(
-    when (estado) {
-        EstadoRevision.BORRADOR -> R.string.hist_estado_borrador
-        EstadoRevision.ENVIADA -> R.string.hist_estado_enviada
-        EstadoRevision.OBSERVADA -> R.string.hist_estado_observada
-        EstadoRevision.VALIDADA -> R.string.hist_estado_validada
-    }
-)
-
-/** Chip de estado (no interactivo): color + icono + texto, para no depender solo del color. */
-@Composable
-private fun ChipEstado(estado: EstadoRevision) {
-    val estilo = estiloEstado(estado)
-    Surface(color = estilo.fondo, contentColor = estilo.contenido, shape = RoundedCornerShape(8.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 8.dp, end = 10.dp, top = 4.dp, bottom = 4.dp)
-        ) {
-            Icon(estilo.icono, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(6.dp))
-            Text(textoEstado(estado), style = MaterialTheme.typography.labelLarge)
-        }
-    }
-}
-
-@Composable
-private fun EtiquetaPendiente() {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            Icons.Filled.CloudUpload,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(Modifier.width(6.dp))
-        Text(
-            stringResource(R.string.hist_pendiente_sync),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.tertiary
-        )
     }
 }
 
