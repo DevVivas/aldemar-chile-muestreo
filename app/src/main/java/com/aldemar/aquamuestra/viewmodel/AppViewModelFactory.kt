@@ -72,6 +72,9 @@ class AppViewModelFactory(
                 sincronizador = syncScheduler
             ) as T
 
+        modelClass.isAssignableFrom(DashboardViewModel::class.java) ->
+            DashboardViewModel(muestraRepository) as T
+
         modelClass.isAssignableFrom(ConteoViewModel::class.java) -> ConteoViewModel() as T
 
         // API externa: usa MarineClient (Retrofit separado, sin credenciales del backend)

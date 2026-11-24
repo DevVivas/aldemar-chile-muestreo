@@ -28,10 +28,11 @@ import com.aldemar.aquamuestra.data.local.EstadoRevision
 
 // Componentes compartidos por el historial y el detalle para mostrar el estado de una muestra.
 
-private data class EstiloEstado(val fondo: Color, val contenido: Color, val icono: ImageVector)
+/** Colores e icono de cada estado (los usa el chip y el gráfico de estados del dashboard). */
+data class EstiloEstado(val fondo: Color, val contenido: Color, val icono: ImageVector)
 
 @Composable
-private fun estiloEstado(estado: EstadoRevision): EstiloEstado {
+fun estiloEstado(estado: EstadoRevision): EstiloEstado {
     val c = MaterialTheme.colorScheme
     return when (estado) {
         EstadoRevision.BORRADOR -> EstiloEstado(c.surfaceContainerHighest, c.onSurfaceVariant, Icons.Filled.Edit)

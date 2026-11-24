@@ -48,6 +48,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import com.aldemar.aquamuestra.ui.theme.components.textoGeneradoPor
+import com.aldemar.aquamuestra.ui.theme.components.rememberExportadorPdf
+import com.aldemar.aquamuestra.ui.theme.components.BotonExportarPdf
+import com.aldemar.aquamuestra.ui.theme.SessionManager
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -115,6 +121,11 @@ fun HistorialScreen(navController: NavController) {
     val syncViewModel: SyncViewModel = viewModel(factory = AppViewModelFactory(context))
     val sync by syncViewModel.uiState.collectAsStateWithLifecycle()
 
+    // Exportar PDF de las validadas visibles con los filtros actuales (solo SUPERVISOR y ANALISTA)
+    val snackbar = remember { SnackbarHostState() }
+    val exportador = rememberExportadorPdf(snackbar)
+    val generadoPor = textoGeneradoPor()
+
     Scaffold(
         topBar = {
             AppTopBar(
@@ -123,6 +134,7 @@ fun HistorialScreen(navController: NavController) {
             )
         },
         bottomBar = { BottomNavBar(navController = navController) },
+        snackbarHost = { SnackbarHost(snackbar) },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         HistorialContenido(
@@ -131,6 +143,15 @@ fun HistorialScreen(navController: NavController) {
             sync = sync,
             onSincronizar = syncViewModel::sincronizarAhora,
             onAbrirMuestra = { id -> navController.navigate(AppRoutes.SampleDetail.createRoute(id)) },
+            // Exportar PDF: solo SUPERVISOR y ANALISTA, con las validadas que pasan los filtros actuales
+            botonExportar = if (SessionManager.puedeExportarReportes) {
+                {
+                    BotonExportarPdf(
+                        generando = exportador.generando,
+                        onClick = { exportador.exportar(viewModel.prepararReporte(generadoPor)) }
+                    )
+                }
+            } else null,
             modifier = Modifier.padding(padding)
         )
     }
@@ -144,6 +165,7 @@ private fun HistorialContenido(
     sync: SyncUiState,
     onSincronizar: () -> Unit,
     onAbrirMuestra: (String) -> Unit,
+    botonExportar: (@Composable () -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     var mostrarRango by rememberSaveable { mutableStateOf(false) }
@@ -170,7 +192,8 @@ private fun HistorialContenido(
                 mostradas = state.muestras.size,
                 total = state.total,
                 hayFiltros = state.filtros.hayFiltros,
-                onLimpiar = viewModel::limpiarFiltros
+                onLimpiar = viewModel::limpiarFiltros,
+                accion = botonExportar
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
@@ -351,7 +374,13 @@ private fun <T> ChipMenu(
 }
 
 @Composable
-private fun ResumenResultados(mostradas: Int, total: Int, hayFiltros: Boolean, onLimpiar: () -> Unit) {
+private fun ResumenResultados(
+    mostradas: Int,
+    total: Int,
+    hayFiltros: Boolean,
+    onLimpiar: () -> Unit,
+    accion: (@Composable () -> Unit)? = null
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -374,6 +403,11 @@ private fun ResumenResultados(mostradas: Int, total: Int, hayFiltros: Boolean, o
         )
         if (hayFiltros) {
             TextButton(onClick = onLimpiar) { Text(stringResource(R.string.hist_limpiar_filtros)) }
+        }
+        if (accion != null) {
+            Spacer(Modifier.width(4.dp))
+            accion()
+            Spacer(Modifier.width(12.dp))
         }
     }
 }

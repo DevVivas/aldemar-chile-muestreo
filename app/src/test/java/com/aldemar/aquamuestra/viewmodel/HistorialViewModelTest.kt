@@ -69,6 +69,22 @@ class HistorialViewModelTest {
     }
 
     @Test
+    fun `dados los filtros del historial cuando se prepara el reporte entonces trae solo las validadas visibles`() = runTest {
+        // Arrange
+        every { repo.obtenerTodas() } returns tabla
+        val vm = HistorialViewModel(repo, reloj = { 0L })
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
+        vm.onCentroChange("Reloncaví Estuario")
+
+        // Act
+        val r = vm.prepararReporte("Analista Demo (Analista de Datos)")
+
+        // Assert
+        assertEquals(listOf("b"), r.filas.map { it.id })
+        assertEquals(listOf("Centro: Reloncaví Estuario"), r.filtros)
+    }
+
+    @Test
     fun `dados varios filtros cuando se limpian entonces vuelven a verse todas`() = runTest {
         // Arrange
         every { repo.obtenerTodas() } returns tabla

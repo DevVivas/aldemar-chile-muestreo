@@ -61,6 +61,9 @@ object SessionManager {
     /** Dashboard: SUPERVISOR y ANALISTA. */
     val puedeVerDashboard: Boolean get() = rol == UserRole.SUPERVISOR || rol == UserRole.ANALISTA
 
+    /** Exportar el reporte PDF de validadas: SUPERVISOR y ANALISTA (el operario no). */
+    val puedeExportarReportes: Boolean get() = rol == UserRole.SUPERVISOR || rol == UserRole.ANALISTA
+
     /** Empieza a escuchar DataStore. Se puede llamar varias veces; solo actúa la primera. */
     fun init(context: Context) {
         if (store != null) return

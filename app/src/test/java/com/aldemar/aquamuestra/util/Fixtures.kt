@@ -28,7 +28,8 @@ object Fixtures {
         conteoMarcas: Int = 0,
         ajusteManual: Int = cantidad,
         marcasJson: String? = null,
-        operador: String = "Operario Demo"
+        operador: String = "Operario Demo",
+        observaciones: String = ""
     ) = MuestraEntity(
         id = id,
         centro = centro,
@@ -39,7 +40,7 @@ object Fixtures {
         fechaHora = fechaHora,
         operador = operador,
         cantidad = cantidad,
-        observaciones = "",
+        observaciones = observaciones,
         estado = estado,
         fotoPath = fotoPath,
         pendienteSync = pendienteSync,

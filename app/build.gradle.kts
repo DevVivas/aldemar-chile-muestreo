@@ -136,6 +136,9 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // Gráficos del dashboard (Vico 3.2.x: última estable compilada con Kotlin 2.3, legible por Kotlin 2.2)
+    implementation(libs.vico.compose.m3)
+
     // Room (base de datos local)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
@@ -213,6 +216,10 @@ kover {
                     // Dependen de WorkManager; su lógica vive en SincronizadorMuestras, que sí se mide.
                     "com.aldemar.aquamuestra.data.sync.SyncWorker*",
                     "com.aldemar.aquamuestra.data.sync.SyncScheduler*",
+                    // Dibuja el PDF con android.graphics.pdf.PdfDocument (Canvas/Paint de Android): no corre en
+                    // la JVM de los tests. Lo que va en el PDF (filtrar validadas, filas, totales) está en
+                    // ReporteMuestras, que sí se mide; el PDF se revisa a mano en el emulador.
+                    "com.aldemar.aquamuestra.data.reporte.GeneradorPdf*",
                     // Clases de solo datos (sin lógica): estados de UI, eventos y resultados.
                     "com.aldemar.aquamuestra.viewmodel.*UiState*",
                     "com.aldemar.aquamuestra.viewmodel.*Evento*",

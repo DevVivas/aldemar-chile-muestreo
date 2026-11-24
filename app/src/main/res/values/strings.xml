@@ -423,4 +423,44 @@
     <string name="mar_error_cache">No pudimos actualizar. Último dato disponible: %1$s</string>
     <string name="mar_reintentar">Reintentar</string>
 
+
+    <!-- Dashboard con datos reales (Tarea 11) -->
+    <string name="dash_hola">Hola, %1$s</string>
+    <string name="dash_periodo_7">7 días</string>
+    <string name="dash_periodo_30">30 días</string>
+    <string name="dash_periodo_todo">Todo</string>
+    <string name="dash_todos_centros">Todos los centros</string>
+    <string name="dash_filtro_centro">Centro: %1$s</string>
+    <string name="dash_kpi_muestras">Muestras</string>
+    <string name="dash_kpi_individuos">Individuos</string>
+    <string name="dash_kpi_individuos_ayuda">contados en total</string>
+    <string name="dash_kpi_densidad">Densidad</string>
+    <string name="dash_kpi_densidad_unidad">ind/m promedio</string>
+    <string name="dash_kpi_pendientes">Por revisar</string>
+    <string name="dash_kpi_pendientes_ayuda">Enviadas + observadas</string>
+    <string name="dash_sin_dato">—</string>
+    <string name="dash_pendientes_sync">%1$d sin subir al servidor</string>
+    <string name="dash_por_centro">Por centro</string>
+    <string name="dash_metrica_muestras">Muestras</string>
+    <string name="dash_metrica_individuos">Individuos</string>
+    <string name="dash_estados">Estado de revisión</string>
+    <string name="dash_evolucion">Evolución de una línea</string>
+    <string name="dash_elegir_linea">Línea</string>
+    <string name="dash_metrica_cantidad">Cantidad</string>
+    <string name="dash_metrica_densidad">Densidad (ind/m)</string>
+    <string name="dash_evolucion_resumen">%1$d muestreos · último %2$s el %3$s · mín %4$s · máx %5$s</string>
+    <string name="dash_evolucion_uno">Solo hay un muestreo en esta línea: %1$s el %2$s</string>
+    <string name="dash_vacio_titulo">Aún no hay muestras para estos filtros</string>
+    <string name="dash_vacio_texto">Prueba con otro período u otro centro.</string>
+    <string name="dash_cargando">Cargando indicadores…</string>
+
+    <!-- Exportar PDF -->
+    <string name="pdf_exportar">Exportar PDF</string>
+    <string name="pdf_generando">Generando PDF…</string>
+    <string name="pdf_listo">PDF guardado</string>
+    <string name="pdf_abrir">Abrir</string>
+    <string name="pdf_sin_validadas">No hay muestras validadas con estos filtros: no se generó el PDF.</string>
+    <string name="pdf_error">No se pudo guardar el PDF.</string>
+    <string name="pdf_sin_visor">No hay una app para abrir PDF en este teléfono.</string>
+    <string name="pdf_generado_por">%1$s (%2$s)</string>
 </resources>

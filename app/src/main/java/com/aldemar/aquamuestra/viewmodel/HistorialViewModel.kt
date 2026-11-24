@@ -29,7 +29,10 @@ data class HistorialUiState(
  *  2. los filtros que elige el usuario.
  * Cada vez que cambia cualquiera de las dos, recalcula la lista con [FiltroMuestras.aplicar].
  */
-class HistorialViewModel(repository: MuestraRepository) : ViewModel() {
+class HistorialViewModel(
+    repository: MuestraRepository,
+    private val reloj: () -> Long = { System.currentTimeMillis() }
+) : ViewModel() {
 
     private val filtros = MutableStateFlow(FiltrosHistorial())
 
@@ -58,4 +61,15 @@ class HistorialViewModel(repository: MuestraRepository) : ViewModel() {
         filtros.update { it.copy(desdeUtc = desdeUtc, hastaUtc = hastaUtc) }
 
     fun limpiarFiltros() = filtros.update { FiltrosHistorial() }
+
+    /** Reporte PDF de las validadas que se ven ahora en el historial (con sus filtros). */
+    fun prepararReporte(generadoPor: String): Reporte {
+        val s = uiState.value
+        return ReporteMuestras.preparar(
+            muestras = s.muestras,
+            filtros = ReporteMuestras.describir(s.filtros),
+            generadoPor = generadoPor,
+            fecha = reloj()
+        )
+    }
 }
