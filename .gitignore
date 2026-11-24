@@ -38,3 +38,7 @@ lib/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Backend Spring Boot
+backend/.env
+backend/target/

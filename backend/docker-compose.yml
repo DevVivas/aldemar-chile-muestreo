@@ -1,0 +1,27 @@
+# MySQL 8 para el backend de AquaSample.
+# Usuario y contraseñas se leen del archivo .env (copiar .env.example a .env).
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: aquasample-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: aquasample
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: America/Santiago
+    ports:
+      # Puerto del PC : puerto del contenedor. Si el 3306 ya está ocupado, cambia MYSQL_PORT en .env.
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      # Volumen con nombre: los datos sobreviven aunque se borre el contenedor.
+      - aquasample-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  aquasample-mysql-data:
