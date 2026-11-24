@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kover)
 }
 
 // URL del backend: se lee de local.properties (API_BASE_URL=...), que NO se sube a git.
@@ -108,3 +109,62 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
+// ---------------------------------------------------------------------------------------------
+// Cobertura de pruebas con Kover (variant debug)
+//   ./gradlew :app:koverHtmlReportDebug   → app/build/reports/kover/htmlDebug/index.html
+//   ./gradlew :app:koverXmlReportDebug    → app/build/reports/kover/reportDebug.xml
+//   ./gradlew :app:koverVerifyDebug       → falla si las líneas cubiertas bajan de 90 %
+// ---------------------------------------------------------------------------------------------
+kover {
+    reports {
+        filters {
+            // Lo que se mide: la lógica que se puede probar en la JVM con JUnit + MockK.
+            includes {
+                classes(
+                    "com.aldemar.aquamuestra.viewmodel.*",                       // ViewModels y lógica pura
+                    "com.aldemar.aquamuestra.data.repository.*",                 // Repositorios
+                    "com.aldemar.aquamuestra.data.sync.SincronizadorMuestras*",  // lógica de sincronización
+                    "com.aldemar.aquamuestra.data.remote.MuestraMapper*",        // Room <-> JSON
+                    "com.aldemar.aquamuestra.data.remote.marine.MarineRepository*",
+                    "com.aldemar.aquamuestra.data.remote.Resultado*",            // Resultado y llamarApi()
+                )
+            }
+            excludes {
+                // Pantallas Compose: se prueban con Compose UI Test en el dispositivo, no con JUnit.
+                annotatedBy("androidx.compose.runtime.Composable")
+                classes(
+                    "com.aldemar.aquamuestra.ui.*",
+                    // Código generado (Room *_Impl, BuildConfig): no lo escribimos nosotros.
+                    "*_Impl*",
+                    "*.BuildConfig",
+                    // Necesitan Android real (base de datos, contexto) o solo arman dependencias.
+                    "com.aldemar.aquamuestra.data.local.AppDatabase*",
+                    "com.aldemar.aquamuestra.viewmodel.AppViewModelFactory*",
+                    // Clientes HTTP: solo configuran Retrofit/OkHttp; su uso se prueba con la API mockeada.
+                    "com.aldemar.aquamuestra.data.remote.RetrofitClient*",
+                    "com.aldemar.aquamuestra.data.remote.marine.MarineClient*",
+                    // Dependen de WorkManager; su lógica vive en SincronizadorMuestras, que sí se mide.
+                    "com.aldemar.aquamuestra.data.sync.SyncWorker*",
+                    "com.aldemar.aquamuestra.data.sync.SyncScheduler*",
+                    // Clases de solo datos (sin lógica): estados de UI, eventos y resultados.
+                    "com.aldemar.aquamuestra.viewmodel.*UiState*",
+                    "com.aldemar.aquamuestra.viewmodel.*Evento*",
+                    "com.aldemar.aquamuestra.viewmodel.ResultadoConteo*",
+                    "com.aldemar.aquamuestra.viewmodel.PuntoEvolucion*",
+                    "com.aldemar.aquamuestra.viewmodel.Punto",
+                    "com.aldemar.aquamuestra.viewmodel.EstadoMarino*",
+                    "com.aldemar.aquamuestra.viewmodel.BannerSync*",
+                )
+            }
+        }
+        variant("debug") {
+            verify {
+                rule("Cobertura mínima de líneas") {
+                    minBound(90) // % de líneas cubiertas sobre lo incluido arriba
+                }
+            }
+        }
+    }
+}
+

@@ -71,6 +71,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
@@ -340,7 +341,8 @@ private fun NewSampleFormContent(
                     singleLine = true,
                     enabled = !bloqueado,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                    modifier = Modifier.fillMaxWidth()
+                    // testTag: lo usa el Compose UI Test para encontrar este campo
+                    modifier = Modifier.fillMaxWidth().testTag(TAG_CAMPO_TRAMO)
                 )
                 ResumenConteo(
                     conteoMarcas = state.conteoMarcas,
@@ -823,3 +825,6 @@ private fun medianocheUtc(millisLocal: Long): Long {
         set(local.get(Calendar.YEAR), local.get(Calendar.MONTH), local.get(Calendar.DAY_OF_MONTH))
     }.timeInMillis
 }
+
+/** Identificador del campo tramo para los Compose UI Tests. */
+const val TAG_CAMPO_TRAMO = "campo_tramo"

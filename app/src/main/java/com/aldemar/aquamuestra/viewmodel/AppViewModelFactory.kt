@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.aldemar.aquamuestra.data.local.AppDatabase
 import com.aldemar.aquamuestra.data.remote.RetrofitClient
+import com.aldemar.aquamuestra.data.remote.marine.CacheMarinoDataStore
 import com.aldemar.aquamuestra.data.remote.marine.MarineClient
 import com.aldemar.aquamuestra.data.remote.marine.MarineRepository
 import com.aldemar.aquamuestra.data.repository.AuthRepository
@@ -75,7 +76,7 @@ class AppViewModelFactory(
 
         // API externa: usa MarineClient (Retrofit separado, sin credenciales del backend)
         modelClass.isAssignableFrom(MarineViewModel::class.java) ->
-            MarineViewModel(MarineRepository(MarineClient.api, appContext)) as T
+            MarineViewModel(MarineRepository(MarineClient.api, CacheMarinoDataStore(appContext))) as T
 
         else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
     }
