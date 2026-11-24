@@ -108,6 +108,18 @@ public class GlobalExceptionHandler {
         return respuesta(HttpStatus.CONFLICT, ex.getMessage(), req, null);
     }
 
+    /** 404: el usuario no existe. */
+    @ExceptionHandler(UsuarioNoEncontradoException.class)
+    public ResponseEntity<ErrorRespuesta> usuarioNoEncontrado(UsuarioNoEncontradoException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.NOT_FOUND, ex.getMessage(), req, null);
+    }
+
+    /** 409: username repetido o regla de supervisores (desactivarse a sí mismo, quedar sin supervisores). */
+    @ExceptionHandler(ConflictoUsuarioException.class)
+    public ResponseEntity<ErrorRespuesta> conflictoUsuario(ConflictoUsuarioException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.CONFLICT, ex.getMessage(), req, null);
+    }
+
     private ResponseEntity<ErrorRespuesta> respuesta(HttpStatus status, String mensaje, HttpServletRequest req,
                                                      Map<String, String> errores) {
         ErrorRespuesta cuerpo = new ErrorRespuesta(

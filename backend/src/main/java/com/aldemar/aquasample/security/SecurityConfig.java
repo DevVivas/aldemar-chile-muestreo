@@ -43,6 +43,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/muestras/**").hasAnyRole("OPERARIO", "SUPERVISOR")
                         .requestMatchers(HttpMethod.PUT, "/api/muestras/**").hasAnyRole("OPERARIO", "SUPERVISOR")
 
+                        // Usuarios (listar, crear, editar, desactivar): solo SUPERVISOR
+                        .requestMatchers("/api/usuarios", "/api/usuarios/**").hasRole("SUPERVISOR")
+
                         // Reportes
                         .requestMatchers("/api/reportes/**").hasAnyRole("SUPERVISOR", "ANALISTA")
 

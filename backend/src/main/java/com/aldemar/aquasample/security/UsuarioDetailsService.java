@@ -30,6 +30,8 @@ public class UsuarioDetailsService implements UserDetailsService {
         return User.withUsername(usuario.getUsername())
                 .password(usuario.getPasswordHash())
                 .roles(usuario.getRol().name())
+                // Usuario desactivado: Spring Security rechaza el login (DisabledException → 401).
+                .disabled(!usuario.isActivo())
                 .build();
     }
 }

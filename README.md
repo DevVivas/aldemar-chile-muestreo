@@ -238,6 +238,7 @@ sequenceDiagram
 | `PATCH /api/muestras/{id}/estado` | ❌ 403 | ✅ | ❌ 403 |
 | `DELETE /api/muestras/{id}` | ❌ 403 | ✅ | ❌ 403 |
 | `GET /api/reportes/resumen` | ❌ 403 | ✅ | ✅ |
+| `/api/usuarios/**` (listar, crear, editar, desactivar) | ❌ 403 | ✅ | ❌ 403 |
 
 Los usuarios de demostración son `op01` (Operario Demo), `su01` (Supervisor Demo) y `an01` (Analista Demo). Sus contraseñas están solo en `backend/.env`, que no se sube a git.
 
@@ -301,6 +302,13 @@ Al arrancar por primera vez, el backend crea los usuarios demo (con contraseña 
 | `GET` | `/api/muestras/{id}/foto` | Cualquiera | Descarga la foto. |
 | `DELETE` | `/api/muestras/{id}` | SUPERVISOR | Elimina una muestra. |
 | `GET` | `/api/reportes/resumen` | SUPERVISOR, ANALISTA | Totales por estado y por centro, y densidad promedio. |
+| `GET` | `/api/usuarios` | SUPERVISOR | Lista los usuarios, sin contraseña. Filtros opcionales: `rol`, `activo`. |
+| `GET` | `/api/usuarios/{username}` | SUPERVISOR | Obtiene un usuario. Responde 404 si no existe. |
+| `POST` | `/api/usuarios` | SUPERVISOR | Crea un usuario (username de 3 a 20 letras o números, contraseña de mínimo 8, guardada con BCrypt). Responde 201, o 409 si el username ya existe. |
+| `PUT` | `/api/usuarios/{username}` | SUPERVISOR | Actualiza nombre y rol; `activo` y `password` son opcionales (la contraseña nueva se vuelve a hashear). |
+| `DELETE` | `/api/usuarios/{username}` | SUPERVISOR | **Desactiva** el usuario (`activo = false`): ya no puede iniciar sesión, pero la fila se conserva para la trazabilidad de sus muestras. |
+
+**Reglas de usuarios:** las respuestas nunca incluyen la contraseña ni su hash. Un supervisor no puede desactivarse ni quitarse el rol a sí mismo, y siempre debe quedar al menos un supervisor activo (si no, 409).
 
 Los errores responden con un JSON uniforme (`status`, `mensaje`, `ruta` y, cuando aplica, `errores` por campo): 400, 401, 403, 404, 409 y 413.
 
@@ -453,7 +461,7 @@ cd backend; .\mvnw.cmd test
 |---|---:|---|
 | Unitarios de la app (`testDebugUnitTest`) | **172** | ✅ 0 fallos |
 | UI e instrumentados (`connectedDebugAndroidTest`): login, formulario y PDF | **6** | ✅ |
-| Backend (`mvnw test`): contexto e integración de seguridad | **8** | ✅ |
+| Backend (`mvnw test`): contexto, seguridad de muestras y CRUD de usuarios | **18** | ✅ |
 
 | Cobertura Kover (app, debug) | Valor |
 |---|---:|

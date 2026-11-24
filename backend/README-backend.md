@@ -59,10 +59,13 @@ Usan el perfil `test` con una base H2 en memoria (`src/test/resources/applicatio
 | Usuario | Nombre | Rol | Qué puede hacer |
 |---|---|---|---|
 | `op01` | Operario Demo | OPERARIO | Ver muestras, crearlas o sincronizarlas en BORRADOR o ENVIADA, subir fotos |
-| `su01` | Supervisor Demo | SUPERVISOR | Todo lo anterior en cualquier estado, observar o validar, eliminar, ver reportes |
+| `su01` | Supervisor Demo | SUPERVISOR | Todo lo anterior en cualquier estado, observar o validar, eliminar, ver reportes y **administrar usuarios** |
 | `an01` | Analista Demo | ANALISTA | Ver muestras, fotos y reportes (solo lectura) |
 
 Las contraseñas están en tu `.env` (variables `DEMO_PASSWORD_*`).
+
+Un supervisor puede crear más usuarios con `POST /api/usuarios` (ver abajo). Cada usuario tiene el campo
+`activo`: un usuario **desactivado** no puede iniciar sesión (responde 401), pero su fila se conserva.
 
 ## Endpoints y permisos
 | Método | Ruta | Qué hace | Quién | Respuestas |
@@ -77,8 +80,27 @@ Las contraseñas están en tu `.env` (variables `DEMO_PASSWORD_*`).
 | GET | `/api/muestras/{id}/foto` | Descarga la foto | Cualquier rol | 200, 401, 404 |
 | DELETE | `/api/muestras/{id}` | Elimina una muestra | SUPERVISOR | 204, 401, 403, 404 |
 | GET | `/api/reportes/resumen` | Totales, cantidad por estado y por centro, densidad promedio. Filtros `desde`/`hasta` | SUPERVISOR, ANALISTA | 200, 400, 401, 403 |
+| GET | `/api/usuarios` | Lista usuarios (sin contraseña). Filtros opcionales: `rol`, `activo` | SUPERVISOR | 200, 400, 401, 403 |
+| GET | `/api/usuarios/{username}` | Obtiene un usuario | SUPERVISOR | 200, 401, 403, 404 |
+| POST | `/api/usuarios` | Crea un usuario `{"username", "nombre", "password", "rol"}`. Contraseña con BCrypt | SUPERVISOR | 201, 400, 401, 403, 409 |
+| PUT | `/api/usuarios/{username}` | Actualiza `nombre` y `rol`; `activo` y `password` son opcionales (si viene password, se re-hashea) | SUPERVISOR | 200, 400, 401, 403, 404, 409 |
+| DELETE | `/api/usuarios/{username}` | **Desactiva** (activo=false); no borra la fila | SUPERVISOR | 204, 401, 403, 404, 409 |
 
 Regla extra en POST y PUT: un **OPERARIO** solo puede dejar la muestra en `BORRADOR` o `ENVIADA`. Si manda `OBSERVADA` o `VALIDADA` recibe **403**.
+
+Reglas de usuarios:
+- `username`: de 3 a 20 letras o números, sin espacios; no se puede cambiar. `password`: mínimo 8 caracteres.
+- Las respuestas **nunca** incluyen la contraseña ni su hash.
+- Un supervisor **no puede desactivarse ni quitarse el rol a sí mismo** → **409**.
+- Siempre debe quedar **al menos un supervisor activo** → **409**.
+- Username repetido → **409**.
+
+Ejemplo (crear un operario):
+```bash
+curl -u su01:<clave> -H "Content-Type: application/json" \
+     -d '{"username":"op03","nombre":"Operario Tres","password":"<clave-nueva>","rol":"OPERARIO"}' \
+     http://localhost:8080/api/usuarios
+```
 
 Las fotos se guardan en `app.fotos.dir` (por defecto `./uploads`, variable `FOTOS_DIR`), como `{id}.jpg` o `{id}.png`.
 
@@ -97,8 +119,8 @@ Siempre en JSON, con el mismo formato (también 401 y 403):
 ## Estructura
 ```
 src/main/java/com/aldemar/aquasample/
-├── controller/  MuestraController, AuthController, ReporteController → reciben la petición HTTP
-├── dto/         MuestraDto, CambioEstadoDto, UsuarioDto, ResumenDto, Mapper → JSON + validaciones
+├── controller/  MuestraController, AuthController, ReporteController, UsuarioController → reciben la petición HTTP
+├── dto/         MuestraDto, CambioEstadoDto, UsuarioDto, UsuarioCrearDto, UsuarioActualizarDto, ResumenDto, Mapper → JSON + validaciones
 ├── service/     MuestraService, FotoService, ReporteService, UsuarioService → lógica y reglas
 ├── repository/  MuestraRepository, UsuarioRepository → acceso a MySQL (Spring Data JPA)
 ├── model/       Muestra, Usuario, EstadoRevision, Rol → tablas "muestras" y "usuarios"

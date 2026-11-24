@@ -6,6 +6,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 
 /**
  * Usuario de la API (tabla "usuarios").
@@ -29,6 +30,15 @@ public class Usuario {
     @Column(nullable = false, columnDefinition = "varchar(20)")
     private Rol rol;
 
+    /**
+     * false = usuario desactivado: no puede iniciar sesión, pero se conserva la fila
+     * (sus muestras siguen mostrando quién las registró o revisó).
+     * DEFAULT true: al agregar la columna, los usuarios que ya existían quedan activos.
+     */
+    @ColumnDefault("true")
+    @Column(nullable = false)
+    private Boolean activo = true;
+
     public Usuario() {
     }
 
@@ -50,4 +60,7 @@ public class Usuario {
 
     public Rol getRol() { return rol; }
     public void setRol(Rol rol) { this.rol = rol; }
+
+    public boolean isActivo() { return !Boolean.FALSE.equals(activo); }
+    public void setActivo(boolean activo) { this.activo = activo; }
 }
