@@ -98,10 +98,12 @@ public class MuestraController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Muestra encontrada"),
             @ApiResponse(responseCode = "404", description = "No existe una muestra con ese id",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "409", description = "ID corto que coincide con varias muestras: usa el UUID completo",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     })
-    public MuestraDto obtener(@Parameter(description = "UUID de la muestra") @PathVariable String id) {
-        return service.obtener(id);
+    public MuestraDto obtener(@Parameter(description = "UUID completo o ID corto (8 primeros caracteres, ej. A9DDA450)") @PathVariable String id) {
+        return service.obtener(service.resolverId(id));
     }
 
     @GetMapping("/codigo/{codigo}")
@@ -158,15 +160,16 @@ public class MuestraController {
             @ApiResponse(responseCode = "201", description = "Muestra creada"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos o id distinto al de la URL",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
-            @ApiResponse(responseCode = "409", description = "Un OPERARIO intentó modificar una muestra ya VALIDADA",
+            @ApiResponse(responseCode = "409", description = "Un OPERARIO intentó modificar una muestra ya VALIDADA, o el ID corto coincide con varias muestras",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     })
     public ResponseEntity<MuestraDto> crearOActualizar(
-            @Parameter(description = "UUID de la muestra") @PathVariable String id,
+            @Parameter(description = "UUID completo o ID corto (8 primeros caracteres, ej. A9DDA450)") @PathVariable String id,
             @Valid @RequestBody MuestraDto dto,
             Authentication auth
     ) {
-        MuestraService.ResultadoUpsert resultado = service.crearOActualizar(id, dto, auth.getName());
+        MuestraService.ResultadoUpsert resultado =
+                service.crearOActualizar(service.resolverIdParaGuardar(id, dto.id()), dto, auth.getName());
         HttpStatus status = resultado.creada() ? HttpStatus.CREATED : HttpStatus.OK;
         return ResponseEntity.status(status).body(resultado.muestra());
     }
@@ -183,14 +186,16 @@ public class MuestraController {
             @ApiResponse(responseCode = "400", description = "Estado faltante u OBSERVADA sin comentario",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
             @ApiResponse(responseCode = "404", description = "No existe una muestra con ese id",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "409", description = "ID corto que coincide con varias muestras: usa el UUID completo",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     })
     public MuestraDto cambiarEstado(
-            @Parameter(description = "UUID de la muestra") @PathVariable String id,
+            @Parameter(description = "UUID completo o ID corto (8 primeros caracteres, ej. A9DDA450)") @PathVariable String id,
             @Valid @RequestBody CambioEstadoDto cambio,
             Authentication auth
     ) {
-        return service.cambiarEstado(id, cambio, auth.getName());
+        return service.cambiarEstado(service.resolverId(id), cambio, auth.getName());
     }
 
     @PostMapping(value = "/{id}/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -205,14 +210,16 @@ public class MuestraController {
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
             @ApiResponse(responseCode = "404", description = "No existe una muestra con ese id",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "409", description = "ID corto que coincide con varias muestras: usa el UUID completo",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
             @ApiResponse(responseCode = "413", description = "La foto supera 5 MB",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     })
     public Map<String, String> subirFoto(
-            @Parameter(description = "UUID de la muestra") @PathVariable String id,
+            @Parameter(description = "UUID completo o ID corto (8 primeros caracteres, ej. A9DDA450)") @PathVariable String id,
             @Parameter(description = "Imagen JPEG o PNG (máx. 5 MB)") @RequestPart("archivo") MultipartFile archivo
     ) {
-        return Map.of("fotoUrl", fotoService.guardar(id, archivo));
+        return Map.of("fotoUrl", fotoService.guardar(service.resolverId(id), archivo));
     }
 
     @GetMapping("/{id}/foto")
@@ -221,10 +228,12 @@ public class MuestraController {
             @ApiResponse(responseCode = "200", description = "La imagen",
                     content = {@Content(mediaType = "image/jpeg"), @Content(mediaType = "image/png")}),
             @ApiResponse(responseCode = "404", description = "La muestra no existe o todavía no tiene foto",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "409", description = "ID corto que coincide con varias muestras: usa el UUID completo",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     })
-    public ResponseEntity<Resource> descargarFoto(@Parameter(description = "UUID de la muestra") @PathVariable String id) {
-        FotoService.FotoArchivo foto = fotoService.obtener(id);
+    public ResponseEntity<Resource> descargarFoto(@Parameter(description = "UUID completo o ID corto (8 primeros caracteres, ej. A9DDA450)") @PathVariable String id) {
+        FotoService.FotoArchivo foto = fotoService.obtener(service.resolverId(id));
         return ResponseEntity.ok().contentType(foto.tipo()).body(foto.recurso());
     }
 
@@ -233,10 +242,12 @@ public class MuestraController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Muestra eliminada"),
             @ApiResponse(responseCode = "404", description = "No existe una muestra con ese id",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "409", description = "ID corto que coincide con varias muestras: usa el UUID completo",
                     content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
     })
-    public ResponseEntity<Void> eliminar(@Parameter(description = "UUID de la muestra") @PathVariable String id) {
-        service.eliminar(id);
+    public ResponseEntity<Void> eliminar(@Parameter(description = "UUID completo o ID corto (8 primeros caracteres, ej. A9DDA450)") @PathVariable String id) {
+        service.eliminar(service.resolverId(id));
         return ResponseEntity.noContent().build();
     }
 }

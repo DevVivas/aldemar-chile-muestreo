@@ -87,6 +87,8 @@ Un supervisor puede crear más usuarios con `POST /api/usuarios` (ver abajo). Ca
 | PUT | `/api/usuarios/{username}` | Actualiza `nombre` y `rol`; `activo` y `password` son opcionales (si viene password, se re-hashea) | SUPERVISOR | 200, 400, 401, 403, 404, 409 |
 | DELETE | `/api/usuarios/{username}` | **Desactiva** (activo=false); no borra la fila | SUPERVISOR | 204, 401, 403, 404, 409 |
 
+**ID corto en todas las rutas con `{id}`:** `GET`, `PUT`, `PATCH /estado`, `DELETE` y las de foto aceptan el UUID completo o sus **8 primeros caracteres** (el ID que muestra la app, sin importar mayúsculas), por ejemplo `GET /api/muestras/A9DDA450`. Si varias muestras empiezan igual responde **409** y hay que usar el UUID completo. En `PUT`, si el id del cuerpo empieza con ese código, se usa el del cuerpo (sirve también para crear).
+
 Regla extra en POST y PUT: un **OPERARIO** solo puede dejar la muestra en `BORRADOR` o `ENVIADA`. Si manda `OBSERVADA` o `VALIDADA` recibe **403**.
 
 Reglas de usuarios:

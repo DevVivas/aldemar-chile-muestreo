@@ -8,18 +8,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * GET /api/muestras/codigo/{codigo}: buscar una muestra por su ID corto (8 primeros caracteres del UUID).
+ * ID corto (8 primeros caracteres del UUID): GET /api/muestras/codigo/{codigo} y todos los endpoints
+ * con {id}, que aceptan el UUID completo o el ID corto.
  * Cada test usa IDs propios (prefijos c0de...) para no chocar con los datos de los otros tests.
  */
 @SpringBootTest
@@ -94,5 +99,95 @@ class MuestraCodigoIntegrationTest {
     void sinCredenciales401() throws Exception {
         mockMvc.perform(get("/api/muestras/codigo/C0DE0001"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    private static String muestraJson(String id, String estado) {
+        return """
+                {"id": "%s", "centro": "Calbuco Sur", "tren": "Tren 1 - Módulo A", "linea": "Línea 10",
+                 "tramoCm": 100, "fechaHora": "2026-11-20T10:00:00", "operador": "Operario Demo",
+                 "cantidad": 130, "observaciones": "", "estado": "%s"}
+                """.formatted(id, estado);
+    }
+
+    @Test
+    @DisplayName("GET /api/muestras/{id} con el ID corto → 200 con la muestra")
+    void getConIdCorto200() throws Exception {
+        crear("c0de0003-1111-4111-8111-111111111111");
+
+        mockMvc.perform(get("/api/muestras/C0DE0003").with(httpBasic("an01", "test-analista")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("c0de0003-1111-4111-8111-111111111111"));
+    }
+
+    @Test
+    @DisplayName("PATCH /{id}/estado con el ID corto → el supervisor valida la muestra")
+    void patchConIdCorto200() throws Exception {
+        crear("c0de0004-1111-4111-8111-111111111111");
+
+        mockMvc.perform(patch("/api/muestras/c0de0004/estado")
+                        .with(httpBasic("su01", "test-supervisor"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"estado": "VALIDADA"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("c0de0004-1111-4111-8111-111111111111"))
+                .andExpect(jsonPath("$.estado").value("VALIDADA"));
+    }
+
+    @Test
+    @DisplayName("PUT /{id} con el ID corto → actualiza la existente (200) o crea una nueva (201)")
+    void putConIdCorto() throws Exception {
+        String existente = "c0de0005-1111-4111-8111-111111111111";
+        crear(existente);
+        mockMvc.perform(put("/api/muestras/C0DE0005")
+                        .with(httpBasic("op01", "test-operario"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(muestraJson(existente, "ENVIADA")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cantidad").value(130));
+
+        String nueva = "c0de0006-1111-4111-8111-111111111111";
+        mockMvc.perform(put("/api/muestras/c0de0006")
+                        .with(httpBasic("op01", "test-operario"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(muestraJson(nueva, "BORRADOR")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(nueva));
+    }
+
+    @Test
+    @DisplayName("DELETE /{id} con el ID corto → 204 y la muestra ya no existe")
+    void deleteConIdCorto204() throws Exception {
+        crear("c0de0007-1111-4111-8111-111111111111");
+
+        mockMvc.perform(delete("/api/muestras/C0DE0007").with(httpBasic("su01", "test-supervisor")))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/muestras/c0de0007-1111-4111-8111-111111111111").with(httpBasic("su01", "test-supervisor")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("GET /{id}/foto con el ID corto de una muestra sin foto → 404 de foto (la muestra sí se encontró)")
+    void fotoConIdCorto404() throws Exception {
+        crear("c0de0008-1111-4111-8111-111111111111");
+
+        mockMvc.perform(get("/api/muestras/c0de0008/foto").with(httpBasic("an01", "test-analista")))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.ruta").value("/api/muestras/c0de0008/foto"));
+    }
+
+    @Test
+    @DisplayName("DELETE con un ID corto ambiguo → 409 y no se borra ninguna")
+    void deleteAmbiguo409() throws Exception {
+        crear("c0de0009-1111-4111-8111-111111111111");
+        crear("c0de0009-2222-4222-8222-222222222222");
+
+        mockMvc.perform(delete("/api/muestras/c0de0009").with(httpBasic("su01", "test-supervisor")))
+                .andExpect(status().isConflict());
+        mockMvc.perform(get("/api/muestras/c0de0009-1111-4111-8111-111111111111").with(httpBasic("su01", "test-supervisor")))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/muestras/c0de0009-2222-4222-8222-222222222222").with(httpBasic("su01", "test-supervisor")))
+                .andExpect(status().isOk());
     }
 }

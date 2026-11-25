@@ -73,19 +73,52 @@ public class MuestraService {
     @Transactional(readOnly = true)
     public MuestraDto obtenerPorCodigo(String codigo) {
         String c = codigo == null ? "" : codigo.trim();
-        if (!c.matches("^[0-9a-fA-F]{8}$")) {
+        if (!esCodigoCorto(c)) {
             throw new ValidacionCampoException("codigo",
                     "El código debe tener 8 caracteres hexadecimales (0-9, A-F), por ejemplo A9DDA450");
         }
+        return obtener(idDesdeCodigo(c));
+    }
+
+    /**
+     * Todos los endpoints con {id} aceptan el UUID completo o su ID corto (los 8 primeros caracteres,
+     * el que muestra la app). Con un ID corto devuelve el UUID de la única muestra que empieza así:
+     * 404 si no hay ninguna, 409 si hay varias. Cualquier otro valor se devuelve tal cual.
+     */
+    @Transactional(readOnly = true)
+    public String resolverId(String idOCodigo) {
+        String c = idOCodigo == null ? "" : idOCodigo.trim();
+        return esCodigoCorto(c) ? idDesdeCodigo(c) : idOCodigo;
+    }
+
+    /**
+     * Para PUT (crear o actualizar): si la URL trae el ID corto y el id del cuerpo empieza con él,
+     * se usa el id del cuerpo (así también se puede CREAR con el ID corto en la URL).
+     */
+    @Transactional(readOnly = true)
+    public String resolverIdParaGuardar(String idOCodigo, String idDelCuerpo) {
+        String c = idOCodigo == null ? "" : idOCodigo.trim();
+        if (esCodigoCorto(c) && idDelCuerpo != null
+                && idDelCuerpo.toLowerCase(Locale.ROOT).startsWith(c.toLowerCase(Locale.ROOT))) {
+            return idDelCuerpo;
+        }
+        return resolverId(idOCodigo);
+    }
+
+    private static boolean esCodigoCorto(String valor) {
+        return valor.matches("^[0-9a-fA-F]{8}$");
+    }
+
+    private String idDesdeCodigo(String codigo) {
         // Los UUID se guardan en minúsculas
-        List<Muestra> encontradas = repository.findByIdStartingWith(c.toLowerCase(Locale.ROOT));
+        List<Muestra> encontradas = repository.findByIdStartingWith(codigo.toLowerCase(Locale.ROOT));
         if (encontradas.isEmpty()) {
-            throw MuestraNoEncontradaException.porCodigo(c.toUpperCase(Locale.ROOT));
+            throw MuestraNoEncontradaException.porCodigo(codigo.toUpperCase(Locale.ROOT));
         }
         if (encontradas.size() > 1) {
-            throw new CodigoAmbiguoException(c.toUpperCase(Locale.ROOT), encontradas.size());
+            throw new CodigoAmbiguoException(codigo.toUpperCase(Locale.ROOT), encontradas.size());
         }
-        return MuestraMapper.toDto(encontradas.get(0));
+        return encontradas.get(0).getId();
     }
 
     /** Crea una muestra nueva. Si el id ya existe, responde 409 (no la pisa). */

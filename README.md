@@ -311,6 +311,8 @@ Al arrancar por primera vez, el backend crea los usuarios demo (con contraseña 
 
 **Reglas de usuarios:** las respuestas nunca incluyen la contraseña ni su hash. Un supervisor no puede desactivarse ni quitarse el rol a sí mismo, y siempre debe quedar al menos un supervisor activo (si no, 409).
 
+**ID corto en todas las rutas con `{id}`:** `GET`, `PUT`, `PATCH /estado`, `DELETE` y las de foto aceptan el UUID completo o sus **8 primeros caracteres** (el ID que muestra la app, sin importar mayúsculas), por ejemplo `GET /api/muestras/A9DDA450`. Si varias muestras empiezan igual responde **409** y hay que usar el UUID completo. En `PUT`, si el id del cuerpo empieza con ese código, se usa el del cuerpo (sirve también para crear).
+
 Los errores responden con un JSON uniforme (`status`, `mensaje`, `ruta` y, cuando aplica, `errores` por campo): 400, 401, 403, 404, 409 y 413.
 
 ---
@@ -462,7 +464,7 @@ cd backend; .\mvnw.cmd test
 |---|---:|---|
 | Unitarios de la app (`testDebugUnitTest`) | **172** | ✅ 0 fallos |
 | UI e instrumentados (`connectedDebugAndroidTest`): login, formulario y PDF | **6** | ✅ |
-| Backend (`mvnw test`): contexto, seguridad de muestras, búsqueda por ID corto y CRUD de usuarios | **23** | ✅ |
+| Backend (`mvnw test`): contexto, seguridad de muestras, ID corto en los endpoints y CRUD de usuarios | **29** | ✅ |
 
 | Cobertura Kover (app, debug) | Valor |
 |---|---:|
