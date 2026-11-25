@@ -20,7 +20,7 @@ AquaMuestra permite a los equipos de ALDEMAR SpA registrar en terreno los muestr
 10. [Modo offline y sincronización](#modo-offline-y-sincronización)
 11. [Instalación](#instalación)
 12. [Pruebas](#pruebas)
-13. [Capturas](#capturas)
+13. [Pantallas y flujos](#pantallas-y-flujos)
 14. [Seguridad](#seguridad)
 15. [Planificación](#planificación)
 
@@ -72,11 +72,11 @@ El diseño de la aplicación está inspirado en el entorno marítimo, priorizand
 
 **Equipo Tridente N°18 · Sección 005-V**
 
-| Integrante | Rol en el proyecto |
-|---|---|
-| Daniel Villamizar | `<rol en el proyecto>` |
-| Abraham Vivas | `<rol en el proyecto>` |
-| Renato Uribe | `<rol en el proyecto>` |
+| Integrante | Rol en el proyecto     |
+|---|------------------------|
+| Daniel Villamizar | `<developer>`          |
+| Abraham Vivas | `<developer>` |
+| Renato Uribe | `<developer>` |
 
 ---
 
@@ -486,18 +486,11 @@ Ejecutarlo solo:
 
 ---
 
-## Capturas
+## Pantallas y flujos
 
-Las capturas se tomaron en el emulador (Pixel 4a, Android 17) con la app v1.0.0 y el backend local. Están en [`docs/capturas/`](docs/capturas/).
+Las 34 pantallas de la app, en modo oscuro y ordenadas por rol y flujo (acceso, operario, supervisor, analista y backend), están en un PDF:
 
-| | | |
-|:---:|:---:|:---:|
-| ![Login](docs/capturas/01_login.png)<br/>**Login** | ![Inicio operario](docs/capturas/02_inicio_operario.png)<br/>**Inicio · Operario** | ![Inicio supervisor](docs/capturas/03_inicio_supervisor.png)<br/>**Inicio · Supervisor** |
-| ![Inicio analista](docs/capturas/04_inicio_analista.png)<br/>**Inicio · Analista** | ![Formulario con errores](docs/capturas/05_formulario_errores.png)<br/>**Formulario con errores** | ![Operador bloqueado](docs/capturas/06_formulario_operador.png)<br/>**Operador fijo de la sesión** |
-| ![Cámara](docs/capturas/07_camara.png)<br/>**Cámara (CameraX)** | ![Formulario con foto](docs/capturas/08_formulario_foto.png)<br/>**Formulario con foto** | ![Conteo con marcas](docs/capturas/09_conteo_marcas.png)<br/>**Conteo con marcas** |
-| ![Historial con filtros](docs/capturas/10_historial_filtros.png)<br/>**Historial con filtros** | ![Detalle](docs/capturas/11_detalle.png)<br/>**Detalle de muestra** | ![Evolución de la línea](docs/capturas/12_detalle_evolucion.png)<br/>**Detalle · evolución de la línea** |
-| ![Revisión supervisor](docs/capturas/13_detalle_revision_supervisor.png)<br/>**Revisión (Observar / Validar)** | ![Dashboard](docs/capturas/14_dashboard.png)<br/>**Dashboard · KPIs** | ![Dashboard gráficos](docs/capturas/15_dashboard_graficos.png)<br/>**Dashboard · gráficos** |
-| ![Reporte PDF](docs/capturas/16_reporte_pdf.png)<br/>**Reporte PDF** | ![Swagger](docs/capturas/17_swagger.png)<br/>**Swagger UI del backend** | |
+📄 **[docs/AquaMuestra_pantallas_modo_oscuro.pdf](docs/AquaMuestra_pantallas_modo_oscuro.pdf)**
 
 ---
 
