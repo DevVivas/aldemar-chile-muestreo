@@ -104,6 +104,29 @@ public class MuestraController {
         return service.obtener(id);
     }
 
+    @GetMapping("/codigo/{codigo}")
+    @Operation(
+            summary = "Obtener una muestra por su ID corto",
+            description = "Busca con los 8 primeros caracteres del UUID, el código que muestra la app "
+                    + "(sin importar mayúsculas). Cualquier rol."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Muestra encontrada"),
+            @ApiResponse(responseCode = "400", description = "El código no tiene 8 caracteres hexadecimales",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "401", description = "Sin credenciales o credenciales incorrectas",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "404", description = "Ninguna muestra empieza con ese código",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class))),
+            @ApiResponse(responseCode = "409", description = "Varias muestras empiezan con ese código: usa el UUID completo",
+                    content = @Content(schema = @Schema(implementation = ErrorRespuesta.class)))
+    })
+    public MuestraDto obtenerPorCodigo(
+            @Parameter(description = "ID corto: 8 primeros caracteres del UUID", example = "A9DDA450")
+            @PathVariable String codigo) {
+        return service.obtenerPorCodigo(codigo);
+    }
+
     @PostMapping
     @Operation(
             summary = "Crear una muestra",

@@ -4,6 +4,7 @@ import com.aldemar.aquasample.dto.CambioEstadoDto;
 import com.aldemar.aquasample.dto.MuestraDto;
 import com.aldemar.aquasample.dto.MuestraMapper;
 import com.aldemar.aquasample.exception.AccionNoPermitidaException;
+import com.aldemar.aquasample.exception.CodigoAmbiguoException;
 import com.aldemar.aquasample.exception.IdNoCoincideException;
 import com.aldemar.aquasample.exception.MuestraDuplicadaException;
 import com.aldemar.aquasample.exception.MuestraNoEncontradaException;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -62,6 +64,28 @@ public class MuestraService {
         return repository.findById(id)
                 .map(MuestraMapper::toDto)
                 .orElseThrow(() -> new MuestraNoEncontradaException(id));
+    }
+
+    /**
+     * Busca por el ID corto que muestra la app (los 8 primeros caracteres del UUID, sin importar mayúsculas).
+     * 400 si no son 8 caracteres hexadecimales; 404 si no hay ninguna; 409 si hay más de una.
+     */
+    @Transactional(readOnly = true)
+    public MuestraDto obtenerPorCodigo(String codigo) {
+        String c = codigo == null ? "" : codigo.trim();
+        if (!c.matches("^[0-9a-fA-F]{8}$")) {
+            throw new ValidacionCampoException("codigo",
+                    "El código debe tener 8 caracteres hexadecimales (0-9, A-F), por ejemplo A9DDA450");
+        }
+        // Los UUID se guardan en minúsculas
+        List<Muestra> encontradas = repository.findByIdStartingWith(c.toLowerCase(Locale.ROOT));
+        if (encontradas.isEmpty()) {
+            throw MuestraNoEncontradaException.porCodigo(c.toUpperCase(Locale.ROOT));
+        }
+        if (encontradas.size() > 1) {
+            throw new CodigoAmbiguoException(c.toUpperCase(Locale.ROOT), encontradas.size());
+        }
+        return MuestraMapper.toDto(encontradas.get(0));
     }
 
     /** Crea una muestra nueva. Si el id ya existe, responde 409 (no la pisa). */

@@ -108,6 +108,12 @@ public class GlobalExceptionHandler {
         return respuesta(HttpStatus.CONFLICT, ex.getMessage(), req, null);
     }
 
+    /** 409: el código corto coincide con varias muestras. */
+    @ExceptionHandler(CodigoAmbiguoException.class)
+    public ResponseEntity<ErrorRespuesta> codigoAmbiguo(CodigoAmbiguoException ex, HttpServletRequest req) {
+        return respuesta(HttpStatus.CONFLICT, ex.getMessage(), req, null);
+    }
+
     /** 404: el usuario no existe. */
     @ExceptionHandler(UsuarioNoEncontradoException.class)
     public ResponseEntity<ErrorRespuesta> usuarioNoEncontrado(UsuarioNoEncontradoException ex, HttpServletRequest req) {

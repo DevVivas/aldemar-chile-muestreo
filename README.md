@@ -295,6 +295,7 @@ Al arrancar por primera vez, el backend crea los usuarios demo (con contraseña 
 | `GET` | `/api/auth/me` | Cualquier usuario autenticado | Devuelve username, nombre y rol. La app lo usa para validar el login. |
 | `GET` | `/api/muestras` | Cualquiera | Lista las muestras, de la más reciente a la más antigua. Filtros opcionales: `centro`, `tren`, `linea`, `estado`, `desde`, `hasta` (yyyy-MM-dd). |
 | `GET` | `/api/muestras/{id}` | Cualquiera | Obtiene una muestra. Responde 404 si no existe. |
+| `GET` | `/api/muestras/codigo/{codigo}` | Cualquiera | Obtiene una muestra por su **ID corto** (los 8 caracteres que muestra la app, sin importar mayúsculas). 400 si el formato es incorrecto, 404 si no existe, 409 si varias muestras empiezan igual. |
 | `POST` | `/api/muestras` | OPERARIO, SUPERVISOR | Crea una muestra con el UUID que envía la app. Responde 409 si el id ya existe. |
 | `PUT` | `/api/muestras/{id}` | OPERARIO, SUPERVISOR | **Upsert idempotente**: crea la muestra (201) o la actualiza (200). Es el endpoint de la sincronización. Un operario solo puede dejarla en BORRADOR o ENVIADA (si no, 403). Si ya está VALIDADA, responde 409. |
 | `PATCH` | `/api/muestras/{id}/estado` | SUPERVISOR | Revisión: VALIDADA u OBSERVADA. OBSERVADA exige comentario (si falta, 400). Guarda `revisadoPor`. |
@@ -461,7 +462,7 @@ cd backend; .\mvnw.cmd test
 |---|---:|---|
 | Unitarios de la app (`testDebugUnitTest`) | **172** | ✅ 0 fallos |
 | UI e instrumentados (`connectedDebugAndroidTest`): login, formulario y PDF | **6** | ✅ |
-| Backend (`mvnw test`): contexto, seguridad de muestras y CRUD de usuarios | **18** | ✅ |
+| Backend (`mvnw test`): contexto, seguridad de muestras, búsqueda por ID corto y CRUD de usuarios | **23** | ✅ |
 
 | Cobertura Kover (app, debug) | Valor |
 |---|---:|

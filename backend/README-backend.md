@@ -73,6 +73,7 @@ Un supervisor puede crear más usuarios con `POST /api/usuarios` (ver abajo). Ca
 | GET | `/api/auth/me` | Usuario autenticado (username, nombre, rol). La app lo usa para el login | Cualquier rol | 200, 401 |
 | GET | `/api/muestras` | Lista muestras. Filtros opcionales: `centro`, `tren`, `linea`, `estado`, `desde`, `hasta` (yyyy-MM-dd) | Cualquier rol | 200, 400, 401 |
 | GET | `/api/muestras/{id}` | Obtiene una muestra | Cualquier rol | 200, 401, 404 |
+| GET | `/api/muestras/codigo/{codigo}` | Obtiene una muestra por su ID corto (8 primeros caracteres del UUID, ej. `A9DDA450`). Si varias empiezan igual → 409 | Cualquier rol | 200, 400, 401, 404, 409 |
 | POST | `/api/muestras` | Crea una muestra (el id lo manda la app) | OPERARIO, SUPERVISOR | 201, 400, 401, 403, 409 |
 | PUT | `/api/muestras/{id}` | Crea o actualiza (upsert). Lo usa la sincronización: nunca duplica | OPERARIO, SUPERVISOR | 201, 200, 400, 401, 403 |
 | PATCH | `/api/muestras/{id}/estado` | Cambia el estado. `{"estado": "...", "comentario": "..."}`; OBSERVADA exige comentario | SUPERVISOR | 200, 400, 401, 403, 404 |

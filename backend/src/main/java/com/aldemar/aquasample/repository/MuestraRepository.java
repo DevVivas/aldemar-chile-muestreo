@@ -37,4 +37,7 @@ public interface MuestraRepository extends JpaRepository<Muestra, String> {
             @Param("desde") LocalDateTime desde,
             @Param("hasta") LocalDateTime hasta
     );
+
+    /** Muestras cuyo id empieza con el código corto (los 8 primeros caracteres del UUID). */
+    List<Muestra> findByIdStartingWith(String prefijo);
 }
