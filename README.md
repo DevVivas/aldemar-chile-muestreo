@@ -474,6 +474,14 @@ cd backend; .\mvnw.cmd test
 
 Kover mide la lógica: ViewModels, repositorios, red, sincronización y reglas. Las pantallas Compose, la cámara y el generador del PDF se prueban con tests de UI e instrumentados, y en el emulador.
 
+### Evidencia de los tests en el emulador
+
+Los 6 tests instrumentados (login, formulario y reporte PDF) se ejecutaron en el emulador (Pixel 4a, Android 17) y todos pasaron. Cada uno aparece con su ubicación exacta en el proyecto (archivo y línea), lo que verifica en formato *Dado / Cuando / Entonces*, su tiempo y la captura de la pantalla o de las páginas PDF que generó:
+
+📄 **[docs/AquaMuestra_tests_emulador.pdf](docs/AquaMuestra_tests_emulador.pdf)**
+
+> Para correrlos: emulador encendido y **desbloqueado** (con la pantalla apagada, los tests de Compose fallan con "No compose hierarchies found") y el teléfono desconectado.
+
 ### Test destacado para la demo
 
 **`InicioViewModelTest` → "dadas pendientes cuando elige sincronizar y salir y todo sube entonces sale"**
