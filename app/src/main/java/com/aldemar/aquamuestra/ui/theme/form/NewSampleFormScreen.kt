@@ -1,11 +1,10 @@
 package com.aldemar.aquamuestra.ui.theme.form
 
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,16 +25,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -44,32 +41,27 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -99,14 +91,12 @@ import com.aldemar.aquamuestra.viewmodel.NewSampleEvento
 import com.aldemar.aquamuestra.viewmodel.NewSampleUiState
 import com.aldemar.aquamuestra.viewmodel.NewSampleViewModel
 import com.aldemar.aquamuestra.viewmodel.ResultadoConteo
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // Opciones de ejemplo (más adelante vendrán de Room o del backend).
 private val CENTROS = listOf("Centro Chiloé (Sector Huito)", "Punta Pelluco, módulo 104", "Calbuco Sur", "Reloncaví Estuario")
@@ -195,8 +185,6 @@ private fun NewSampleFormContent(
         }
     }
 
-    var mostrarFecha by rememberSaveable { mutableStateOf(false) }
-    var mostrarHora by rememberSaveable { mutableStateOf(false) }
 
     // Qué botón se tocó, para mostrar el indicador de carga en ese y no en el otro.
     var accionEnCurso by remember { mutableStateOf<EstadoRevision?>(null) }
@@ -249,7 +237,12 @@ private fun NewSampleFormContent(
                 ComentarioSupervisor(comentario = comentario, autor = state.revisadoPor)
             }
 
-            FichaId(id = state.id)
+            FichaId(
+                id = state.id,
+                operador = state.operador,
+                fechaHora = state.fechaHora,
+                sinOperador = errores.operador != null
+            )
 
             // ---------------------------------------------------------------- Ubicación
             Seccion(titulo = stringResource(R.string.muestra_seccion_ubicacion)) {
@@ -289,52 +282,6 @@ private fun NewSampleFormContent(
                     onSeleccion = viewModel::onLineaChange,
                     error = errores.linea?.let { stringResource(R.string.muestra_error_linea) },
                     habilitado = !bloqueado
-                )
-            }
-
-            // ---------------------------------------------------------------- Fecha y operador
-            Seccion(titulo = stringResource(R.string.muestra_seccion_registro)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CampoToque(
-                        label = stringResource(R.string.muestra_fecha),
-                        valor = formatearFecha(state.fechaHora),
-                        icono = Icons.Filled.CalendarMonth,
-                        descripcionAccion = stringResource(R.string.muestra_elegir_fecha),
-                        habilitado = !bloqueado,
-                        onClick = { mostrarFecha = true },
-                        modifier = Modifier.weight(1.4f)
-                    )
-                    CampoToque(
-                        label = stringResource(R.string.muestra_hora),
-                        valor = formatearHora(state.fechaHora),
-                        icono = Icons.Filled.Schedule,
-                        descripcionAccion = stringResource(R.string.muestra_elegir_hora),
-                        habilitado = !bloqueado,
-                        onClick = { mostrarHora = true },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                // Solo lectura: se toma de la sesión para que nadie registre a nombre de otro.
-                OutlinedTextField(
-                    value = state.operador,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.muestra_operador)) },
-                    trailingIcon = {
-                        Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.muestra_operador_bloqueado))
-                    },
-                    isError = errores.operador != null,
-                    supportingText = {
-                        Text(
-                            stringResource(
-                                if (errores.operador != null) R.string.muestra_error_operador
-                                else R.string.muestra_operador_ayuda
-                            )
-                        )
-                    },
-                    singleLine = true,
-                    enabled = !bloqueado,
-                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -412,21 +359,6 @@ private fun NewSampleFormContent(
             Spacer(Modifier.height(8.dp))
         }
     }
-
-    if (mostrarFecha) {
-        DialogoFecha(
-            fechaHora = state.fechaHora,
-            onAceptar = { viewModel.onFechaChange(it); mostrarFecha = false },
-            onCancelar = { mostrarFecha = false }
-        )
-    }
-    if (mostrarHora) {
-        DialogoHora(
-            fechaHora = state.fechaHora,
-            onAceptar = { h, m -> viewModel.onHoraChange(h, m); mostrarHora = false },
-            onCancelar = { mostrarHora = false }
-        )
-    }
 }
 
 // ===========================================================================================
@@ -465,8 +397,14 @@ private fun ComentarioSupervisor(comentario: String, autor: String?) {
     }
 }
 
+/**
+ * Ficha con el ID de la muestra y sus datos automáticos: operador (de la sesión), fecha y hora
+ * (del reloj al crearla; en edición se mantienen las originales). Son información, no campos.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FichaId(id: String) {
+private fun FichaId(id: String, operador: String, fechaHora: Long, sinOperador: Boolean) {
+    val secundario = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -484,16 +422,44 @@ private fun FichaId(id: String) {
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 3.sp
                     )
-                    Text(
-                        text = id,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                    )
+                    Text(text = id, style = MaterialTheme.typography.bodySmall, color = secundario)
                 }
+            }
+            Spacer(Modifier.height(12.dp))
+            // En una fila si cabe; si no, pasa a la línea siguiente.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (sinOperador) {
+                    DatoMuestra(
+                        icono = Icons.Filled.Person,
+                        etiqueta = stringResource(R.string.muestra_operador),
+                        valor = stringResource(R.string.muestra_error_operador),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    DatoMuestra(Icons.Filled.Person, stringResource(R.string.muestra_operador), operador.ifBlank { "—" }, secundario)
+                }
+                DatoMuestra(Icons.Filled.CalendarMonth, stringResource(R.string.muestra_fecha), formatearFecha(fechaHora), secundario)
+                DatoMuestra(Icons.Filled.Schedule, stringResource(R.string.muestra_hora), formatearHora(fechaHora), secundario)
             }
             Spacer(Modifier.height(10.dp))
             Text(stringResource(R.string.muestra_id_ayuda), style = MaterialTheme.typography.bodyMedium)
         }
+    }
+}
+
+/** Ícono pequeño + texto secundario. TalkBack lo lee como "Fecha, 25 nov 2026". */
+@Composable
+private fun DatoMuestra(icono: ImageVector, etiqueta: String, valor: String, color: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.semantics(mergeDescendants = true) {}
+    ) {
+        Icon(icono, contentDescription = etiqueta, tint = color, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(valor, style = MaterialTheme.typography.bodyMedium, color = color)
     }
 }
 
@@ -554,38 +520,6 @@ private fun CampoSeleccion(
             }
         }
     }
-}
-
-/** Campo de solo lectura que abre un selector (fecha u hora) al tocarlo. */
-@Composable
-private fun CampoToque(
-    label: String,
-    valor: String,
-    icono: ImageVector,
-    descripcionAccion: String,
-    habilitado: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val interaccion = remember { MutableInteractionSource() }
-    val presionado by interaccion.collectIsPressedAsState()
-    LaunchedEffect(presionado) { if (presionado && habilitado) onClick() }
-
-    OutlinedTextField(
-        value = valor,
-        onValueChange = {},
-        readOnly = true,
-        enabled = habilitado,
-        label = { Text(label) },
-        trailingIcon = {
-            IconButton(onClick = onClick, enabled = habilitado) {
-                Icon(icono, contentDescription = descripcionAccion)
-            }
-        },
-        singleLine = true,
-        interactionSource = interaccion,
-        modifier = modifier
-    )
 }
 
 /**
@@ -797,64 +731,6 @@ private fun ContenidoBoton(texto: String, guardado: Boolean, guardando: Boolean)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DialogoFecha(
-    fechaHora: Long,
-    onAceptar: (Long) -> Unit,
-    onCancelar: () -> Unit
-) {
-    // No se permiten fechas futuras: una muestra siempre se registra hoy o antes.
-    val hoyUtc = remember { medianocheUtc(System.currentTimeMillis()) }
-    val estado = rememberDatePickerState(
-        initialSelectedDateMillis = medianocheUtc(fechaHora),
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis <= hoyUtc
-        }
-    )
-    DatePickerDialog(
-        onDismissRequest = onCancelar,
-        confirmButton = {
-            TextButton(onClick = { estado.selectedDateMillis?.let(onAceptar) ?: onCancelar() }) {
-                Text(stringResource(R.string.muestra_aceptar))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onCancelar) { Text(stringResource(R.string.muestra_cancelar)) }
-        }
-    ) {
-        DatePicker(state = estado)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DialogoHora(
-    fechaHora: Long,
-    onAceptar: (Int, Int) -> Unit,
-    onCancelar: () -> Unit
-) {
-    val cal = remember(fechaHora) { Calendar.getInstance().apply { timeInMillis = fechaHora } }
-    val estado = rememberTimePickerState(
-        initialHour = cal.get(Calendar.HOUR_OF_DAY),
-        initialMinute = cal.get(Calendar.MINUTE),
-        is24Hour = true
-    )
-    AlertDialog(
-        onDismissRequest = onCancelar,
-        title = { Text(stringResource(R.string.muestra_hora_titulo)) },
-        text = { TimePicker(state = estado) },
-        confirmButton = {
-            TextButton(onClick = { onAceptar(estado.hour, estado.minute) }) {
-                Text(stringResource(R.string.muestra_aceptar))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onCancelar) { Text(stringResource(R.string.muestra_cancelar)) }
-        }
-    )
-}
-
 // ===========================================================================================
 // Ayudantes
 // ===========================================================================================
@@ -864,15 +740,6 @@ private fun formatearFecha(millis: Long): String =
 
 private fun formatearHora(millis: Long): String =
     SimpleDateFormat("HH:mm", LOCALE_CL).format(Date(millis))
-
-/** El DatePicker trabaja con la medianoche en UTC del día elegido. */
-private fun medianocheUtc(millisLocal: Long): Long {
-    val local = Calendar.getInstance().apply { timeInMillis = millisLocal }
-    return Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-        clear()
-        set(local.get(Calendar.YEAR), local.get(Calendar.MONTH), local.get(Calendar.DAY_OF_MONTH))
-    }.timeInMillis
-}
 
 /** Identificador del campo tramo para los Compose UI Tests. */
 const val TAG_CAMPO_TRAMO = "campo_tramo"

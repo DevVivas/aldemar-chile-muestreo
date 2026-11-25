@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import java.util.TimeZone
 import java.util.UUID
 
 /**
@@ -96,31 +94,6 @@ class NewSampleViewModel(
      */
     fun fijarOperador(nombre: String?) {
         if (muestraIdEditar == null && !nombre.isNullOrBlank()) editar { copy(operador = nombre.trim()) }
-    }
-
-    /**
-     * Cambia el día manteniendo la hora.
-     * @param fechaUtcMillis lo que entrega el DatePicker de Material 3 (medianoche en UTC).
-     */
-    fun onFechaChange(fechaUtcMillis: Long) = editar {
-        val elegido = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = fechaUtcMillis }
-        val nuevo = Calendar.getInstance().apply {
-            timeInMillis = fechaHora
-            set(elegido.get(Calendar.YEAR), elegido.get(Calendar.MONTH), elegido.get(Calendar.DAY_OF_MONTH))
-        }
-        copy(fechaHora = nuevo.timeInMillis)
-    }
-
-    /** Cambia la hora manteniendo el día. */
-    fun onHoraChange(hora: Int, minuto: Int) = editar {
-        val nuevo = Calendar.getInstance().apply {
-            timeInMillis = fechaHora
-            set(Calendar.HOUR_OF_DAY, hora)
-            set(Calendar.MINUTE, minuto)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        copy(fechaHora = nuevo.timeInMillis)
     }
 
     /**

@@ -34,7 +34,6 @@
     <string name="muestra_id_label">ID de muestra</string>
     <string name="muestra_id_ayuda">Se guarda en el teléfono aunque no haya señal.</string>
     <string name="muestra_seccion_ubicacion">Ubicación</string>
-    <string name="muestra_seccion_registro">Fecha y operador</string>
     <string name="muestra_seccion_conteo">Conteo</string>
     <string name="muestra_seccion_foto">Foto de la muestra</string>
     <string name="muestra_seccion_observaciones">Observaciones</string>
@@ -46,8 +45,6 @@
     <string name="muestra_fecha">Fecha</string>
     <string name="muestra_hora">Hora</string>
     <string name="muestra_operador">Operador</string>
-    <string name="muestra_operador_ayuda">Se toma de tu sesión</string>
-    <string name="muestra_operador_bloqueado">Campo bloqueado</string>
     <string name="muestra_tramo">Largo del tramo</string>
     <string name="muestra_tramo_sufijo">cm</string>
     <string name="muestra_tramo_ayuda">Largo de cuerda contado, en centímetros</string>
@@ -64,9 +61,6 @@
     <string name="muestra_guardada">Guardada</string>
     <string name="muestra_aceptar">Aceptar</string>
     <string name="muestra_cancelar">Cancelar</string>
-    <string name="muestra_elegir_fecha">Elegir fecha</string>
-    <string name="muestra_elegir_hora">Elegir hora</string>
-    <string name="muestra_hora_titulo">Hora de la muestra</string>
 
     <!-- Errores del formulario -->
     <string name="muestra_error_centro">Elige el centro de cultivo</string>

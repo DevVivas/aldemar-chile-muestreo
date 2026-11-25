@@ -18,7 +18,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.util.Calendar
 import java.util.TimeZone
 
 class NewSampleViewModelTest {
@@ -257,24 +256,20 @@ class NewSampleViewModelTest {
     }
 
     @Test
-    fun `dada una fecha y una hora elegidas cuando se cambian entonces se combinan en la zona local`() {
-        // Arrange
-        val vm = nuevoVm()
-        val medianocheUtc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-            clear(); set(2026, Calendar.NOVEMBER, 20)
-        }.timeInMillis
+    fun `dada una muestra en edicion cuando se guarda mas tarde entonces conserva su fecha y hora originales`() = runTest {
+        // Arrange: la muestra se tomó en el instante 500; el reloj ahora marca 9_000
+        coEvery { repo.obtenerPorId("m-1") } returns muestra(fechaHora = 500L, estado = EstadoRevision.BORRADOR)
+        val guardada = slot<MuestraEntity>()
+        coEvery { repo.guardar(capture(guardada)) } returns Unit
+        val vm = NewSampleViewModel(repo, muestraIdEditar = "m-1", reloj = { 9_000L })
 
         // Act
-        vm.onFechaChange(medianocheUtc)
-        vm.onHoraChange(10, 30)
+        vm.guardarBorrador()
 
-        // Assert
-        val c = Calendar.getInstance().apply { timeInMillis = vm.uiState.value.fechaHora }
-        assertEquals(2026, c.get(Calendar.YEAR))
-        assertEquals(Calendar.NOVEMBER, c.get(Calendar.MONTH))
-        assertEquals(20, c.get(Calendar.DAY_OF_MONTH))
-        assertEquals(10, c.get(Calendar.HOUR_OF_DAY))
-        assertEquals(30, c.get(Calendar.MINUTE))
+        // Assert: la fecha y hora de la muestra no cambian; solo la de modificación
+        assertEquals(500L, vm.uiState.value.fechaHora)
+        assertEquals(500L, guardada.captured.fechaHora)
+        assertEquals(9_000L, guardada.captured.actualizadoEn)
     }
 
     @Test
